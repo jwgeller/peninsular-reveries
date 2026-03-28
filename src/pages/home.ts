@@ -12,6 +12,12 @@ if (main) {
         card.href = './' + game.slug + '/'
         card.className = 'game-card'
 
+        const icon = document.createElement('span')
+        icon.className = 'game-card-icon'
+        icon.textContent = game.icon
+        icon.setAttribute('aria-hidden', 'true')
+        card.appendChild(icon)
+
         const h2 = document.createElement('h2')
         h2.textContent = game.name
         card.appendChild(h2)
