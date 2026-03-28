@@ -129,6 +129,12 @@ main {
   color: var(--color-text);
 }
 
+.game-card-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+
 .game-card p {
   color: var(--color-muted);
   margin-top: var(--space-xs);
