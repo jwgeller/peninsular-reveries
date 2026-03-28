@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Super Word — Peninsular Reveries</title>
   <meta name="description" content="Find hidden letters and spell the secret word.">
+  <meta property="og:title" content="Super Word — Peninsular Reveries">
+  <meta property="og:description" content="Find hidden letters and spell the secret word.">
+  <meta property="og:url" content="https://jaredkrinke.github.io/peninsular-reveries/super-word/">
+  <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
   <link rel="stylesheet" href="../styles/main.css">
+  <script>
+    const theme = localStorage.getItem('theme');
+    if (theme) document.documentElement.setAttribute('data-theme', theme);
+  </script>
   <link rel="stylesheet" href="game.css">
 </head>
 <body data-base="..">

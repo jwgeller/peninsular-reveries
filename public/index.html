@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Peninsular Reveries</title>
   <meta name="description" content="Games, puzzles, and experiments — made for fun.">
+  <meta property="og:title" content="Peninsular Reveries">
+  <meta property="og:description" content="Games, puzzles, and experiments — made for fun.">
+  <meta property="og:url" content="https://jaredkrinke.github.io/peninsular-reveries/">
+  <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="stylesheet" href="./styles/main.css">
+  <script>
+    const theme = localStorage.getItem('theme');
+    if (theme) document.documentElement.setAttribute('data-theme', theme);
+  </script>
 </head>
 <body data-base=".">
   <header id="site-header" class="site-header"></header>
@@ -16,7 +24,7 @@
       <h1>Peninsular Reveries</h1>
       <p>Games, puzzles, and experiments — made for fun.</p>
     </div>
-    <section>
+    <section id="games" class="games-list">
       <noscript>
         <p class="noscript-message">JavaScript adds navigation and interactive features. The content below is still browsable without it.</p>
       </noscript>
