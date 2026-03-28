@@ -67,11 +67,12 @@ Plans:
   2. Sharing any page URL on social media renders a rich preview card (title, description, image)
   3. Site switches between light and dark themes based on OS preference via CSS custom properties
   4. Site has personality micro-interactions — hover effects, subtle animations, and a playful 404 page
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
 - [x] 03-01-PLAN.md — Visual design system: dark mode CSS, card hover, link transitions, OG meta tags
 - [x] 03-02-PLAN.md — Interactivity: theme toggle, dynamic cards from registry, playful 404 page
+- [ ] 03-03-PLAN.md — Gap closure: card emoji icon + OG image for social previews
 
 **UI hint**: yes
 
