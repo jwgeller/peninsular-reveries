@@ -14,11 +14,11 @@ A frictionless home for creative projects — dead simple to add new games and e
 
 - [x] Super Word game: full rewrite of the AI prototype — same letter-finding concept, polished visuals and UX (Validated in Phase 02: super-word-game)
 - [x] TypeScript throughout, web standards first (Validated in Phase 02: super-word-game)
+- [x] Clean, minimal design with subtle quirky personality touches (Validated in Phase 03: homepage-visual-design)
 
 ### Active
 
 - [ ] Static site with homepage and per-project pages
-- [ ] Clean, minimal design with subtle quirky personality touches
 - [ ] Easy to add new games/experiments (just create files, minimal boilerplate)
 - [ ] GitHub Pages deployment
 - [ ] Accessible and responsive
@@ -54,6 +54,7 @@ A frictionless home for creative projects — dead simple to add new games and e
 | GitHub Pages hosting | Free, deploys from git, familiar workflow | — Pending |
 | Full rewrite of Super Word (not cleanup) | AI prototype has useful concept but needs proper architecture | ✓ Good — 8 TS modules, proper state/render/input separation |
 | No React / no virtual DOM | Web standards alignment, Remix 3 philosophy, simpler mental model | — Pending |
+| Raw PNG generation via zlib | Generates apple-touch-icon and og-image at build time with zero image deps | ✓ Good |
 
 ## Evolution
 
@@ -73,4 +74,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: after Phase 02 (super-word-game) completion*
+*Last updated: after Phase 03 (homepage-visual-design) completion*
