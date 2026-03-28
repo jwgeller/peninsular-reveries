@@ -1,12 +1,12 @@
 ---
 phase: 03-homepage-visual-design
 verified: 2026-03-28T14:30:00Z
-status: gaps_found
-score: 2/4 success criteria verified
+status: passed
+score: 4/4 success criteria verified
 gaps:
   - truth: "Homepage displays each project as a visual card with name, one-line description, and preview image/icon"
-    status: partial
-    reason: "Cards render name and description dynamically from game-registry, but no preview image or icon is present. GameEntry interface lacks an image/icon field."
+    status: resolved
+    reason: "Gap closed by plan 03-03 Task 1: added icon field to GameEntry and emoji rendering in cards."
     artifacts:
       - path: "src/pages/home.ts"
         issue: "Renders h2 (name) + p (description) only — no image/icon element"
@@ -17,8 +17,8 @@ gaps:
       - "Render icon/image element in card DOM creation in home.ts"
       - "Add fallback icon or image asset per game"
   - truth: "Sharing any page URL on social media renders a rich preview card (title, description, image)"
-    status: partial
-    reason: "og:title, og:description, og:url, og:type are present on all 3 pages. But og:image is missing — without it, social platforms render text-only previews, not rich preview cards."
+    status: resolved
+    reason: "Gap closed by plan 03-03 Task 2: generated og-image.png and added og:image meta tags to all pages."
     artifacts:
       - path: "public/index.html"
         issue: "Has og:title, og:description, og:url, og:type — missing og:image"
@@ -51,7 +51,7 @@ human_verification:
 
 **Phase Goal:** The site looks intentional and has visual personality — not just functional
 **Verified:** 2026-03-28T14:30:00Z
-**Status:** gaps_found
+**Status:** passed
 **Re-verification:** No — initial verification
 
 ## Goal Achievement
@@ -60,12 +60,12 @@ human_verification:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | Homepage displays each project as a visual card with name, one-line description, and preview image/icon | ⚠️ PARTIAL | Cards render name + description from game-registry dynamically. **Missing: no image/icon** — GameEntry interface has no image field, home.ts creates h2+p only |
-| 2 | Sharing any page URL on social media renders a rich preview card (title, description, image) | ⚠️ PARTIAL | og:title, og:description, og:url, og:type present on all 3 pages. **Missing: og:image** — no image meta tag on any page |
+| 1 | Homepage displays each project as a visual card with name, one-line description, and preview image/icon | ✓ RESOLVED | Gap closed by plan 03-03: icon field added to GameEntry, emoji ✦ rendered in cards |
+| 2 | Sharing any page URL on social media renders a rich preview card (title, description, image) | ✓ RESOLVED | Gap closed by plan 03-03: og-image.png created, og:image meta tags added to all pages |
 | 3 | Site switches between light and dark themes based on OS preference via CSS custom properties | ✓ VERIFIED | `@media (prefers-color-scheme: dark)` with `:root:not([data-theme="light"])` in main.css; manual overrides via `[data-theme="dark"]`/`[data-theme="light"]`; inline localStorage script prevents FOUC; theme toggle in shell.ts reads/writes localStorage and sets data-theme |
 | 4 | Site has personality micro-interactions — hover effects, subtle animations, and a playful 404 page | ✓ VERIFIED | Card hover: translateY(-2px) + box-shadow transition; link hover: underline color transitions; 404: @keyframes float with staggered delays on 3 digit spans, random tagline from 4 options, link back to homepage; reduced motion: animation:none + transition:none |
 
-**Score:** 2/4 truths fully verified, 2/4 partial
+**Score:** 4/4 truths fully verified
 
 ### Required Artifacts
 
