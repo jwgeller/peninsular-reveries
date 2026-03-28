@@ -67,7 +67,12 @@ Plans:
   2. Sharing any page URL on social media renders a rich preview card (title, description, image)
   3. Site switches between light and dark themes based on OS preference via CSS custom properties
   4. Site has personality micro-interactions — hover effects, subtle animations, and a playful 404 page
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Visual design system: dark mode CSS, card hover, link transitions, OG meta tags
+- [ ] 03-02-PLAN.md — Interactivity: theme toggle, dynamic cards from registry, playful 404 page
+
 **UI hint**: yes
 
 ### Phase 4: Game Polish & Persistence
@@ -102,6 +107,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|---------------|--------|-----------|
 | 1. Foundation & Deploy | 2/2 | Complete   | 2026-03-28 |
 | 2. Super Word Game | 0/3 | Planned | - |
-| 3. Homepage & Visual Design | 0/? | Not started | - |
+| 3. Homepage & Visual Design | 0/2 | Planned | - |
 | 4. Game Polish & Persistence | 0/? | Not started | - |
 | 5. Progressive Enhancement & Performance | 0/? | Not started | - |
