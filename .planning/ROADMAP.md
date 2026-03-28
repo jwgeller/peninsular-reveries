@@ -72,7 +72,7 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Visual design system: dark mode CSS, card hover, link transitions, OG meta tags
 - [x] 03-02-PLAN.md — Interactivity: theme toggle, dynamic cards from registry, playful 404 page
-- [ ] 03-03-PLAN.md — Gap closure: card emoji icon + OG image for social previews
+- [x] 03-03-PLAN.md — Gap closure: card emoji icon + OG image for social previews
 
 **UI hint**: yes
 
