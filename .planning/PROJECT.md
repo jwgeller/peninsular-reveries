@@ -2,31 +2,44 @@
 
 ## What This Is
 
-A lo-fi personal website for hosting self-contained web games, puzzles, and code experiments. Built with web standards — TypeScript, vanilla CSS, esbuild, no framework. Clean, minimal aesthetic with subtle personality — the kind of site that makes you pause and think "oh, this is nice." Deployed as a static site on GitHub Pages.
+A lo-fi personal website hosting self-contained web games, puzzles, and code experiments. Ships one polished game (Super Word — a children's letter-finding puzzle). Built with web standards — TypeScript, vanilla CSS, esbuild, no framework. Dark mode, View Transitions, accessibility-first, sub-200KB pages. Live on GitHub Pages with automated CI/CD, Lighthouse audits, and Playwright tests.
 
 ## Core Value
 
 A frictionless home for creative projects — dead simple to add new games and experiments, beautiful to look at, zero maintenance overhead.
 
+## Current State
+
+**Shipped:** v1.0 (2026-03-29)
+**Live at:** GitHub Pages
+**Codebase:** ~2,965 LOC (1,710 TS + 1,058 CSS + 197 HTML), 80 tracked files
+**Stack:** TypeScript + esbuild + vanilla CSS + GitHub Pages
+**Test suite:** Playwright (7 spec files covering all infrastructure and site requirements)
+**CI pipeline:** GitHub Actions → build → budget check → Lighthouse → Playwright → deploy
+
 ## Requirements
 
 ### Validated
 
-- [x] Super Word game: full rewrite of the AI prototype — same letter-finding concept, polished visuals and UX (Validated in Phase 02: super-word-game)
-- [x] TypeScript throughout, web standards first (Validated in Phase 02: super-word-game)
-- [x] Clean, minimal design with subtle quirky personality touches (Validated in Phase 03: homepage-visual-design)
-- [x] View Transitions API for smooth page navigation with graceful degradation (Validated in Phase 05: progressive-enhancement-performance)
-- [x] Performance budget enforcement — 200KB per-page hard gate at build time (Validated in Phase 05: progressive-enhancement-performance)
-- [x] Lighthouse CI audit in deployment pipeline (Validated in Phase 05: progressive-enhancement-performance)
-- [x] Automated Playwright test suite covering all Phase 1 requirements (Validated in Phase 06: test-harness-phase1-verification)
-- [x] CI test gate — tests must pass before deployment (Validated in Phase 06: test-harness-phase1-verification)
+- ✓ Static site with homepage and per-project pages — v1.0
+- ✓ Easy to add new games/experiments (game registry pattern, minimal boilerplate) — v1.0
+- ✓ GitHub Pages deployment with CI/CD — v1.0
+- ✓ Accessible and responsive (WCAG 2.1 AA, keyboard, touch, screen reader) — v1.0
+- ✓ Super Word game: full TypeScript rewrite with polished visuals and UX — v1.0
+- ✓ Clean, minimal design with subtle quirky personality touches — v1.0
+- ✓ View Transitions API for smooth page navigation with graceful degradation — v1.0
+- ✓ Performance budget enforcement — 200KB per-page hard gate at build time — v1.0
+- ✓ Lighthouse CI audit in deployment pipeline — v1.0
+- ✓ Automated Playwright test suite covering all Phase 1 requirements — v1.0
+- ✓ CI test gate — tests must pass before deployment — v1.0
+- ✓ Dark mode via prefers-color-scheme with CSS custom properties — v1.0
+- ✓ OG meta tags for social sharing previews — v1.0
+- ✓ Share results (emoji score summary to clipboard) — v1.0
+- ✓ All animations respect prefers-reduced-motion — v1.0
 
 ### Active
 
-- [x] Static site with homepage and per-project pages
-- [x] Easy to add new games/experiments (just create files, minimal boilerplate)
-- [x] GitHub Pages deployment
-- [x] Accessible and responsive
+(None — fresh for next milestone)
 
 ### Out of Scope
 
@@ -34,14 +47,18 @@ A frictionless home for creative projects — dead simple to add new games and e
 - Blog/writing features — not interested in writing-heavy content right now
 - Backend/database — everything is client-side
 - React or any virtual DOM framework — web standards only
+- localStorage game persistence — game is ~5 min, starts fresh (descoped v1, revisit if needed)
+- Loading indicator — scene transitions serve this purpose (descoped v1)
+- Analytics — deferred to v2, no cookie-free provider selected yet
 
 ## Context
 
-- **Existing code:** `super-word/` contains an AI-generated prototype of a children's word puzzle game (vanilla HTML/CSS/JS). Kids find emoji-labeled letters hidden in a scene to spell words. 5 puzzles (CAT, SUN, FROG, STAR, plus one more). Drag-and-drop collection, hints, score tracking, level progression, win screen. This is the starting point for the remake — concept stays, implementation gets rewritten in TypeScript with proper architecture.
-- **Remix 3 evaluated:** Research concluded fetch-router is server-side only (no server here), html-template is marginal. Revisit in future milestones if server-side features are needed.
-- **Design references:** makingsoftware.com (warm, intentional aesthetic without overdesign). Goal is minimal effort to maintain but visually delightful.
+- **Shipped product:** Live personal site with one polished game (Super Word), dark mode, View Transitions, social previews, and automated test/deploy pipeline
+- **Super Word game:** 8-module TypeScript architecture (types, puzzles, state, renderer, input, accessibility, animations, main). 5 puzzles, keyboard + pointer + touch input, aria-live announcements, CSS animations
+- **Design system:** CSS custom properties for theming, responsive breakpoints, card hover effects, link transitions, playful 404 page with floating digits
+- **Build pipeline:** esbuild (~50-line build.ts), build-time page budget assertion (200KB), raw PNG generation for icons/OG images via zlib (zero image deps)
+- **CI/CD:** GitHub Actions → build → Lighthouse CI (performance, accessibility, best practices) → Playwright tests → deploy to GitHub Pages
 - **Developer context:** Autism means sticking with things can be hard — the site and tooling need to be low-friction enough to return to after breaks. Minimizing setup/maintenance overhead is a real requirement, not a nice-to-have.
-- **Minimal tooling:** esbuild for TS compilation (sub-second builds). No Vite, no Webpack, no complex config.
 
 ## Constraints
 
@@ -54,15 +71,17 @@ A frictionless home for creative projects — dead simple to add new games and e
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| No Remix 3 packages at launch | Research: fetch-router is server-side only, html-template marginal. Revisit later. | ✓ Good |
-| TypeScript over plain JS | Better DX for game logic, catches bugs early | — Pending |
-| GitHub Pages hosting | Free, deploys from git, familiar workflow | — Pending |
+| No Remix 3 packages at launch | Research: fetch-router is server-side only, html-template marginal | ✓ Good — no regrets, web standards worked fine |
+| TypeScript over plain JS | Better DX for game logic, catches bugs early | ✓ Good — 8-module game architecture, type safety caught real issues |
+| GitHub Pages hosting | Free, deploys from git, familiar workflow | ✓ Good — zero-cost, reliable, fast deploys |
 | Full rewrite of Super Word (not cleanup) | AI prototype has useful concept but needs proper architecture | ✓ Good — 8 TS modules, proper state/render/input separation |
-| No React / no virtual DOM | Web standards alignment, Remix 3 philosophy, simpler mental model | — Pending |
-| Raw PNG generation via zlib | Generates apple-touch-icon and og-image at build time with zero image deps | ✓ Good |
-| CSS-only View Transitions | @view-transition MPA approach — no JS needed, progressive enhancement | ✓ Good |
+| No React / no virtual DOM | Web standards alignment, simpler mental model | ✓ Good — vanilla TS + DOM API was sufficient for everything |
+| Raw PNG generation via zlib | Generates apple-touch-icon and og-image at build time with zero image deps | ✓ Good — no Sharp/Canvas deps to maintain |
+| CSS-only View Transitions | @view-transition MPA approach — no JS needed, progressive enhancement | ✓ Good — works in Chrome/Edge, graceful fallback elsewhere |
 | Analytics descoped from v1 | LOOK-08 removed — privacy-respecting analytics deferred to v2 | ✓ Good — reduced scope without losing core value |
-| Build-time budget over runtime monitoring | statSync assertion is simpler and catches issues at CI, not in production | ✓ Good |
+| Build-time budget over runtime monitoring | statSync assertion is simpler and catches issues at CI, not in production | ✓ Good — caught budget issues early in pipeline |
+| localStorage persistence descoped | Game is ~5 min, always starts fresh. JSON-serializable state if needed later | ✓ Good — simplified v1 scope |
+| Playwright for automated testing | Lightweight, fast, browser-level verification of requirements | ✓ Good — catches regressions, CI-integrated |
 
 ## Evolution
 
@@ -82,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after Phase 06 (test-harness-phase1-verification) completion — final phase of v1.0*
+*Last updated: 2026-03-29 after v1.0 milestone completion*
