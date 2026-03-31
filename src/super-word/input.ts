@@ -273,4 +273,191 @@ export function setupInput(
   hintBtn.addEventListener('click', () => callbacks.onHintRequested())
   nextBtn.addEventListener('click', () => callbacks.onNextPuzzle())
   replayBtn.addEventListener('click', () => callbacks.onPlayAgain())
+
+  // ── Gamepad support (Xbox Bluetooth controller) ─────────
+  const DEADZONE = 0.5
+  const prevButtons: boolean[] = []
+  let prevStickDir = ''
+  let stickCooldown = 0
+
+  // Remove gamepad-active on mouse/keyboard
+  document.addEventListener('mousemove', () => document.body.classList.remove('gamepad-active'), { once: false })
+  document.addEventListener('keydown', () => document.body.classList.remove('gamepad-active'), { once: false })
+
+  function getActiveScreen(): string | null {
+    const active = document.querySelector('.screen.active') as HTMLElement | null
+    return active?.id ?? null
+  }
+
+  function focusNearestItem(direction: string): void {
+    const items = Array.from(sceneEl.querySelectorAll('.scene-item:not(.collected)')) as HTMLElement[]
+    if (items.length === 0) return
+
+    const focused = document.activeElement as HTMLElement
+    const current = items.find(el => el === focused) ?? items[0]
+
+    const nearest = findNearestInDirection(current, items, direction)
+    if (nearest) {
+      for (const el of items) el.tabIndex = -1
+      nearest.tabIndex = 0
+      nearest.focus()
+    }
+  }
+
+  function activateFocusedItem(): void {
+    const focused = document.activeElement as HTMLElement
+    if (!focused?.classList.contains('scene-item') || focused.classList.contains('collected')) return
+
+    const itemId = focused.dataset.itemId
+    const puzzle = getPuzzle()
+    const item = puzzle.items.find(it => it.id === itemId)
+    if (!item) return
+
+    if (item.type === 'letter') {
+      callbacks.onLetterCollected(item)
+    } else {
+      callbacks.onDistractorClicked(item)
+    }
+  }
+
+  function handleContextStart(): void {
+    const screen = getActiveScreen()
+    if (screen === 'start-screen') startBtn.click()
+    else if (screen === 'complete-screen') nextBtn.click()
+    else if (screen === 'win-screen') replayBtn.click()
+  }
+
+  function navigateTiles(direction: number): void {
+    const state = getState()
+    if (state.collectedLetters.length === 0) return
+
+    const tiles = Array.from(slotsEl.querySelectorAll('.letter-tile')) as HTMLElement[]
+    const focused = document.activeElement as HTMLElement
+    const currentIdx = tiles.indexOf(focused)
+
+    if (currentIdx < 0) {
+      tiles[0]?.focus()
+      return
+    }
+
+    const nextIdx = currentIdx + direction
+    if (nextIdx >= 0 && nextIdx < tiles.length) {
+      tiles[nextIdx].focus()
+    }
+  }
+
+  function swapFocusedTile(direction: number): void {
+    const tiles = Array.from(slotsEl.querySelectorAll('.letter-tile')) as HTMLElement[]
+    const focused = document.activeElement as HTMLElement
+    const currentIdx = tiles.indexOf(focused)
+    if (currentIdx < 0) return
+
+    const targetIdx = currentIdx + direction
+    if (targetIdx >= 0 && targetIdx < tiles.length) {
+      callbacks.onLettersSwapped(currentIdx, targetIdx)
+    }
+  }
+
+  function pollGamepad(): void {
+    if (document.visibilityState !== 'visible') {
+      requestAnimationFrame(pollGamepad)
+      return
+    }
+
+    const gamepads = navigator.getGamepads?.()
+    if (!gamepads) {
+      requestAnimationFrame(pollGamepad)
+      return
+    }
+
+    let gp: Gamepad | null = null
+    for (const pad of gamepads) {
+      if (pad?.connected) { gp = pad; break }
+    }
+
+    if (!gp) {
+      requestAnimationFrame(pollGamepad)
+      return
+    }
+
+    document.body.classList.add('gamepad-active')
+
+    // Button press detection (edge-triggered)
+    for (let i = 0; i < gp.buttons.length; i++) {
+      const pressed = gp.buttons[i].pressed
+      const wasPressed = prevButtons[i] ?? false
+
+      if (pressed && !wasPressed) {
+        const screen = getActiveScreen()
+        switch (i) {
+          case 0: // A — activate/select
+            if (screen === 'game-screen') activateFocusedItem()
+            break
+          case 1: // B — check answer
+            if (screen === 'game-screen' && !checkBtn.hasAttribute('disabled')) callbacks.onCheckAnswer()
+            break
+          case 2: // X — hint
+            if (screen === 'game-screen') callbacks.onHintRequested()
+            break
+          case 4: // Left bumper — tile left
+            if (screen === 'game-screen') navigateTiles(-1)
+            break
+          case 5: // Right bumper — tile right
+            if (screen === 'game-screen') navigateTiles(1)
+            break
+          case 6: // Left trigger — swap tile left
+            if (screen === 'game-screen') swapFocusedTile(-1)
+            break
+          case 7: // Right trigger — swap tile right
+            if (screen === 'game-screen') swapFocusedTile(1)
+            break
+          case 9: // Start — context-sensitive
+            handleContextStart()
+            break
+          case 12: // D-pad up
+            if (screen === 'game-screen') focusNearestItem('ArrowUp')
+            break
+          case 13: // D-pad down
+            if (screen === 'game-screen') focusNearestItem('ArrowDown')
+            break
+          case 14: // D-pad left
+            if (screen === 'game-screen') focusNearestItem('ArrowLeft')
+            break
+          case 15: // D-pad right
+            if (screen === 'game-screen') focusNearestItem('ArrowRight')
+            break
+        }
+      }
+
+      prevButtons[i] = pressed
+    }
+
+    // Analog stick navigation (with deadzone + cooldown)
+    if (stickCooldown > 0) {
+      stickCooldown--
+    } else if (gp.axes.length >= 2) {
+      const lx = gp.axes[0]
+      const ly = gp.axes[1]
+      let dir = ''
+
+      if (Math.abs(lx) > DEADZONE || Math.abs(ly) > DEADZONE) {
+        if (Math.abs(lx) > Math.abs(ly)) {
+          dir = lx > 0 ? 'ArrowRight' : 'ArrowLeft'
+        } else {
+          dir = ly > 0 ? 'ArrowDown' : 'ArrowUp'
+        }
+      }
+
+      if (dir && dir !== prevStickDir) {
+        if (getActiveScreen() === 'game-screen') focusNearestItem(dir)
+        stickCooldown = 12 // ~200ms at 60fps
+      }
+
+      prevStickDir = dir
+    }
+
+    requestAnimationFrame(pollGamepad)
+  }
+
+  requestAnimationFrame(pollGamepad)
 }
