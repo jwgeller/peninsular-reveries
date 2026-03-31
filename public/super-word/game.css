@@ -180,6 +180,26 @@
   opacity: 0.8;
 }
 
+/* ── Hint Display ─────────────────────────────────────────── */
+
+.hint-text {
+  color: var(--game-white);
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  text-align: center;
+  padding: var(--game-space-xs) var(--game-space-md);
+  opacity: 0.85;
+  width: 100%;
+}
+
+.hint-text.hint-visible {
+  animation: hintFadeIn 300ms ease forwards;
+}
+
+@keyframes hintFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 0.85; transform: translateY(0); }
+}
+
 /* ── Scene ────────────────────────────────────────────────── */
 
 #scene-wrapper {

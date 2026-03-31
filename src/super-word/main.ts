@@ -96,6 +96,16 @@ function refreshGameScreen(): void {
   renderLetterSlots(state, puzzle, slotsEl)
   renderGameHeader(state, puzzle, state.currentPuzzleIndex, activePuzzles.length)
   setCheckButtonEnabled(state.collectedLetters.length === puzzle.answer.length)
+
+  // Reset hint display for new puzzle
+  const hintEl = document.getElementById('hint-text')
+  const hintBtnEl = document.getElementById('hint-btn')
+  if (hintEl) {
+    hintEl.hidden = true
+    hintEl.textContent = ''
+    hintEl.classList.remove('hint-visible')
+  }
+  if (hintBtnEl) hintBtnEl.textContent = '💡 Hint'
 }
 
 // ── Game Flow — InputCallbacks ────────────────────────────
@@ -118,6 +128,7 @@ function onLetterCollected(item: SceneItem): void {
   setState(collectLetter(getState(), item.char!, item.id))
 
   const sceneItem = sceneEl.querySelector(`[data-item-id="${item.id}"]`) as HTMLElement | null
+  sceneItem?.classList.add('collected')
 
   renderLetterSlots(getState(), currentPuzzle(), slotsEl)
 
@@ -241,8 +252,24 @@ function onCheckAnswer(): void {
 
 function onHintRequested(): void {
   setState(useHint(getState()))
-  announceHint(currentPuzzle().hint)
-  showToast('💡 ' + currentPuzzle().hint, 3000)
+  const puzzle = currentPuzzle()
+  announceHint(puzzle.hint)
+
+  const hintEl = document.getElementById('hint-text')
+  const hintBtnEl = document.getElementById('hint-btn')
+  if (hintEl) {
+    const isVisible = !hintEl.hidden
+    if (isVisible) {
+      hintEl.hidden = true
+      hintEl.classList.remove('hint-visible')
+      if (hintBtnEl) hintBtnEl.textContent = '💡 Hint'
+    } else {
+      hintEl.textContent = puzzle.hintEmoji + ' ' + puzzle.hint
+      hintEl.hidden = false
+      hintEl.classList.add('hint-visible')
+      if (hintBtnEl) hintBtnEl.textContent = '💡 Hide Hint'
+    }
+  }
 }
 
 function onNextPuzzle(): void {
