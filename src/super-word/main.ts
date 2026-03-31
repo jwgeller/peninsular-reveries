@@ -19,6 +19,7 @@ import {
   renderCompleteScreen,
   renderWinScreen,
   setCheckButtonEnabled,
+  renderPuzzleCreator,
 } from './renderer.js'
 import { setupInput } from './input.js'
 import type { InputCallbacks } from './input.js'
@@ -310,4 +311,5 @@ const callbacks: InputCallbacks = {
 }
 
 setupInput(getState, setState, currentPuzzle, callbacks)
+renderPuzzleCreator()
 showScreen('start-screen')

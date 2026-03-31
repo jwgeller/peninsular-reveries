@@ -1,4 +1,5 @@
 import type { GameState, Puzzle, SceneItem } from './types.js'
+import { PUZZLES } from './puzzles.js'
 import { isReducedMotion } from './animations.js'
 
 // ── Lazy element cache ───────────────────────────────────────
@@ -267,4 +268,92 @@ export function setCheckButtonEnabled(enabled: boolean): void {
     btn.setAttribute('disabled', '')
     btn.classList.add('disabled')
   }
+}
+
+// ── Puzzle Creator ───────────────────────────────────────────
+
+export function renderPuzzleCreator(): void {
+  const wordsInput = document.getElementById('puzzle-words') as HTMLInputElement | null
+  const suggestionsEl = document.getElementById('puzzle-suggestions')
+  const urlOutput = document.getElementById('puzzle-url-output')
+  const urlText = document.getElementById('puzzle-url-text')
+  const copyBtn = document.getElementById('puzzle-copy-btn')
+  const openLink = document.getElementById('puzzle-open-link') as HTMLAnchorElement | null
+  const difficultySelect = document.getElementById('puzzle-difficulty-select') as HTMLSelectElement | null
+  const countInput = document.getElementById('puzzle-count-input') as HTMLInputElement | null
+
+  if (!wordsInput || !suggestionsEl || !urlOutput || !urlText || !copyBtn || !openLink || !difficultySelect || !countInput) return
+
+  function generateUrl(): void {
+    const words = wordsInput!.value.split(',').map(w => w.trim().toUpperCase()).filter(Boolean)
+    const difficulty = difficultySelect!.value
+    const count = countInput!.value
+
+    const baseUrl = window.location.origin + window.location.pathname
+    const params = new URLSearchParams()
+    if (words.length > 0) params.set('puzzles', words.join(','))
+    if (difficulty) params.set('difficulty', difficulty)
+    if (count) params.set('count', count)
+
+    const paramStr = params.toString()
+    if (!paramStr) {
+      urlOutput!.hidden = true
+      return
+    }
+
+    const url = baseUrl + '?' + paramStr
+    urlText!.textContent = url
+    openLink!.href = url
+    urlOutput!.hidden = false
+  }
+
+  function showSuggestions(): void {
+    const parts = wordsInput!.value.split(',')
+    const current = parts[parts.length - 1].trim().toUpperCase()
+    suggestionsEl!.innerHTML = ''
+
+    if (current.length === 0) return
+
+    const existing = new Set(parts.slice(0, -1).map(w => w.trim().toUpperCase()))
+    const matches = PUZZLES
+      .filter(p => p.answer.startsWith(current) && !existing.has(p.answer))
+      .slice(0, 8)
+
+    for (const puzzle of matches) {
+      const chip = document.createElement('button')
+      chip.type = 'button'
+      chip.className = 'puzzle-suggestion-chip'
+      chip.textContent = `${puzzle.answer} (${puzzle.difficulty}) — ${puzzle.hintEmoji} ${puzzle.hint}`
+      chip.addEventListener('click', () => {
+        const words = wordsInput!.value.split(',').map(w => w.trim()).filter(Boolean)
+        words[words.length - 1] = puzzle.answer
+        wordsInput!.value = words.join(', ') + ', '
+        suggestionsEl!.innerHTML = ''
+        generateUrl()
+        wordsInput!.focus()
+      })
+      suggestionsEl!.appendChild(chip)
+    }
+  }
+
+  wordsInput.addEventListener('input', () => {
+    showSuggestions()
+    generateUrl()
+  })
+
+  difficultySelect.addEventListener('change', generateUrl)
+  countInput.addEventListener('input', generateUrl)
+
+  copyBtn.addEventListener('click', () => {
+    const url = urlText!.textContent ?? ''
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        copyBtn!.textContent = '\u2705 Copied!'
+        setTimeout(() => { copyBtn!.textContent = '\ud83d\udccb Copy URL' }, 1500)
+      }).catch(() => {
+        copyBtn!.textContent = '\u274c Failed'
+        setTimeout(() => { copyBtn!.textContent = '\ud83d\udccb Copy URL' }, 1500)
+      })
+    }
+  })
 }
