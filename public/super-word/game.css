@@ -410,6 +410,18 @@
   display: none;
 }
 
+/* ── Gamepad Focus ────────────────────────────────────────── */
+
+body.gamepad-active .scene-item:focus .item-card {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 3px var(--game-yellow), 0 0 12px var(--game-yellow);
+}
+
+body.gamepad-active .letter-tile:focus {
+  outline: 3px solid var(--game-yellow);
+  outline-offset: 2px;
+}
+
 .item-emoji {
   font-size: clamp(1.6rem, 5vw, 2.1rem);
   line-height: 1;
