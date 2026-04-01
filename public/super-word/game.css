@@ -90,7 +90,6 @@
   text-align: center;
   gap: var(--game-space-lg);
   padding: var(--game-space-xl);
-  overflow-y: auto;
 }
 
 .title {
@@ -130,45 +129,82 @@
   text-decoration: underline;
 }
 
-/* ── Puzzle Creator ────────────────────────────────────────── */
+/* ── Puzzle Creator Modal ──────────────────────────────────── */
 
-.puzzle-creator {
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding-top: var(--game-space-md);
-  margin-top: var(--game-space-md);
-  width: 100%;
-  max-width: 360px;
-}
-
-.puzzle-play-btn {
-  margin-top: var(--game-space-sm);
-  width: 100%;
-}
-
-.puzzle-creator-toggle {
-  cursor: pointer;
+.puzzle-creator-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--game-white);
+  font-family: var(--game-font);
   font-size: 0.9rem;
+  font-weight: 700;
   opacity: 0.75;
-  list-style: none;
-  text-align: center;
+  cursor: pointer;
+  padding: var(--game-space-xs) var(--game-space-sm);
+  transition: opacity 150ms ease;
 }
 
-.puzzle-creator-toggle::-webkit-details-marker { display: none; }
-
-.puzzle-creator[open] .puzzle-creator-toggle {
+.puzzle-creator-toggle-btn:hover {
   opacity: 1;
-  margin-bottom: var(--game-space-sm);
 }
 
-.puzzle-creator-body {
+.puzzle-creator-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.puzzle-creator-modal[hidden] {
+  display: none;
+}
+
+.puzzle-creator-content {
+  background: linear-gradient(145deg, #3A1F8A 0%, #6C3FC5 55%, #A06FE8 100%);
+  border-radius: 24px;
+  padding: var(--game-space-xl) var(--game-space-2xl);
+  color: var(--game-white);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   gap: var(--game-space-sm);
+  width: 90%;
+  max-width: 380px;
+  animation: celebrationIn 250ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-.puzzle-creator-body label {
+.puzzle-creator-heading {
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  font-weight: 800;
+  margin: 0 0 var(--game-space-xs);
+  text-align: center;
+}
+
+.puzzle-creator-content label {
   font-size: 0.8rem;
   opacity: 0.8;
+}
+
+.puzzle-creator-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--game-space-xs);
+  margin-top: var(--game-space-sm);
+}
+
+.puzzle-play-btn {
+  width: 100%;
+}
+
+.puzzle-creator-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--game-white);
+  font-size: 0.9rem;
+  width: 100%;
 }
 
 .puzzle-input {
