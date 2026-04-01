@@ -312,13 +312,45 @@ export function setCheckButtonEnabled(enabled: boolean): void {
 // ── Puzzle Creator ───────────────────────────────────────────
 
 export function renderPuzzleCreator(onPlay: () => void): void {
+  const modal = document.getElementById('puzzle-creator-modal')
+  const openBtn = document.getElementById('puzzle-creator-open')
+  const closeBtn = document.getElementById('puzzle-creator-close')
   const wordsInput = document.getElementById('puzzle-words') as HTMLInputElement | null
   const suggestionsEl = document.getElementById('puzzle-suggestions')
   const playBtn = document.getElementById('puzzle-play-btn') as HTMLButtonElement | null
   const difficultySelect = document.getElementById('puzzle-difficulty-select') as HTMLSelectElement | null
   const countInput = document.getElementById('puzzle-count-input') as HTMLInputElement | null
 
-  if (!wordsInput || !suggestionsEl || !difficultySelect || !countInput) return
+  if (!modal || !openBtn || !wordsInput || !suggestionsEl || !difficultySelect || !countInput) return
+
+  function openModal(): void {
+    modal!.hidden = false
+    wordsInput!.focus()
+  }
+
+  function closeModal(): void {
+    modal!.hidden = true
+    openBtn!.focus()
+  }
+
+  openBtn.addEventListener('click', openModal)
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal)
+  }
+
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal()
+  })
+
+  // Close on Escape
+  modal.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      closeModal()
+    }
+  })
 
   function showSuggestions(): void {
     const parts = wordsInput!.value.split(',')
@@ -354,8 +386,7 @@ export function renderPuzzleCreator(onPlay: () => void): void {
 
   if (playBtn) {
     playBtn.addEventListener('click', () => {
-      const details = document.getElementById('puzzle-creator') as HTMLDetailsElement | null
-      if (details) details.open = false
+      closeModal()
       onPlay()
     })
   }
