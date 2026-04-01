@@ -80,7 +80,8 @@ None yet.
 | 260331-rey | Puzzle creator, letter fix, hint UX, gamepad support | 2026-03-31 | 1c954c6 | [260331-rey-super-word-hash-generator-tool-letter-di](./quick/260331-rey-super-word-hash-generator-tool-letter-di/) |
 | 260331-sap | Remove toast system and unused functions/params from Super Word | 2026-04-01 | 8e52eab | [260331-sap-remove-toast-system-and-unused-functions](./quick/260331-sap-remove-toast-system-and-unused-functions/) |
 | 260331-rrj | Celebration popup + scene-sliding transitions | 2026-03-31 | de8ba0d | [260331-rrj-gamepad-snap-navigation-and-scene-slidin](./quick/260331-rrj-gamepad-snap-navigation-and-scene-slidin/) |
+| 260331-taj | Fix start screen layout, puzzle creator direct play, random puzzle re-roll | 2026-04-01 | f85f0ac | [260331-taj-fix-super-word-start-screen-puzzle-build](./quick/260331-taj-fix-super-word-start-screen-puzzle-build/) |
 
 ## Session Continuity
 
-Last activity: 2026-03-31 - Completed quick task 260331-rrj: Celebration popup + scene-sliding transitions
+Last activity: 2026-04-01 - Completed quick task 260331-taj: Fix start screen layout, puzzle creator direct play, random puzzle re-roll
