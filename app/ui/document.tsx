@@ -10,12 +10,26 @@ interface DocumentProps {
   stylesheets?: string[]
   scripts?: string[]
   bodyClass?: string
+  manifestPath?: string
+  serviceWorkerPath?: string
+  serviceWorkerScope?: string
   children: RemixNode
 }
 
 export function Document() {
   return (props: DocumentProps) => {
-    const { title, description, path, stylesheets = [], scripts = [], bodyClass, children } = props
+    const {
+      title,
+      description,
+      path,
+      stylesheets = [],
+      scripts = [],
+      bodyClass,
+      manifestPath,
+      serviceWorkerPath,
+      serviceWorkerScope,
+      children,
+    } = props
     const siteBasePath = getSiteBasePath()
     const siteUrl = getSiteUrl()
     const fullTitle = path === '/' ? 'Peninsular Reveries' : `${title} — Peninsular Reveries`
@@ -23,9 +37,17 @@ export function Document() {
 
     const allStyles = ['/styles/main.css', ...stylesheets].map(href => withBasePath(href, siteBasePath))
     const allScripts = ['/client/shell.js', ...scripts].map(src => withBasePath(src, siteBasePath))
+    const manifestHref = manifestPath ? withBasePath(manifestPath, siteBasePath) : undefined
+    const serviceWorkerHref = serviceWorkerPath ? withBasePath(serviceWorkerPath, siteBasePath) : undefined
+    const serviceWorkerScopeHref = serviceWorkerScope ? withBasePath(serviceWorkerScope, siteBasePath) : undefined
 
     return (
-      <html lang="en" data-base-path={siteBasePath}>
+      <html
+        lang="en"
+        data-base-path={siteBasePath}
+        data-service-worker-path={serviceWorkerHref}
+        data-service-worker-scope={serviceWorkerScopeHref}
+      >
         <head>
           <meta charSet="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -40,7 +62,7 @@ export function Document() {
           <meta property="og:image:height" content="630" />
           <link rel="icon" type="image/svg+xml" href={withBasePath('/favicon.svg', siteBasePath)} />
           <link rel="apple-touch-icon" href={withBasePath('/apple-touch-icon.png', siteBasePath)} />
-          <link rel="manifest" href={withBasePath('/manifest.json', siteBasePath)} />
+          {manifestHref ? <link rel="manifest" href={manifestHref} /> : null}
           <meta name="theme-color" content="#1a1a2e" />
           {allStyles.map(href => <link rel="stylesheet" href={href} />)}
           <script innerHTML={`const theme=localStorage.getItem('theme');if(theme)document.documentElement.setAttribute('data-theme',theme);`} />

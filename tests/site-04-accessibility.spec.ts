@@ -55,6 +55,16 @@ test.describe('SITE-04: Accessibility', () => {
     await startDeterministicGame(page)
   })
 
+  test('phone-sized start button is pointer clickable', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 })
+    await page.goto(deterministicGamePath)
+
+    await page.getByRole('button', { name: /let's go/i }).click()
+
+    const firstSceneItem = page.locator('#scene .scene-item[tabindex="0"]').first()
+    await expect(firstSceneItem).toBeVisible()
+  })
+
   test('starting the game announces the current puzzle in the polite live region', async ({ page }) => {
     await startDeterministicGame(page)
 

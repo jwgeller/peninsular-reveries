@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execSync } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -32,10 +32,19 @@ test('build script writes the expected static output', () => {
       'client/404.js',
       'favicon.svg',
       'manifest.json',
+      'super-word/manifest.json',
       'sw.js',
+      'super-word/sw.js',
     ]) {
       assert.ok(existsSync(join(outputDir, relativePath)), `Expected ${relativePath} to exist in build output`)
     }
+
+    const homeHtml = readFileSync(join(outputDir, 'index.html'), 'utf-8')
+    const gameHtml = readFileSync(join(outputDir, 'super-word/index.html'), 'utf-8')
+
+    assert.doesNotMatch(homeHtml, /rel="manifest"/)
+    assert.match(gameHtml, /href="\/super-word\/manifest\.json"/)
+    assert.match(gameHtml, /data-service-worker-path="\/super-word\/sw\.js"/)
   } finally {
     rmSync(outputDir, { recursive: true, force: true })
   }
