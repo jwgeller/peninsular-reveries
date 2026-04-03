@@ -12,6 +12,7 @@ export default [
       'gen-og-image.cjs',
       'node_modules/**',
       'playwright-report/**',
+      'public/**/sw.js',
       'public/sw.js',
       'test-results/**',
       'super-word/**',

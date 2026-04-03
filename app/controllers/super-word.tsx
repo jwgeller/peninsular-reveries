@@ -10,6 +10,9 @@ export async function superWordAction() {
       stylesheets={['/styles/game.css']}
       scripts={['/client/super-word/main.js']}
       bodyClass="super-word-game"
+      manifestPath="/super-word/manifest.json"
+      serviceWorkerPath="/super-word/sw.js"
+      serviceWorkerScope="/super-word/"
     >
       <div className="scene-track">
 

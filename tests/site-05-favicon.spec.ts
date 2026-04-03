@@ -32,4 +32,16 @@ test.describe('SITE-05: SVG favicon', () => {
       expect(href).toBeTruthy();
     });
   }
+
+  test('homepage does not advertise a site-wide install manifest', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('link[rel="manifest"]')).toHaveCount(0);
+  });
+
+  test('game page advertises a game-scoped install manifest', async ({ page }) => {
+    await page.goto('/super-word/');
+    const manifest = page.locator('link[rel="manifest"]');
+    await expect(manifest).toBeAttached();
+    await expect(manifest).toHaveAttribute('href', '/super-word/manifest.json');
+  });
 });
