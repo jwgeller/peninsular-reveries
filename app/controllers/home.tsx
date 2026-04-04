@@ -34,17 +34,14 @@ export async function homeAction() {
 
           return (
             <article className="game-card" data-game-card={game.slug}>
-              <div className="game-card-body">
+              <a href={gamePath} className="game-card-primary" aria-label={`Open ${game.name}`}>
                 <span className="game-card-icon" aria-hidden="true">{game.icon}</span>
                 <div className="game-card-copy">
                   <h2>{game.name}</h2>
                   <p>{game.description}</p>
                 </div>
-              </div>
-              <div className="game-card-actions">
-                <a href={gamePath} className="game-card-launch">Open {game.name}</a>
-                <a href={attributionPath} className="game-card-attribution" aria-label={`View attributions for ${game.name}`}>Attributions</a>
-              </div>
+              </a>
+              <a href={attributionPath} className="game-card-info-btn" aria-label={`View attributions for ${game.name}`} title={`Attributions for ${game.name}`}>i</a>
             </article>
           )
         })}

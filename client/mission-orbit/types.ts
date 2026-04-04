@@ -37,6 +37,7 @@ export interface MissionPhaseDefinition {
   readonly briefingMs?: number
   readonly autoAdvanceMs?: number
   readonly assistAfterMs?: number
+  readonly holdDurationMs?: number
   readonly meterSpeed?: number
   readonly timingWindow?: TimingWindow
 }
@@ -59,7 +60,7 @@ export interface GameState {
   readonly briefingActive: boolean
   readonly countdownValue: number
   readonly actionHeld: boolean
-  readonly launchProgress: number
+  readonly holdProgress: number
   readonly timingCursor: number
   readonly timingDirection: 1 | -1
   readonly timingLatched: boolean
@@ -96,6 +97,8 @@ const PHASE_DEFINITIONS: readonly MissionPhaseDefinition[] = [
     timingHint: 'Hold until Orion reaches orbit.',
     mode: 'hold',
     briefingMs: 1600,
+    holdDurationMs: 2500,
+    autoAdvanceMs: 1400,
   },
   {
     id: 'orbit-insertion',
@@ -126,12 +129,13 @@ const PHASE_DEFINITIONS: readonly MissionPhaseDefinition[] = [
     label: 'Trans-lunar injection',
     dayLabel: 'Flight Day 2',
     status: 'Time to leave Earth orbit',
-    prompt: 'The engines fire. Orion leaves Earth and heads for the Moon.',
-    actionLabel: 'Continue',
-    timingHint: 'Continue when you are ready to watch the burn.',
-    mode: 'narrative',
+    prompt: 'Hold the transfer burn to leave Earth orbit and send Orion toward the Moon.',
+    actionLabel: 'Hold transfer burn',
+    timingHint: 'Hold until Orion clears Earth orbit and the transfer burn is complete.',
+    mode: 'hold',
     briefingMs: 2000,
-    autoAdvanceMs: 4800,
+    holdDurationMs: 2200,
+    autoAdvanceMs: 1800,
   },
   {
     id: 'lunar-flyby',
@@ -162,24 +166,26 @@ const PHASE_DEFINITIONS: readonly MissionPhaseDefinition[] = [
     label: 'Entry interface',
     dayLabel: 'Flight Day 10',
     status: 'Re-entry heating is building',
-    prompt: 'The service module separates. The crew capsule keeps falling toward Earth.',
-    actionLabel: 'Continue',
-    timingHint: 'Continue when you are ready for re-entry.',
-    mode: 'narrative',
+    prompt: 'Hold steady while the service module peels away and the crew capsule points for entry.',
+    actionLabel: 'Hold to separate',
+    timingHint: 'Hold until the service module clears the capsule.',
+    mode: 'hold',
     briefingMs: 1800,
-    autoAdvanceMs: 3200,
+    holdDurationMs: 1600,
+    autoAdvanceMs: 1500,
   },
   {
     id: 'parachute-deploy',
     label: 'Parachute deploy',
     dayLabel: 'Flight Day 10',
     status: 'Ocean recovery is in range',
-    prompt: 'The parachutes open. Orion slows down for the water landing.',
-    actionLabel: 'Continue',
-    timingHint: 'Continue when you are ready to watch splashdown.',
-    mode: 'narrative',
+    prompt: 'Hold steady and let the parachutes bloom before splashdown.',
+    actionLabel: 'Hold to deploy',
+    timingHint: 'Hold until the parachutes catch clean air and Orion slows for splashdown.',
+    mode: 'hold',
     briefingMs: 1800,
-    autoAdvanceMs: 4200,
+    holdDurationMs: 1700,
+    autoAdvanceMs: 1800,
   },
   {
     id: 'splashdown',

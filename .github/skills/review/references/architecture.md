@@ -10,8 +10,8 @@
 
 - Stack: TypeScript + Remix 3 packages (`component`, `fetch-router`, `node-fetch-server`) + esbuild + vanilla CSS + GitHub Pages
 - Hosting: GitHub Pages with static files in `dist/`
-- Build: `tsx build.ts`
-- Dev: `tsx server.ts`
+- Build: `tsx --tsconfig config/tsconfig.json build.ts`
+- Dev: `tsx --tsconfig config/tsconfig.json server.ts`
 - Design: clean typography, good spacing, a few intentional personality touches without heavy maintenance cost
 
 ## Technology Stack
@@ -33,6 +33,12 @@
 ## Architecture Layout
 
 ```text
+config/                  toolchain and repo config
+  budget.json            Lighthouse budgets
+  eslint.config.mjs      ESLint flat config
+  playwright.config.ts   Playwright config
+  tsconfig.json          TypeScript project config
+
 app/                     server and build-time code
   routes.ts              route map
   router.ts              router setup
@@ -44,6 +50,10 @@ client/                  browser code bundled into dist/client/
   shell.ts               theme toggle and service worker registration
   404.ts                 random 404 tagline
   <game>/                game code modules
+    *.test.ts            colocated logic/data tests for that game when useful
+
+e2e/                     Playwright browser specs for rendered-site behavior
+  site-*.spec.ts         responsive, navigation, semantic HTML, a11y, and gameplay UI checks
 
 public/                  static assets copied to dist/
   styles/                site and game CSS
@@ -81,6 +91,8 @@ Every game in `client/` follows this pattern:
 - `accessibility.ts` — announcements and focus management
 - `animations.ts` — CSS-first animation helpers
 - `sounds.ts` — Web Audio API synth logic
+- `sample-manifest.ts` — optional bundled audio metadata and sourcing info when a game ships curated samples
+- `*.test.ts` — colocated pure-logic or data-shape tests when that makes ownership clearer
 
 ## DOM-Based Game Architecture
 

@@ -1,6 +1,6 @@
 import { renderToString } from 'remix/component/server'
 import { Document } from '../ui/document.js'
-import { getGameAttribution } from '../data/attributions.js'
+import { attributionsPagePath, getGameAttribution } from '../data/attributions.js'
 import { getSiteBasePath } from '../site-config.js'
 import { withBasePath } from '../site-paths.js'
 
@@ -8,6 +8,7 @@ export async function superWordAction() {
   const attribution = getGameAttribution('super-word')
   const siteBasePath = getSiteBasePath()
   const homePath = withBasePath('/', siteBasePath)
+  const superWordAttributionsPath = withBasePath(`${attributionsPagePath}#super-word`, siteBasePath)
   const html = await renderToString(
     <Document
       title="Super Word"
@@ -49,7 +50,7 @@ export async function superWordAction() {
             </div>
             <div className="game-header-right">
               <button data-settings-open="true" className="settings-toggle-btn settings-toggle-btn-inline" aria-label="Menu" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>
-              <span id="letters-count" className="letters-count">0 / 3</span>
+              <span id="letters-count" className="letters-count" aria-label="Letters found: 0 of 3">0 / 3</span>
             </div>
           </div>
           <div className="prompt-bubble">
@@ -115,6 +116,7 @@ export async function superWordAction() {
                 <option value="expert">Expert · 6 letters</option>
               </select>
               <p className="settings-help">Each round randomly picks 5 words from the selected difficulty, from sight-word tiny terms to longer chapter-book words.</p>
+              <p className="settings-help">Word groups follow a simple early-reader progression. <a href={superWordAttributionsPath}>See reading notes</a>.</p>
             </div>
 
             <div className="settings-section">

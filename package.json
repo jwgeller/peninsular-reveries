@@ -8,17 +8,17 @@
     "node": "24.14.1"
   },
   "scripts": {
-    "build": "tsx build.ts",
+    "build": "tsx --tsconfig config/tsconfig.json build.ts",
     "check": "npm run lint && npm run typecheck",
-    "lint": "eslint .",
-    "sync:attributions": "tsx scripts/sync-attributions.ts",
-    "typecheck": "tsc --noEmit",
-    "dev": "tsx server.ts",
+    "lint": "eslint --config config/eslint.config.mjs .",
+    "sync:attributions": "tsx --tsconfig config/tsconfig.json scripts/sync-attributions.ts",
+    "typecheck": "tsc --noEmit -p config/tsconfig.json",
+    "dev": "tsx --tsconfig config/tsconfig.json server.ts",
     "test": "npm run test:unit && npm run test:e2e",
     "test:local": "npm run check && npm run test",
-    "test:unit": "node --import tsx --test tests/unit/*.test.ts",
-    "test:e2e": "npx playwright test --reporter=list",
-    "test:report": "npm run test:unit && npx playwright test",
+    "test:unit": "node --import tsx --test app/**/*.test.ts client/**/*.test.ts config/**/*.test.ts",
+    "test:e2e": "npx playwright test --config config/playwright.config.ts --reporter=list",
+    "test:report": "npm run test:unit && npx playwright test --config config/playwright.config.ts",
     "prepare": "node scripts/install-git-hooks.mjs"
   },
   "devDependencies": {

@@ -19,6 +19,13 @@ test.describe('SITE-02: Navigation', () => {
     expect(page.url()).toContain('super-word');
   });
 
+  test('clicking the Super Word card body navigates to /super-word/', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('heading', { name: 'Super Word' }).click();
+    await page.waitForURL('**/super-word/**');
+    expect(page.url()).toContain('super-word');
+  });
+
   test('game page exposes Home inside the Menu', async ({ page }) => {
     await page.goto('/super-word/');
     await page.getByRole('button', { name: 'Menu' }).click();

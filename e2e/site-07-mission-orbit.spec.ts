@@ -18,6 +18,7 @@ test.describe('SITE-07: Mission Orbit', () => {
     await expect(page.locator('#mission-screen')).toHaveClass(/active/)
     await expect(page.locator('#mission-phase-label')).toContainText('Final countdown')
     await expect(page.locator('#mission-action-btn')).toBeDisabled()
+    await expect(page.locator('#mission-crew-overlay')).toHaveCount(0)
     await expect(page.locator('#game-status')).toBeAttached()
     await expect(page.locator('#phase-description')).toBeAttached()
   })
@@ -30,27 +31,48 @@ test.describe('SITE-07: Mission Orbit', () => {
     await expect(page.getByLabel('Space ambience')).toBeVisible()
     await expect(page.getByLabel('Physical sound intensity')).toBeVisible()
     await expect(page.locator('#sound-intensity-select')).toHaveValue('heavy')
+    await expect(page.getByText(/Source details \(\d+\)/)).toBeVisible()
+    await expect(page.locator('.settings-attribution-card').first()).toBeHidden()
+
+    await page.getByText(/Source details \(\d+\)/).click()
+    await expect(page.getByText('Mission ambience and interface synth bed')).toBeVisible()
 
     await page.getByRole('button', { name: 'Close' }).click()
     await expect(page.locator('#settings-modal')).toBeHidden()
   })
 
   test('spacecraft hit area can drive the launch phase directly', async ({ page }) => {
+    test.slow()
+
     await page.goto('/mission-orbit/')
 
     await page.getByRole('button', { name: 'Begin countdown' }).click()
     await expect(page.locator('#mission-screen')).toHaveClass(/active/)
     await page.waitForFunction(() => document.getElementById('mission-phase-label')?.textContent?.includes('Ascent to orbit'))
     await expect(page.locator('#mission-action-btn')).toHaveText('Hold to launch')
+    await expect(page.locator('#timing-panel #mission-prompt')).toBeVisible()
 
     const hitArea = page.locator('#mission-rocket-hit-area')
     await hitArea.dispatchEvent('pointerdown', { pointerId: 1, pointerType: 'touch', isPrimary: true })
-    await page.waitForTimeout(2600)
+    await page.waitForFunction(() => document.getElementById('mission-phase-label')?.textContent?.includes('Orbit raise burn'))
     await hitArea.dispatchEvent('pointerup', { pointerId: 1, pointerType: 'touch', isPrimary: true })
 
-    await page.waitForFunction(() => document.getElementById('mission-phase-label')?.textContent?.includes('Orbit raise burn'))
     await expect(page.locator('#mission-action-btn')).toHaveText('Continue')
     await expect(page.locator('#timing-mode-chip')).toContainText('Mission log')
+
+    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.waitForFunction(() => document.getElementById('mission-phase-label')?.textContent?.includes('Trans-lunar injection'))
+    const actionButton = page.locator('#mission-action-btn')
+    await expect(actionButton).toHaveText('Hold transfer burn')
+    await expect(page.locator('#timing-mode-chip')).toContainText('Mission brief')
+
+    await actionButton.click()
+    await actionButton.hover()
+    await page.mouse.down()
+    await expect(actionButton).toHaveText('Keep the burn steady')
+    await expect(page.locator('#timing-mode-chip')).toContainText('Hold burn')
+    await page.waitForFunction(() => document.getElementById('mission-phase-label')?.textContent?.includes('Lunar flyby'))
+    await page.mouse.up()
   })
 
   test('portrait orbit animation stays on-stage and moves smoothly', async ({ page }) => {
@@ -132,7 +154,16 @@ test.describe('SITE-07: Mission Orbit', () => {
     await page.locator('.mission-toolbar').scrollIntoViewIfNeeded()
     await expect(page.locator('.mission-stage-shell')).toBeVisible()
     await expect(page.locator('.mission-toolbar')).toBeVisible()
+    await expect(page.locator('#timing-panel #mission-status-line')).toBeVisible()
     await expect(page.locator('#mission-stage-target')).toContainText(/continue|spacecraft|clock|recovery/i)
+
+    const selectionGuard = await page.evaluate(() => ({
+      shell: getComputedStyle(document.querySelector('.mission-shell') as Element).userSelect,
+      panel: getComputedStyle(document.getElementById('timing-panel') as Element).userSelect,
+    }))
+
+    expect(selectionGuard.shell).toBe('none')
+    expect(selectionGuard.panel).toBe('none')
   })
 
   test('start screen shows the fixed Artemis II roster', async ({ page }) => {

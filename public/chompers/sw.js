@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chompers-v2'
+const CACHE_NAME = 'chompers-v3'
 const APP_SHELL_URL = new URL('./', self.registration.scope).toString()
 const ASSETS = [
   APP_SHELL_URL,
@@ -8,6 +8,11 @@ const ASSETS = [
   new URL('../favicon.svg', self.registration.scope).toString(),
   new URL('../apple-touch-icon.png', self.registration.scope).toString(),
   new URL('./manifest.json', self.registration.scope).toString(),
+  new URL('./audio/ui-tap.ogg', self.registration.scope).toString(),
+  new URL('./audio/collect-pop.ogg', self.registration.scope).toString(),
+  new URL('./audio/chomp-splash.ogg', self.registration.scope).toString(),
+  new URL('./audio/hazard-snap.ogg', self.registration.scope).toString(),
+  new URL('./audio/miss-plop.ogg', self.registration.scope).toString(),
 ]
 
 self.addEventListener('install', (event) => {

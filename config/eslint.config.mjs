@@ -24,11 +24,12 @@ export default [
     files: [
       'app/**/*.{ts,tsx}',
       'client/**/*.{ts,tsx}',
+      'config/**/*.ts',
+      'config/**/*.mjs',
+      'e2e/**/*.ts',
       'scripts/**/*.mjs',
-      'tests/**/*.ts',
       'build.ts',
       'server.ts',
-      'playwright.config.ts',
     ],
     languageOptions: {
       ecmaVersion: 'latest',

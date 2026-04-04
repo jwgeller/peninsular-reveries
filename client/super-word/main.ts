@@ -201,7 +201,7 @@ function onDistractorClicked(item: SceneItem): void {
     // No animation fallback — accessibility announcement handles feedback
   } else {
     const sceneItem = sceneEl.querySelector(`[data-item-id="${item.id}"]`) as HTMLElement | null
-    const card = sceneItem?.querySelector('.item-card') as HTMLElement | null
+    const card = sceneItem?.querySelector('.scene-visual') as HTMLElement | null
     if (card) animateItemShake(card)
   }
   announceDistractorClicked(item.label)

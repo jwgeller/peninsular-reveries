@@ -7,7 +7,7 @@ import {
   getDiyMissionOrbitSamples,
   getDownloadableMissionOrbitSamples,
   missionOrbitSampleManifest,
-} from '../../client/mission-orbit/sample-manifest.js'
+} from './sample-manifest.js'
 
 test('mission orbit sample manifest keeps expected CC0 and DIY split', () => {
   const bundled = getBundledMissionOrbitSamples()

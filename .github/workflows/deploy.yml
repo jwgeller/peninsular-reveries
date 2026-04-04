@@ -30,7 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run test:unit
-      - run: npx tsx build.ts
+      - run: npm run build
         env:
           NODE_ENV: production
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
@@ -61,6 +61,6 @@ jobs:
           urls: |
             ${{ needs.deploy.outputs.page_url }}
             ${{ needs.deploy.outputs.page_url }}super-word/
-          budgetPath: ./budget.json
+          budgetPath: ./config/budget.json
           uploadArtifacts: true
           runs: 1

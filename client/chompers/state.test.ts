@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { attemptChomp, createInitialState, moveHippo, nudgeHippo, spawnItem, tickState } from '../../client/chompers/state'
-import { FRUIT_DEFINITIONS, ZEN_ROUND_ITEMS } from '../../client/chompers/types'
+import { attemptChomp, createInitialState, moveHippo, nudgeHippo, spawnItem, tickState } from './state'
+import { FRUIT_DEFINITIONS, ZEN_ROUND_ITEMS } from './types'
 
 test('initial rush state opens with starter fruit and a centered hippo', () => {
   const state = createInitialState('rush')

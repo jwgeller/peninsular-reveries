@@ -1,7 +1,7 @@
-const launchLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.game-card-launch'))
+const gameLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.game-card-primary'))
 const gamepadHint = document.getElementById('home-gamepad-hint') as HTMLElement | null
 
-if (launchLinks.length > 0) {
+if (gameLinks.length > 0) {
   let activeIndex = -1
   let previousPreviousPressed = false
   let previousNextPressed = false
@@ -14,15 +14,15 @@ if (launchLinks.length > 0) {
     }
   }
 
-  function focusLaunchLink(index: number): void {
-    const normalizedIndex = (index + launchLinks.length) % launchLinks.length
+  function focusGameLink(index: number): void {
+    const normalizedIndex = (index + gameLinks.length) % gameLinks.length
 
     if (activeIndex >= 0) {
-      launchLinks[activeIndex].classList.remove('gamepad-focus')
+      gameLinks[activeIndex].classList.remove('gamepad-focus')
     }
 
     activeIndex = normalizedIndex
-    const nextLink = launchLinks[activeIndex]
+    const nextLink = gameLinks[activeIndex]
     nextLink.classList.add('gamepad-focus')
     setGamepadMode(true)
     nextLink.focus({ preventScroll: true })
@@ -31,7 +31,7 @@ if (launchLinks.length > 0) {
 
   function clearGamepadMode(): void {
     if (activeIndex >= 0) {
-      launchLinks[activeIndex].classList.remove('gamepad-focus')
+      gameLinks[activeIndex].classList.remove('gamepad-focus')
     }
 
     activeIndex = -1
@@ -54,18 +54,18 @@ if (launchLinks.length > 0) {
     const primaryPressed = Boolean(pad?.buttons[0]?.pressed)
 
     if (previousPressed && !previousPreviousPressed) {
-      focusLaunchLink(activeIndex === -1 ? 0 : activeIndex - 1)
+      focusGameLink(activeIndex === -1 ? 0 : activeIndex - 1)
     }
 
     if (nextPressed && !previousNextPressed) {
-      focusLaunchLink(activeIndex === -1 ? 0 : activeIndex + 1)
+      focusGameLink(activeIndex === -1 ? 0 : activeIndex + 1)
     }
 
     if (primaryPressed && !previousPrimaryPressed) {
       if (activeIndex === -1) {
-        focusLaunchLink(0)
+        focusGameLink(0)
       } else {
-        launchLinks[activeIndex].click()
+        gameLinks[activeIndex].click()
       }
     }
 

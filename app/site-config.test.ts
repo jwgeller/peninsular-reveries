@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { getSiteBasePath, getSiteUrl } from '../../app/site-config'
-import { normalizeBasePath, resolveSiteUrl, withBasePath } from '../../app/site-paths'
+import { getSiteBasePath, getSiteUrl } from './site-config'
+import { normalizeBasePath, resolveSiteUrl, withBasePath } from './site-paths'
 
 test('site path helpers produce GitHub Pages-safe URLs', () => {
   assert.equal(normalizeBasePath('/peninsular-reveries/'), '/peninsular-reveries')

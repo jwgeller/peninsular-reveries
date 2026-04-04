@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import {
+  getDownloadableChompersSamples,
+} from '../../../../client/chompers/sample-manifest.js'
+import {
   getDownloadableMissionOrbitSamples,
   type MissionOrbitSampleDefinition,
   type MissionOrbitSampleProcessingPlan,
@@ -50,6 +53,10 @@ const repoRoot = resolve(scriptDir, '../../../../')
 const envPath = join(repoRoot, '.env')
 
 const gameAudioConfigs: Record<string, GameAudioConfig> = {
+  chompers: {
+    outputDir: join(repoRoot, 'public', 'chompers', 'audio'),
+    getDownloadableSamples: () => getDownloadableChompersSamples() as readonly GenericGameAudioSampleDefinition[],
+  },
   'mission-orbit': {
     outputDir: join(repoRoot, 'public', 'mission-orbit', 'audio'),
     getDownloadableSamples: () => getDownloadableMissionOrbitSamples() as readonly GenericGameAudioSampleDefinition[],

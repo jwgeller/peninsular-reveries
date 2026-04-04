@@ -9,6 +9,7 @@ interface WordSpec {
 interface ItemArt {
   readonly emoji: string
   readonly label: string
+  readonly zone?: 'sky' | 'ground'
 }
 
 interface ScenePosition {
@@ -75,38 +76,38 @@ const LETTER_ART: Partial<Record<string, readonly ItemArt[]>> = {
 }
 
 const DISTRACTOR_ART: readonly ItemArt[] = [
-  { emoji: '🦋', label: 'Butterfly' },
-  { emoji: '🌷', label: 'Tulip' },
-  { emoji: '🏰', label: 'Castle' },
-  { emoji: '🏔️', label: 'Mountain' },
-  { emoji: '🐢', label: 'Turtle' },
-  { emoji: '🎆', label: 'Fireworks' },
-  { emoji: '📷', label: 'Camera' },
-  { emoji: '✏️', label: 'Pencil' },
-  { emoji: '🔔', label: 'Bell' },
-  { emoji: '🧸', label: 'Teddy Bear' },
-  { emoji: '🍂', label: 'Feather' },
-  { emoji: '🗿', label: 'Rock' },
-  { emoji: '🌵', label: 'Cactus' },
-  { emoji: '🌎', label: 'Planet' },
-  { emoji: '🍯', label: 'Honey' },
-  { emoji: '🎒', label: 'Backpack' },
-  { emoji: '❄️', label: 'Snowflake' },
-  { emoji: '🌻', label: 'Sunflower' },
-  { emoji: '🧭', label: 'Compass' },
-  { emoji: '⛵', label: 'Sailboat' },
-  { emoji: '🧁', label: 'Cupcake' },
-  { emoji: '🧃', label: 'Juice Box' },
-  { emoji: '🎯', label: 'Target' },
-  { emoji: '🌺', label: 'Hibiscus' },
-  { emoji: '🍪', label: 'Cookie' },
-  { emoji: '🎢', label: 'Slide' },
-  { emoji: '🎨', label: 'Paint Palette' },
-  { emoji: '🎵', label: 'Music Note' },
-  { emoji: '⚽', label: 'Soccer Ball' },
-  { emoji: '🪁', label: 'Spare Kite' },
-  { emoji: '🧊', label: 'Ice Cube' },
-  { emoji: '🌈', label: 'Bright Rainbow' },
+  { emoji: '🦋', label: 'Butterfly', zone: 'sky' },
+  { emoji: '🌷', label: 'Tulip', zone: 'ground' },
+  { emoji: '🏰', label: 'Castle', zone: 'ground' },
+  { emoji: '🏔️', label: 'Mountain', zone: 'ground' },
+  { emoji: '🐢', label: 'Turtle', zone: 'ground' },
+  { emoji: '🎆', label: 'Fireworks', zone: 'sky' },
+  { emoji: '📷', label: 'Camera', zone: 'ground' },
+  { emoji: '✏️', label: 'Pencil', zone: 'ground' },
+  { emoji: '🔔', label: 'Bell', zone: 'ground' },
+  { emoji: '🧸', label: 'Teddy Bear', zone: 'ground' },
+  { emoji: '🍂', label: 'Feather', zone: 'sky' },
+  { emoji: '🗿', label: 'Rock', zone: 'ground' },
+  { emoji: '🌵', label: 'Cactus', zone: 'ground' },
+  { emoji: '🌎', label: 'Planet', zone: 'sky' },
+  { emoji: '🍯', label: 'Honey', zone: 'ground' },
+  { emoji: '🎒', label: 'Backpack', zone: 'ground' },
+  { emoji: '❄️', label: 'Snowflake', zone: 'sky' },
+  { emoji: '🌻', label: 'Sunflower', zone: 'ground' },
+  { emoji: '🧭', label: 'Compass', zone: 'ground' },
+  { emoji: '⛵', label: 'Sailboat', zone: 'sky' },
+  { emoji: '🧁', label: 'Cupcake', zone: 'ground' },
+  { emoji: '🧃', label: 'Juice Box', zone: 'ground' },
+  { emoji: '🎯', label: 'Target', zone: 'ground' },
+  { emoji: '🌺', label: 'Hibiscus', zone: 'ground' },
+  { emoji: '🍪', label: 'Cookie', zone: 'ground' },
+  { emoji: '🎢', label: 'Slide', zone: 'ground' },
+  { emoji: '🎨', label: 'Paint Palette', zone: 'ground' },
+  { emoji: '🎵', label: 'Music Note', zone: 'sky' },
+  { emoji: '⚽', label: 'Soccer Ball', zone: 'ground' },
+  { emoji: '🪁', label: 'Spare Kite', zone: 'sky' },
+  { emoji: '🧊', label: 'Ice Cube', zone: 'ground' },
+  { emoji: '🌈', label: 'Bright Rainbow', zone: 'sky' },
 ]
 
 function wordSpecs(difficulty: Difficulty, entries: ReadonlyArray<readonly [string, string]>): WordSpec[] {
@@ -274,12 +275,31 @@ function pickDistractors(answer: string, count: number, usedLabels: Set<string>)
   return selected
 }
 
+function getZoneBounds(zone: SceneItem['zone']): { minY: number, maxY: number } {
+  if (zone === 'sky') {
+    return { minY: 16, maxY: 48 }
+  }
+
+  if (zone === 'ground') {
+    return { minY: 52, maxY: 76 }
+  }
+
+  return { minY: 22, maxY: 70 }
+}
+
+function mapYToZone(baseY: number, zone: SceneItem['zone']): number {
+  const normalized = clamp((baseY - 14) / 64, 0, 1)
+  const { minY, maxY } = getZoneBounds(zone)
+
+  return minY + normalized * (maxY - minY)
+}
+
 function assignBasePositions(items: readonly Omit<SceneItem, 'x' | 'y'>[]): SceneItem[] {
   const layout = BASE_LAYOUTS[items.length] ?? BASE_LAYOUTS[9]
   return items.map((item, index) => ({
     ...item,
     x: layout[index]?.x ?? 50,
-    y: layout[index]?.y ?? 50,
+    y: mapYToZone(layout[index]?.y ?? 50, item.zone),
   }))
 }
 
@@ -288,9 +308,14 @@ function randomizeLayout(items: readonly SceneItem[]): SceneItem[] {
   const shuffledItems = shuffle(items)
 
   return shuffledItems.map((item, index) => ({
-    ...item,
-    x: clamp(layout[index].x + (Math.random() * 8 - 4), 12, 88),
-    y: clamp(layout[index].y + (Math.random() * 8 - 4), 14, 78),
+    ...(() => {
+      const { minY, maxY } = getZoneBounds(item.zone)
+      return {
+        ...item,
+        x: clamp(layout[index].x + (Math.random() * 8 - 4), 12, 88),
+        y: clamp(mapYToZone(layout[index].y, item.zone) + (Math.random() * 6 - 3), minY, maxY),
+      }
+    })(),
   }))
 }
 
@@ -303,6 +328,7 @@ function buildPuzzle(spec: WordSpec): Puzzle {
     return {
       id: `${spec.answer.toLowerCase()}-letter-${index}`,
       type: 'letter' as const,
+      zone: 'middle' as const,
       char,
       emoji: art.emoji,
       label: art.label,
@@ -313,6 +339,7 @@ function buildPuzzle(spec: WordSpec): Puzzle {
   const distractors = pickDistractors(spec.answer, distractorCount, usedLabels).map((art, index) => ({
     id: `${spec.answer.toLowerCase()}-distractor-${index}`,
     type: 'distractor' as const,
+    zone: art.zone,
     emoji: art.emoji,
     label: art.label,
   }))

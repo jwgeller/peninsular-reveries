@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { DEFAULT_SESSION_SIZE, PUZZLES, selectPuzzles } from '../../client/super-word/puzzles'
-import { DIFFICULTIES } from '../../client/super-word/types'
+import { DEFAULT_SESSION_SIZE, PUZZLES, selectPuzzles } from './puzzles'
+import { DIFFICULTIES } from './types'
 
 const expectedWordLengths = {
   starter: 2,
@@ -37,5 +37,25 @@ test('difficulty selection keeps each session inside its tier and mobile-safe bo
     assert.ok(selected.length <= DEFAULT_SESSION_SIZE)
     assert.ok(selected.every((puzzle) => puzzle.difficulty === difficulty))
     assert.ok(selected.every((puzzle) => puzzle.items.every((item) => item.x >= 12 && item.x <= 88 && item.y >= 14 && item.y <= 78)))
+  }
+})
+
+test('distractors stay in scene-friendly sky or ground bands while letters stay central', () => {
+  for (const difficulty of DIFFICULTIES) {
+    const selected = selectPuzzles(difficulty)
+
+    for (const puzzle of selected) {
+      const letters = puzzle.items.filter((item) => item.type === 'letter')
+      const distractors = puzzle.items.filter((item) => item.type === 'distractor')
+
+      assert.ok(letters.every((item) => item.zone === 'middle'))
+      assert.ok(letters.every((item) => item.y >= 18 && item.y <= 76))
+      assert.ok(distractors.every((item) => item.zone === 'sky' || item.zone === 'ground'))
+      assert.ok(distractors.every((item) => (
+        item.zone === 'sky'
+          ? item.y >= 12 && item.y <= 51
+          : item.y >= 51 && item.y <= 82
+      )))
+    }
   }
 })
