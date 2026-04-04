@@ -20,7 +20,7 @@ Before building or modifying any game, read `README.md` and follow the `Game Pri
 - If a validation run finds an **objective blocker to human testing** that was introduced or exposed by the current work, fix it before stopping when the fix is clear and low-risk. Examples: stale generated files, shared responsive overflow, broken hidden-state CSS, route/build wiring gaps.
 - Ask the user a clarifying question only when the answer would materially change the implementation, or when proceeding would require a destructive, irreversible, or product-direction choice. If a reasonable default exists, use it and keep going.
 - If the user says some version of **"continue until done"**, interpret "done" as **human-ready unless genuinely blocked**.
-- If the user has made it clear that **pushing finished work is welcome**, and the work is validated and human-ready, the agent may stage, commit, and push without asking for one more round of confirmation.
+- If the user says **"wrap it up"** or otherwise makes it clear that **pushing finished work is welcome**, treat that as permission to finish the current task end-to-end. When the work is validated and human-ready, and the commit scope is clear with no ambiguous unrelated changes, the agent may stage the intended files, create a concise commit, and push without asking for one more round of confirmation. If the working tree is mixed or risky, stop short of commit/push and explain the blocker briefly.
 - Keep the closeout focused on readiness. Do **not** default to optional extra suggestions or "I can also..." follow-ups unless one of these is true:
   1. the user explicitly asked for options,
   2. something still blocks human readiness,

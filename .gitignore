@@ -5,3 +5,5 @@ node_modules/
 playwright-report/
 test-results/
 copilot-check.jsonl
+.env
+.github/skills/cc0-game-audio-curation/.sound-staging/

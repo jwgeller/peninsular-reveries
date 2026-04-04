@@ -19,12 +19,14 @@ test.describe('SITE-07: Mission Orbit', () => {
     await expect(page.locator('#phase-description')).toBeAttached()
   })
 
-  test('settings modal opens and exposes the audio toggle', async ({ page }) => {
+  test('settings modal opens and exposes the audio controls', async ({ page }) => {
     await page.goto('/mission-orbit/')
 
     await page.getByRole('button', { name: 'Mission settings' }).click()
     await expect(page.locator('#settings-modal')).toBeVisible()
     await expect(page.getByLabel('Space ambience')).toBeVisible()
+    await expect(page.getByLabel('Physical sound intensity')).toBeVisible()
+    await expect(page.locator('#sound-intensity-select')).toHaveValue('heavy')
 
     await page.getByRole('button', { name: 'Close' }).click()
     await expect(page.locator('#settings-modal')).toBeHidden()

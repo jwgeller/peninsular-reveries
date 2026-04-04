@@ -40,6 +40,9 @@ import {
 import {
   ensureAudioUnlocked,
   getMusicEnabled,
+  getSfxIntensityMode,
+  loadSamples,
+  setSfxIntensityMode,
   setMusicEnabled,
   sfxCueApproach,
   sfxCueReady,
@@ -70,14 +73,28 @@ let lastBurnCount = 0
 let lastCueBand: CueSignalBand | null = null
 let lastStopMoActive = false
 
+function primeMissionAudio(): void {
+  ensureAudioUnlocked()
+  void loadSamples()
+}
+
 const musicToggle = document.getElementById('music-enabled-toggle') as HTMLInputElement | null
+const sfxIntensitySelect = document.getElementById('sound-intensity-select') as HTMLSelectElement | null
 
 if (musicToggle) {
   musicToggle.checked = getMusicEnabled()
   musicToggle.addEventListener('change', () => {
-    ensureAudioUnlocked()
+    primeMissionAudio()
     setMusicEnabled(musicToggle.checked)
     syncMusicPlayback(state.phase)
+  })
+}
+
+if (sfxIntensitySelect) {
+  sfxIntensitySelect.value = getSfxIntensityMode()
+  sfxIntensitySelect.addEventListener('change', () => {
+    primeMissionAudio()
+    setSfxIntensityMode(sfxIntensitySelect.value === 'light' ? 'light' : 'heavy')
   })
 }
 
@@ -272,7 +289,7 @@ function syncCueAudio(): void {
 }
 
 function startGame(): void {
-  ensureAudioUnlocked()
+  primeMissionAudio()
   sfxButton()
   clearAdvanceTimer()
   state = startMission()
@@ -303,7 +320,7 @@ function replayGame(): void {
 const callbacks: InputCallbacks = {
   onStartGame: startGame,
   onActionStart: () => {
-    ensureAudioUnlocked()
+    primeMissionAudio()
 
     if (state.phase === 'title') {
       startGame()
