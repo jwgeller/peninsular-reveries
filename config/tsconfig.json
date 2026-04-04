@@ -11,13 +11,13 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
   "include": [
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "client/**/*.ts",
-    "client/**/*.tsx",
-    "tests/**/*.ts",
-    "build.ts",
-    "server.ts",
-    "playwright.config.ts"
+    "../app/**/*.ts",
+    "../app/**/*.tsx",
+    "../client/**/*.ts",
+    "../client/**/*.tsx",
+    "../e2e/**/*.ts",
+    "./**/*.ts",
+    "../build.ts",
+    "../server.ts"
   ]
 }

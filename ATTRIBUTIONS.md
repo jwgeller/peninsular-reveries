@@ -31,11 +31,11 @@
 ##### Artemis II crew information
 
 - Type: other
-- Used in: Mission: Orbit start screen crew roster and in-mission crew overlays
+- Used in: Mission: Orbit start screen crew roster
 - Creator: NASA
 - Source: Our Artemis Crew (https://www.nasa.gov/feature/our-artemis-crew/)
 - License: Public domain (U.S. government work)
-- Modifications: Condensed into short crew cards naming the four Artemis II astronauts and their roles.
+- Modifications: Condensed into short crew cards naming the four Artemis II astronauts and their roles on the launch screen.
 - Notes: Crew roster matches Reid Wiseman, Victor Glover, Christina Koch, and Jeremy Hansen.
 
 ##### Rocket Launch Rumble at Canaveral
@@ -141,7 +141,7 @@
 
 - Slug: super-word
 - Code license: GPL-3.0
-- Summary: The deployed game shows credits in Settings. No third-party media assets are currently bundled for Super Word.
+- Summary: The deployed game shows credits in Settings. Its word bank ramps from short, high-frequency early-reader words to longer spelling patterns and chapter-book vocabulary so players can climb through a gentle reading progression. No third-party media assets are currently bundled for Super Word.
 
 #### Entries
 
@@ -155,20 +155,75 @@
 - Modifications: Not applicable
 - Notes: This soundtrack is synthesized at runtime. No external recording, loop, or sample pack is used.
 
+##### Word-stage puzzle progression
+
+- Type: other
+- Used in: Super Word difficulty tiers and puzzle ordering
+- Creator: Peninsular Reveries
+- Source: Original word list and difficulty grouping
+- License: GPL-3.0
+- Modifications: Short two-letter terms anchor the starter tier, then the game steps through 3-letter and 4-letter decodable-style words before moving into longer vocabulary.
+- Notes: This is a playful early-reader ramp rather than a formal curriculum. The tiers are meant to feel like a progression from emergent readers toward more confident readers while keeping the vocabulary concrete and kid-friendly.
+
 ### Chompers
 
 - Slug: chompers
 - Code license: GPL-3.0
-- Summary: Chompers uses geometric CSS artwork and browser-synthesized Web Audio effects. The in-game settings panel shows the same credits summary surfaced here.
+- Summary: Chompers uses geometric CSS artwork, a browser synth bed, and a small curated CC0 sample set for taps, chomps, collects, misses, and hazards. The in-game settings panel shows the same credits summary surfaced here.
 
 #### Entries
 
-##### Fruit-chomping soundtrack and effects
+##### Fruit-chomping synth bed
 
 - Type: music
-- Used in: Chompers start screen, gameplay chomps, countdown cues, and game-over stingers
+- Used in: Chompers gameplay chomps, countdown tones, combo rises, hazard sweeps, and game-over stingers
 - Creator: Peninsular Reveries
 - Source: Generated in-browser with the Web Audio API
 - License: GPL-3.0
 - Modifications: Not applicable
-- Notes: The game synthesizes its sounds at runtime. No downloaded loops, recorded samples, or image assets are bundled.
+- Notes: These synthesized tones now sit under a small CC0 sample layer so the main gameplay cues read more clearly on laptop and phone speakers.
+
+##### Kalimba (C-note)
+
+- Type: sound effect
+- Used in: Chompers menu taps and countdown ticks
+- Creator: foochie_foochie
+- Source: Freesound (https://freesound.org/people/foochie_foochie/sounds/331047/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a short mono OGG tap for Chompers UI and countdown cues.
+
+##### MUSCTnprc-Blue Snowball Microphone, CU_Kalimba, Duo Note_Nicholas Judy_TDC
+
+- Type: sound effect
+- Used in: Chompers fruit collect pop and combo accents
+- Creator: designerschoice
+- Source: Freesound (https://freesound.org/people/designerschoice/sounds/824972/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a compact mono OGG pop for collect feedback.
+
+##### Water_Paddle_impact_001.wav
+
+- Type: sound effect
+- Used in: Chompers primary chomp impact layer
+- Creator: EpicWizard
+- Source: Freesound (https://freesound.org/people/EpicWizard/sounds/316572/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a short mono OGG water slap to sit under the hippo chomp synth.
+
+##### G39-19-Parachute Swish Snap.wav
+
+- Type: sound effect
+- Used in: Chompers bomb and hazard snap layer
+- Creator: craigsmith
+- Source: Freesound (https://freesound.org/people/craigsmith/sounds/438636/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a tighter mono OGG snap for hazard feedback.
+
+##### WATRSplsh_Stick Throw Into Water_Jaku5.wav
+
+- Type: sound effect
+- Used in: Chompers missed-fruit plops and game-over splash layer
+- Creator: jakubp.jp
+- Source: Freesound (https://freesound.org/people/jakubp.jp/sounds/554595/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a small mono OGG plop and reused at a lower playback rate for the game-over drop.

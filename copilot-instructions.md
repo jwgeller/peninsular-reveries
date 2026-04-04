@@ -8,6 +8,7 @@ For project architecture, game quality standards, and testing conventions, load 
 
 - Default to **human-ready completion** for non-trivial feature work. Do not stop at code edits alone when the clear user intent is "ready for me to try it." Continue through generated-file sync, repository validation, and low-risk regression fixes unless the user explicitly scopes the work smaller.
 - Treat **`npm run test:local`** as the preferred end-state check before handoff when the change is large enough to affect app behavior beyond a single isolated file.
+- Treat **secret hygiene as blocking release work**. Do not leave real credentials, tokens, private keys, or committed `.env` secrets in the working tree or reachable history when the task is about review, release readiness, pushing, or security cleanup.
 - If a validation run finds an **objective blocker to human testing** that was introduced or exposed by the current work, fix it before stopping when the fix is clear and low-risk.
 - Ask the user a clarifying question only when the answer would materially change the implementation, or when proceeding would require a destructive, irreversible, or product-direction choice. If a reasonable default exists, use it and keep going.
 - If the user says some version of **"continue until done"**, interpret "done" as **human-ready unless genuinely blocked**.
@@ -27,6 +28,7 @@ For project architecture, game quality standards, and testing conventions, load 
 - You are capable of completing every step in an approved plan. When you finish one step, immediately start the next. Do not stop partway through a plan to ask whether you should continue.
 - Keep momentum through the checkpoints built into the plan. Finish the current phase before pausing unless you hit a real blocker.
 - If you hit an error, diagnose it and fix it. If you are genuinely stuck, explain the specific blocker. Do not abandon the remaining steps.
+- Before any push-ready handoff, inspect the changed files for accidental secrets or credential-like strings, and if a real secret was already committed, treat rotation plus history cleanup as required work rather than a documentation note.
 - After completing all planned work, run the relevant verification. If it passes, report what changed and what was verified.
 - Do not suggest follow-up work, future ideas, or extra polish unless the user explicitly asks. The goal is completion of the approved scope, not expansion of scope.
 

@@ -3,7 +3,7 @@ import { defineConfig } from '@playwright/test';
 const baseURL = 'http://127.0.0.1:4173';
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: '../e2e',
   testMatch: ['site-*.spec.ts'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -21,7 +21,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'node scripts/playwright-server.mjs',
+    command: 'node ../scripts/playwright-server.mjs',
     port: 4173,
     reuseExistingServer: false,
   },

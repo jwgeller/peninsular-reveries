@@ -63,14 +63,48 @@ test.describe('SITE-01: Responsive layout', () => {
     const headerFits = await page.evaluate(() => {
       const header = document.querySelector('.game-header');
       const right = document.querySelector('.game-header-right');
+      const menu = document.querySelector('.settings-toggle-btn-inline');
+      const letters = document.getElementById('letters-count');
       if (!(header instanceof HTMLElement) || !(right instanceof HTMLElement)) return false;
+      if (!(menu instanceof HTMLElement) || !(letters instanceof HTMLElement)) return false;
 
       const headerRect = header.getBoundingClientRect();
       const rightRect = right.getBoundingClientRect();
-      return rightRect.right <= headerRect.right + 1;
+      const menuRect = menu.getBoundingClientRect();
+      const lettersRect = letters.getBoundingClientRect();
+      return rightRect.right <= headerRect.right + 1
+        && lettersRect.right <= headerRect.right + 1
+        && menuRect.height >= 44
+        && menuRect.width >= 44;
     });
 
     expect(headerFits).toBe(true);
+  });
+
+  test('super word scene uses floating distractor objects while keeping letters on cards', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 600 });
+    await page.goto('/super-word/');
+
+    await page.getByRole('button', { name: /let's go/i }).click();
+
+    const sceneStructure = await page.evaluate(() => {
+      const letter = document.querySelector('#scene .scene-item[data-item-type="letter"]');
+      const distractor = document.querySelector('#scene .scene-item[data-item-type="distractor"]');
+      if (!(letter instanceof HTMLElement) || !(distractor instanceof HTMLElement)) return null;
+
+      return {
+        letterHasCard: Boolean(letter.querySelector('.item-card')),
+        letterHasBadge: Boolean(letter.querySelector('.item-badge')),
+        distractorHasSceneObject: Boolean(distractor.querySelector('.scene-object')),
+        distractorHasCard: Boolean(distractor.querySelector('.item-card')),
+      };
+    });
+
+    expect(sceneStructure).not.toBeNull();
+    expect(sceneStructure?.letterHasCard).toBe(true);
+    expect(sceneStructure?.letterHasBadge).toBe(true);
+    expect(sceneStructure?.distractorHasSceneObject).toBe(true);
+    expect(sceneStructure?.distractorHasCard).toBe(false);
   });
 
   test('mission orbit keeps start and mission controls visible on a short landscape viewport', async ({ page }) => {

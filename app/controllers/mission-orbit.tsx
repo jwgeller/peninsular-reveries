@@ -85,11 +85,6 @@ export async function missionOrbitAction() {
               </div>
             </header>
 
-            <div className="mission-copy">
-              <p id="mission-status-line" className="mission-status-line">Kennedy Space Center is live.</p>
-              <p id="mission-prompt" className="mission-prompt" role="status">Stand by for the countdown.</p>
-            </div>
-
             <div id="mission-stage-shell" className="mission-stage-shell">
               <svg id="mission-map" className="mission-map" viewBox="0 0 100 100" aria-hidden="true">
                 <g id="mission-stars"></g>
@@ -138,7 +133,6 @@ export async function missionOrbitAction() {
 
               <div id="mission-stage-target" className="mission-stage-target" aria-hidden="true"></div>
               <div id="mission-countdown-callout" className="mission-countdown-callout" aria-hidden="true" hidden>Go for launch</div>
-              <div id="mission-crew-overlay" className="mission-crew-overlay" aria-hidden="true" hidden></div>
               <div id="mission-recovery-boat" className="mission-recovery-boat" aria-hidden="true">
                 <svg className="mission-recovery-boat-svg" viewBox="0 0 120 48">
                   <path className="mission-boat-wake" d="M 10 36 C 18 30, 30 30, 38 36 C 46 42, 58 42, 66 36" />
@@ -157,13 +151,21 @@ export async function missionOrbitAction() {
                 <h3 id="timing-title">Mission log</h3>
                 <span id="timing-mode-chip" className="timing-mode-chip">Mission brief</span>
               </div>
-              <div id="timing-meter" className="timing-meter" aria-hidden="true">
-                <div id="timing-good-zone" className="timing-good-zone"></div>
-                <div id="timing-sweet-zone" className="timing-sweet-zone"></div>
-                <div id="timing-cursor" className="timing-cursor"></div>
+              <div className="mission-copy mission-log-copy">
+                <p id="mission-status-line" className="mission-status-line">Kennedy Space Center is live.</p>
+                <p id="mission-prompt" className="mission-prompt" role="status">Stand by for the countdown.</p>
               </div>
-              <p id="timing-hint" className="timing-hint">Each step tells you what is happening. Continue when you are ready.</p>
-              <p id="mission-outcome" className="mission-outcome" aria-live="polite"></p>
+              <div className="timing-activity">
+                <div id="timing-meter" className="timing-meter" aria-hidden="true">
+                  <div id="timing-good-zone" className="timing-good-zone"></div>
+                  <div id="timing-sweet-zone" className="timing-sweet-zone"></div>
+                  <div id="timing-cursor" className="timing-cursor"></div>
+                </div>
+                <div className="timing-activity-copy">
+                  <p id="timing-hint" className="timing-hint">Each step tells you what is happening. Continue when you are ready.</p>
+                  <p id="mission-outcome" className="mission-outcome" aria-live="polite"></p>
+                </div>
+              </div>
             </section>
 
             <div className="mission-toolbar">
@@ -243,19 +245,22 @@ export async function missionOrbitAction() {
               <h3 className="settings-section-title">Credits</h3>
               <p className="settings-help"><span className="settings-detail-label">Code license:</span> {attribution.codeLicense}</p>
               <p className="settings-help">{attribution.summary}</p>
-              <div className="settings-attributions">
-                {attribution.entries.map((entry) => (
-                  <article className="settings-attribution-card" aria-label={`${entry.title} credit`}>
-                    <h4 className="settings-attribution-title">{entry.title}</h4>
-                    <p className="settings-attribution-meta">{entry.type} · {entry.creator}</p>
-                    <p className="settings-attribution-copy"><span className="settings-detail-label">Used in:</span> {entry.usedIn}</p>
-                    <p className="settings-attribution-copy"><span className="settings-detail-label">Source:</span> {entry.source}</p>
-                    <p className="settings-attribution-copy"><span className="settings-detail-label">License:</span> {entry.license}</p>
-                    <p className="settings-attribution-copy"><span className="settings-detail-label">Modifications:</span> {entry.modifications}</p>
-                    {entry.notes ? <p className="settings-attribution-copy"><span className="settings-detail-label">Notes:</span> {entry.notes}</p> : null}
-                  </article>
-                ))}
-              </div>
+              <details className="settings-disclosure settings-attributions-disclosure">
+                <summary className="settings-disclosure-summary">Source details ({attribution.entries.length})</summary>
+                <div className="settings-attributions">
+                  {attribution.entries.map((entry) => (
+                    <article className="settings-attribution-card" aria-label={`${entry.title} credit`}>
+                      <h4 className="settings-attribution-title">{entry.title}</h4>
+                      <p className="settings-attribution-meta">{entry.type} · {entry.creator}</p>
+                      <p className="settings-attribution-copy"><span className="settings-detail-label">Used in:</span> {entry.usedIn}</p>
+                      <p className="settings-attribution-copy"><span className="settings-detail-label">Source:</span> {entry.source}</p>
+                      <p className="settings-attribution-copy"><span className="settings-detail-label">License:</span> {entry.license}</p>
+                      <p className="settings-attribution-copy"><span className="settings-detail-label">Modifications:</span> {entry.modifications}</p>
+                      {entry.notes ? <p className="settings-attribution-copy"><span className="settings-detail-label">Notes:</span> {entry.notes}</p> : null}
+                    </article>
+                  ))}
+                </div>
+              </details>
             </section>
 
             <div className="settings-actions">

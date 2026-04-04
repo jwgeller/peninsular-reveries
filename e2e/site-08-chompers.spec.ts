@@ -52,6 +52,8 @@ test.describe('SITE-08: Chompers', () => {
     await expect(page.locator('#settings-modal')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Menu' })).toBeVisible()
     await expect(page.getByText('Gamepad: left stick or D-pad moves, A chomps.')).toBeVisible()
+    await expect(page.getByText(/curated CC0 sample set/i)).toBeVisible()
+    await expect(page.getByText('Kalimba (C-note)')).toBeVisible()
 
     await page.getByRole('button', { name: 'Close' }).click()
     await expect(page.locator('#settings-modal')).toBeHidden()
@@ -104,6 +106,47 @@ test.describe('SITE-08: Chompers', () => {
     expect(widths.bodyWidth).toBeLessThanOrEqual(widths.windowWidth + 1)
     await expect(page.locator('#game-arena')).toBeVisible()
     await expect(page.locator('#chomp-btn')).toBeVisible()
+  })
+
+  test('short landscape layout keeps the chomp button visible and scales the neck reach with the arena', async ({ page }) => {
+    await page.setViewportSize({ width: 932, height: 430 })
+    await page.goto('/chompers/')
+    await page.getByRole('button', { name: 'Start Chomping' }).click()
+
+    const arena = page.locator('#game-arena')
+    const box = await arena.boundingBox()
+    if (!box) {
+      throw new Error('Missing game arena bounds')
+    }
+
+    await page.waitForTimeout(2500)
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.82)
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.82)
+    await page.waitForTimeout(140)
+
+    const metrics = await page.evaluate(() => {
+      const arenaEl = document.getElementById('game-arena')
+      const hippoEl = document.getElementById('hippo')
+      const chompButton = document.getElementById('chomp-btn')
+      if (!(arenaEl instanceof HTMLElement) || !(hippoEl instanceof HTMLElement) || !(chompButton instanceof HTMLElement)) {
+        return null
+      }
+
+      const arenaRect = arenaEl.getBoundingClientRect()
+      const buttonRect = chompButton.getBoundingClientRect()
+      const neckHeight = Number.parseFloat(getComputedStyle(hippoEl).getPropertyValue('--neck-height'))
+
+      return {
+        arenaHeight: arenaRect.height,
+        buttonBottom: buttonRect.bottom,
+        neckHeight,
+        viewportHeight: window.innerHeight,
+      }
+    })
+
+    expect(metrics).not.toBeNull()
+    expect(metrics?.buttonBottom).toBeLessThanOrEqual((metrics?.viewportHeight ?? 0) + 1)
+    expect(metrics?.neckHeight ?? 0).toBeGreaterThan((metrics?.arenaHeight ?? 0) * 0.55)
   })
 
   test('end screen can return to mode selection', async ({ page }) => {

@@ -1,5 +1,22 @@
+import { chompersSampleManifest, getBundledChompersSamples, type ChompersSampleDefinition, type ChompersSampleId } from './sample-manifest.js'
+
 let audioContext: AudioContext | null = null
 let audioUnlocked = false
+let outputBus: GainNode | null = null
+let compressor: DynamicsCompressorNode | null = null
+let sampleLoadPromise: Promise<void> | null = null
+
+const decodedSamples = new Map<ChompersSampleId, AudioBuffer>()
+const failedSamples = new Set<ChompersSampleId>()
+
+interface SamplePlaybackOptions {
+  readonly playbackRate?: number
+  readonly volumeScale?: number
+  readonly whenOffset?: number
+  readonly duration?: number
+  readonly attack?: number
+  readonly release?: number
+}
 
 function getAudioContext(): AudioContext | null {
   if (!audioContext) {
@@ -17,6 +34,45 @@ function getAudioContext(): AudioContext | null {
   return audioContext
 }
 
+function getOutput(context: AudioContext): AudioNode {
+  if (!compressor || !outputBus) {
+    compressor = context.createDynamicsCompressor()
+    outputBus = context.createGain()
+
+    compressor.threshold.value = -18
+    compressor.knee.value = 16
+    compressor.ratio.value = 3.5
+    compressor.attack.value = 0.006
+    compressor.release.value = 0.16
+    outputBus.gain.value = 0.92
+
+    compressor.connect(outputBus)
+    outputBus.connect(context.destination)
+  }
+
+  return compressor
+}
+
+function createEnvelope(
+  context: AudioContext,
+  startTime: number,
+  duration: number,
+  volume: number,
+  attack: number = 0.01,
+  release: number = Math.min(0.2, duration * 0.6),
+): GainNode {
+  const gain = context.createGain()
+  const peakTime = startTime + Math.max(attack, 0.008)
+  const releaseStart = Math.max(peakTime + 0.01, startTime + duration - Math.max(release, 0.04))
+
+  gain.gain.setValueAtTime(0.0001, startTime)
+  gain.gain.linearRampToValueAtTime(volume, peakTime)
+  gain.gain.exponentialRampToValueAtTime(Math.max(volume * 0.82, 0.0002), releaseStart)
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration)
+
+  return gain
+}
+
 function playTone(
   frequency: number,
   duration: number,
@@ -27,19 +83,17 @@ function playTone(
   const context = getAudioContext()
   if (!context) return
 
+  const startTime = context.currentTime + delay
   const oscillator = context.createOscillator()
-  const gain = context.createGain()
+  const gain = createEnvelope(context, startTime, duration, volume)
 
   oscillator.type = type
-  oscillator.frequency.setValueAtTime(frequency, context.currentTime + delay)
-  gain.gain.setValueAtTime(volume, context.currentTime + delay)
-  gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + delay + duration)
-
+  oscillator.frequency.setValueAtTime(frequency, startTime)
   oscillator.connect(gain)
-  gain.connect(context.destination)
+  gain.connect(getOutput(context))
 
-  oscillator.start(context.currentTime + delay)
-  oscillator.stop(context.currentTime + delay + duration)
+  oscillator.start(startTime)
+  oscillator.stop(startTime + duration)
 }
 
 function playSweep(
@@ -53,19 +107,85 @@ function playSweep(
   if (!context) return
 
   const oscillator = context.createOscillator()
-  const gain = context.createGain()
+  const gain = createEnvelope(context, context.currentTime, duration, volume)
 
   oscillator.type = type
   oscillator.frequency.setValueAtTime(startFrequency, context.currentTime)
   oscillator.frequency.exponentialRampToValueAtTime(endFrequency, context.currentTime + duration)
-  gain.gain.setValueAtTime(volume, context.currentTime)
-  gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration)
 
   oscillator.connect(gain)
-  gain.connect(context.destination)
+  gain.connect(getOutput(context))
 
   oscillator.start(context.currentTime)
   oscillator.stop(context.currentTime + duration)
+}
+
+async function decodeSample(sample: ChompersSampleDefinition): Promise<void> {
+  const context = getAudioContext()
+  if (!context || decodedSamples.has(sample.id) || failedSamples.has(sample.id)) return
+
+  try {
+    const response = await fetch(sample.url, { cache: 'force-cache' })
+    if (!response.ok) {
+      failedSamples.add(sample.id)
+      return
+    }
+
+    const audioData = await response.arrayBuffer()
+    const buffer = await context.decodeAudioData(audioData.slice(0))
+    decodedSamples.set(sample.id, buffer)
+  } catch {
+    failedSamples.add(sample.id)
+  }
+}
+
+function loadSamples(): Promise<void> {
+  const context = getAudioContext()
+  if (!context) return Promise.resolve()
+  if (sampleLoadPromise) return sampleLoadPromise
+
+  const bundledSamples = getBundledChompersSamples().filter((sample) => !decodedSamples.has(sample.id) && !failedSamples.has(sample.id))
+  if (bundledSamples.length === 0) {
+    return Promise.resolve()
+  }
+
+  sampleLoadPromise = Promise.all(bundledSamples.map((sample) => decodeSample(sample)))
+    .then(() => undefined)
+    .finally(() => {
+      sampleLoadPromise = null
+    })
+
+  return sampleLoadPromise
+}
+
+function playSample(sampleId: ChompersSampleId, options: SamplePlaybackOptions = {}): boolean {
+  const context = getAudioContext()
+  const sample = chompersSampleManifest[sampleId]
+  const buffer = decodedSamples.get(sampleId)
+  if (!context || !sample || !buffer) return false
+
+  const startTime = context.currentTime + (options.whenOffset ?? 0)
+  const playbackRate = options.playbackRate ?? 1
+  const duration = options.duration ?? buffer.duration / playbackRate
+  const source = context.createBufferSource()
+  const gain = createEnvelope(
+    context,
+    startTime,
+    duration,
+    sample.gain * (options.volumeScale ?? 1),
+    options.attack ?? 0.008,
+    options.release ?? Math.min(0.16, Math.max(duration * 0.42, 0.05)),
+  )
+
+  source.buffer = buffer
+  source.loop = sample.loop && duration > 0
+  source.playbackRate.setValueAtTime(playbackRate, startTime)
+  source.connect(gain)
+  gain.connect(getOutput(context))
+
+  source.start(startTime)
+  source.stop(startTime + duration)
+  return true
 }
 
 export function ensureAudioUnlocked(): void {
@@ -79,38 +199,53 @@ export function ensureAudioUnlocked(): void {
   source.connect(context.destination)
   source.start()
   audioUnlocked = true
+  void loadSamples()
 }
 
 export function sfxButton(): void {
-  playTone(620, 0.06, 'sine', 0.05)
+  const layered = playSample('ui-tap', { playbackRate: 1.06, volumeScale: 1 })
+  playTone(620, 0.06, 'sine', layered ? 0.02 : 0.05)
 }
 
 export function sfxChomp(): void {
-  playTone(170, 0.08, 'triangle', 0.11)
-  playTone(130, 0.1, 'square', 0.06, 0.03)
+  const layered = playSample('chomp-splash', { playbackRate: 0.92, volumeScale: 1.06 })
+  playTone(170, 0.08, 'triangle', layered ? 0.07 : 0.11)
+  playTone(130, 0.1, 'square', layered ? 0.035 : 0.06, 0.03)
 }
 
 export function sfxCollect(points: number): void {
-  playTone(520 + points * 60, 0.12, 'sine', 0.09)
-  playTone(760 + points * 40, 0.12, 'sine', 0.07, 0.05)
+  const layered = playSample('collect-pop', {
+    playbackRate: points >= 8 ? 1.08 : 1,
+    volumeScale: 1 + Math.min(points, 12) / 28,
+  })
+  playTone(520 + points * 60, 0.12, 'sine', layered ? 0.045 : 0.09)
+  playTone(760 + points * 40, 0.12, 'sine', layered ? 0.035 : 0.07, 0.05)
 }
 
 export function sfxHazard(): void {
-  playSweep(260, 120, 0.22, 'square', 0.08)
-  playTone(92, 0.18, 'sawtooth', 0.03, 0.04)
+  const layered = playSample('hazard-snap', { playbackRate: 0.94, volumeScale: 1.08 })
+  playSweep(260, 120, 0.22, 'square', layered ? 0.045 : 0.08)
+  playTone(92, 0.18, 'sawtooth', layered ? 0.018 : 0.03, 0.04)
 }
 
 export function sfxMiss(): void {
-  playSweep(220, 90, 0.18, 'triangle', 0.07)
+  const layered = playSample('miss-plop', { playbackRate: 0.96, volumeScale: 0.96 })
+  playSweep(220, 90, 0.18, 'triangle', layered ? 0.035 : 0.07)
 }
 
 export function sfxCountdown(seconds: number): void {
   const frequency = seconds <= 3 ? 900 : 640
-  playTone(frequency, 0.1, 'sine', 0.08)
+  const layered = playSample('ui-tap', {
+    playbackRate: seconds <= 3 ? 1.18 : 0.98,
+    volumeScale: seconds <= 3 ? 0.82 : 0.66,
+  })
+  playTone(frequency, 0.1, 'sine', layered ? 0.038 : 0.08)
 }
 
 export function sfxGameOver(): void {
-  playTone(220, 0.16, 'triangle', 0.08)
-  playTone(165, 0.22, 'triangle', 0.07, 0.08)
-  playTone(131, 0.3, 'triangle', 0.06, 0.18)
+  const layered = playSample('miss-plop', { playbackRate: 0.72, volumeScale: 0.88 })
+  playSample('ui-tap', { whenOffset: 0.14, playbackRate: 0.84, volumeScale: 0.6 })
+  playTone(220, 0.16, 'triangle', layered ? 0.04 : 0.08)
+  playTone(165, 0.22, 'triangle', layered ? 0.035 : 0.07, 0.08)
+  playTone(131, 0.3, 'triangle', layered ? 0.03 : 0.06, 0.18)
 }

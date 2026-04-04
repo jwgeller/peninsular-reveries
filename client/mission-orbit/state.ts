@@ -33,6 +33,10 @@ function phaseIndexOf(phase: MissionGameplayPhase): number {
   return MISSION_SEQUENCE.indexOf(phase)
 }
 
+function holdDurationForPhase(phase: MissionGameplayPhase): number {
+  return getPhaseDefinition(phase).holdDurationMs ?? 2500
+}
+
 function burnMessage(label: string, grade: BurnGrade): string {
   switch (grade) {
     case 'perfect': return `${label}: perfect. Right on the flight profile.`
@@ -142,7 +146,7 @@ export function createInitialState(): GameState {
     briefingActive: false,
     countdownValue: COUNTDOWN_START,
     actionHeld: false,
-    launchProgress: 0,
+    holdProgress: 0,
     timingCursor: 0.08,
     timingDirection: 1,
     timingLatched: false,
@@ -202,19 +206,20 @@ export function setActionHeld(state: GameState, held: boolean): GameState {
   }
 }
 
-export function updateLaunchProgress(state: GameState, deltaMs: number): GameState {
-  if (state.phase !== 'launch' || state.briefingActive || state.phaseResolved || state.stopMoActive) return state
+export function updateHoldProgress(state: GameState, deltaMs: number): GameState {
+  if (state.phase === 'title' || state.phase === 'celebration' || state.phase === 'countdown') return state
 
-  const nextProgress = clamp(
-    state.launchProgress + (state.actionHeld ? deltaMs / 2500 : -deltaMs / 4500),
-    0,
-    1,
-  )
+  const definition = getPhaseDefinition(state.phase)
+  if (definition.mode !== 'hold' || state.briefingActive || state.phaseResolved || state.stopMoActive) return state
 
-  if (nextProgress === state.launchProgress) return state
+  const holdDurationMs = holdDurationForPhase(state.phase)
+  const releaseDurationMs = Math.max(holdDurationMs * 1.8, holdDurationMs + 900)
+  const nextProgress = clamp(state.holdProgress + (state.actionHeld ? deltaMs / holdDurationMs : -deltaMs / releaseDurationMs), 0, 1)
+
+  if (nextProgress === state.holdProgress) return state
   return {
     ...state,
-    launchProgress: nextProgress,
+    holdProgress: nextProgress,
   }
 }
 
@@ -247,19 +252,39 @@ export function updateTimingCursor(state: GameState, deltaMs: number, speed: num
   }
 }
 
-export function resolveLaunchRelease(state: GameState): GameState {
-  if (state.phase !== 'launch' || state.briefingActive || state.phaseResolved) return state
+function holdOutcome(phase: MissionGameplayPhase): string {
+  switch (phase) {
+    case 'launch':
+      return 'Orbit reached. Orion is moving around Earth.'
+    case 'trans-lunar-injection':
+      return 'Transfer burn complete. Orion is on the way to the Moon.'
+    case 'service-module-jettison':
+      return 'Service module clear. The crew capsule keeps falling home.'
+    case 'parachute-deploy':
+      return 'Parachutes open. Orion slows for splashdown.'
+    default:
+      return getPhaseDefinition(phase).prompt
+  }
+}
+
+export function resolveHoldRelease(state: GameState): GameState {
+  if (state.phase === 'title' || state.phase === 'celebration' || state.phase === 'countdown') return state
+
+  const definition = getPhaseDefinition(state.phase)
+  if (definition.mode !== 'hold' || state.briefingActive || state.phaseResolved) return state
 
   return {
     ...state,
     actionHeld: false,
-    launchProgress: 1,
-    outcomeText: 'Orbit reached. Orion is moving around Earth.',
+    holdProgress: 1,
+    outcomeText: holdOutcome(state.phase),
     outcomeGrade: null,
     briefingActive: false,
     phaseResolved: true,
     stopMoActive: false,
     timingLatched: false,
+    serviceModuleDetached: state.phase === 'service-module-jettison' ? true : state.serviceModuleDetached,
+    parachuteDeployed: state.phase === 'parachute-deploy' ? true : state.parachuteDeployed,
   }
 }
 
@@ -390,9 +415,9 @@ export function enterStopMo(state: GameState, message: string): GameState {
   return {
     ...state,
     stopMoActive: true,
-    launchProgress: state.phase === 'launch' && cueCenter !== null
-      ? Math.max(state.launchProgress, cueCenter)
-      : state.launchProgress,
+    holdProgress: getPhaseDefinition(state.phase).mode === 'hold' && cueCenter !== null
+      ? Math.max(state.holdProgress, cueCenter)
+      : state.holdProgress,
     timingCursor: state.phase !== 'launch' && cueCenter !== null
       ? cueCenter
       : state.timingCursor,
@@ -415,14 +440,31 @@ export function getCueSignal(state: GameState): CueSignalState | null {
 
   const definition = getPhaseDefinition(state.phase)
   if (definition.mode !== 'hold' || !definition.timingWindow) {
-    return null
+    if (definition.mode !== 'hold') {
+      return null
+    }
+
+    if (state.stopMoActive || state.holdProgress >= 1) {
+      return { band: 'strike', intensity: 1 }
+    }
+
+    if (state.actionHeld) {
+      return {
+        band: state.holdProgress >= 0.72 ? 'ready' : 'building',
+        intensity: Math.max(0.24, state.holdProgress),
+      }
+    }
+
+    return state.holdProgress > 0
+      ? { band: 'building', intensity: state.holdProgress }
+      : { band: 'idle', intensity: 0 }
   }
 
   if (state.stopMoActive) {
     return { band: 'strike', intensity: 1 }
   }
 
-  const position = state.phase === 'launch' ? state.launchProgress : state.timingCursor
+  const position = state.phase === 'launch' ? state.holdProgress : state.timingCursor
   const center = centerOf(definition.timingWindow)
   const reach = 0.24
   const intensity = clamp(1 - Math.abs(position - center) / reach, 0, 1)
@@ -472,7 +514,7 @@ export function advancePhase(state: GameState): GameState {
     briefingActive: Boolean(nextDefinition.briefingMs),
     countdownValue: nextPhase === 'countdown' ? COUNTDOWN_START : state.countdownValue,
     actionHeld: false,
-    launchProgress: nextPhase === 'launch' ? 0 : state.launchProgress,
+    holdProgress: 0,
     timingCursor: 0.08,
     timingDirection: 1,
     timingLatched: false,

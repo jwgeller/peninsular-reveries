@@ -38,9 +38,10 @@ export function renderScene(puzzle: Puzzle, state: GameState, sceneEl: HTMLEleme
   for (let i = 0; i < puzzle.items.length; i++) {
     const item = puzzle.items[i]
     const isCollected = collectedIds.has(item.id)
+    const visualClassName = item.type === 'letter' ? 'scene-visual item-card' : 'scene-visual scene-object'
 
     const btn = document.createElement('button')
-    btn.className = 'scene-item'
+    btn.className = `scene-item scene-item-${item.type}`
     if (isCollected) btn.classList.add('collected')
     btn.dataset.itemId = item.id
     btn.dataset.itemType = item.type
@@ -66,7 +67,7 @@ export function renderScene(puzzle: Puzzle, state: GameState, sceneEl: HTMLEleme
     }
 
     const card = document.createElement('div')
-    card.className = 'item-card'
+  card.className = visualClassName
 
     const emojiSpan = document.createElement('span')
     emojiSpan.className = 'item-emoji'
@@ -138,6 +139,7 @@ export function renderGameHeader(
   getScore().textContent = `⭐ ${state.score}`
   getScore().setAttribute('aria-label', `Score: ${state.score}`)
   getLettersCount().textContent = `${state.collectedLetters.length} / ${puzzle.answer.length}`
+  getLettersCount().setAttribute('aria-label', `Letters found: ${state.collectedLetters.length} of ${puzzle.answer.length}`)
 }
 
 export function showScreen(screenId: string): void {

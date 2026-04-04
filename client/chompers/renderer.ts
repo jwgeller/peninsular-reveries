@@ -45,6 +45,24 @@ function percentToPixels(percent: number, size: number): number {
   return (percent / 100) * size
 }
 
+function resolveHippoReachMetrics(neckExtension: number, arenaHeight: number): {
+  neckHeightPx: number
+  headShiftPx: number
+  chompColumnHeightPercent: number
+} {
+  const chompColumnHeightPercent = 12 + neckExtension * 50
+  const chompColumnHeightPx = percentToPixels(chompColumnHeightPercent, arenaHeight)
+  const baseNeckHeightPx = Math.max(56, arenaHeight * 0.14)
+  const neckHeightPx = baseNeckHeightPx + neckExtension * (chompColumnHeightPx * 0.84 + arenaHeight * 0.06)
+  const headShiftPx = -neckExtension * Math.max(24, arenaHeight * 0.08)
+
+  return {
+    neckHeightPx,
+    headShiftPx,
+    chompColumnHeightPercent,
+  }
+}
+
 function modeLabel(mode: GameMode): string {
   if (mode === 'survival') {
     return 'Survival'
@@ -127,20 +145,21 @@ function renderHud(state: GameState): void {
   getComboReadout().textContent = `Combo x${state.combo}`
 }
 
-function renderHippo(state: GameState, arenaWidth: number): void {
+function renderHippo(state: GameState, arenaWidth: number, arenaHeight: number): void {
   const hippo = getHippo()
   const chompColumn = getChompColumn()
   const hippoX = percentToPixels(state.hippo.x, arenaWidth)
+  const reachMetrics = resolveHippoReachMetrics(state.hippo.neckExtension, arenaHeight)
 
   hippo.style.transform = `translate3d(${hippoX.toFixed(1)}px, 0, 0) translate3d(-50%, 0, 0)`
-  hippo.style.setProperty('--neck-height', `${58 + state.hippo.neckExtension * 112}px`)
-  hippo.style.setProperty('--head-shift', `${-state.hippo.neckExtension * 108}px`)
+  hippo.style.setProperty('--neck-height', `${reachMetrics.neckHeightPx.toFixed(1)}px`)
+  hippo.style.setProperty('--head-shift', `${reachMetrics.headShiftPx.toFixed(1)}px`)
   hippo.style.setProperty('--jaw-angle', `${state.hippo.neckExtension * 22}deg`)
   hippo.style.setProperty('--hippo-tilt', `${-state.hippo.neckExtension * 8}deg`)
   hippo.classList.toggle('is-chomping', state.hippo.chomping)
 
   chompColumn.style.transform = `translate3d(${hippoX.toFixed(1)}px, 0, 0) translate3d(-50%, 0, 0)`
-  chompColumn.style.height = `${12 + state.hippo.neckExtension * 50}%`
+  chompColumn.style.height = `${reachMetrics.chompColumnHeightPercent}%`
   chompColumn.classList.toggle('active', state.hippo.chomping)
 }
 
@@ -190,7 +209,7 @@ export function renderGame(state: GameState): void {
 
   renderHud(state)
   renderItems(state, arenaWidth, arenaHeight)
-  renderHippo(state, arenaWidth)
+  renderHippo(state, arenaWidth, arenaHeight)
   arena.dataset.mode = state.mode
   arena.dataset.phase = state.phase
 }

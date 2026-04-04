@@ -2,8 +2,8 @@
 
 ## Test Split
 
-- E2E tests live in `tests/e2e/` and should keep the `site-*.spec.ts` naming pattern.
-- Unit tests live in `tests/unit/` and cover pure logic, config, build, workflow, and data-shape checks.
+- E2E tests live in root `e2e/` and should keep the `site-*.spec.ts` naming pattern.
+- Unit and Node-side tests live next to the code they exercise: `app/**/*.test.ts`, `client/**/*.test.ts`, and `config/**/*.test.ts`.
 - Node-side TypeScript tests should use extensionless workspace imports.
 
 ## Validation Gates

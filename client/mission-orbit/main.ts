@@ -1,7 +1,7 @@
 import { pulseElement } from './animations.js'
 import {
   announceCountdown,
-  announceKeepHolding,
+  announceContinueHolding,
   announceMissionComplete,
   announcePhase,
   announcePhaseReady,
@@ -23,13 +23,13 @@ import {
   getMissionTimeLabel,
   isRecoveryActionReady,
   resetGame,
-  resolveLaunchRelease,
+  resolveHoldRelease,
   resolveNarrativePhase,
   setActionHeld,
   startMission,
   tickClock,
   updateCountdown,
-  updateLaunchProgress,
+  updateHoldProgress,
 } from './state.js'
 import {
   ensureAudioUnlocked,
@@ -95,6 +95,10 @@ function clearAdvanceTimer(): void {
     window.clearTimeout(phaseAdvanceTimer)
     phaseAdvanceTimer = null
   }
+}
+
+function shouldPulseBurn(phase: GameState['phase']): boolean {
+  return phase === 'launch' || phase === 'trans-lunar-injection'
 }
 
 function playPhaseActivationAudio(): void {
@@ -165,6 +169,7 @@ function onPhaseEntered(previousPhase: GameState['phase']): void {
 
 function goToNextPhase(): void {
   clearAdvanceTimer()
+  enginePulseBudgetMs = 0
   const previousPhase = state.phase
   state = advancePhase(state)
   lastPhase = state.phase
@@ -183,11 +188,20 @@ function resolveCurrentPhase(): void {
   const definition = currentPhaseDefinition()
   if (!definition || state.phaseResolved) return
 
-  if (state.phase === 'launch') {
-    state = resolveLaunchRelease(state)
+  if (definition.mode === 'hold') {
+    state = resolveHoldRelease(state)
     renderMission(state)
+
+    if (state.phase === 'service-module-jettison') {
+      sfxReentry()
+    }
+
+    if (state.phase === 'parachute-deploy') {
+      sfxParachute()
+    }
+
     void pulseElement(getOutcomeElement(), 'outcome-pulse-success')
-    scheduleNextPhase(1400)
+    scheduleNextPhase(definition.autoAdvanceMs ?? 1500)
     return
   }
 
@@ -261,6 +275,11 @@ const callbacks: InputCallbacks = {
 
     if (state.briefingActive) {
       finishBriefing()
+
+      if (definition.mode === 'hold') {
+        state = setActionHeld(state, true)
+      }
+
       renderMission(state)
       return
     }
@@ -283,8 +302,8 @@ const callbacks: InputCallbacks = {
     state = setActionHeld(state, false)
     renderMission(state)
 
-    if (state.launchProgress < 1) {
-      announceKeepHolding()
+    if (state.holdProgress < 1) {
+      announceContinueHolding(definition.label)
     }
   },
   onReplay: replayGame,
@@ -328,12 +347,13 @@ function tick(now: number): void {
       if (state.phaseElapsedMs >= 10000) {
         goToNextPhase()
       }
-    } else if (state.phase === 'launch') {
-      state = updateLaunchProgress(state, deltaMs)
+    } else if (definition?.mode === 'hold') {
+      state = updateHoldProgress(state, deltaMs)
 
-      if (state.actionHeld) {
+      if (state.actionHeld && shouldPulseBurn(state.phase)) {
         enginePulseBudgetMs += deltaMs
-        if (enginePulseBudgetMs >= 360) {
+        const pulseCadenceMs = state.phase === 'launch' ? 360 : 440
+        if (enginePulseBudgetMs >= pulseCadenceMs) {
           sfxBurnPulse()
           enginePulseBudgetMs = 0
         }
@@ -341,7 +361,7 @@ function tick(now: number): void {
         enginePulseBudgetMs = 0
       }
 
-      if (!state.phaseResolved && state.launchProgress >= 1) {
+      if (!state.phaseResolved && state.holdProgress >= 1) {
         resolveCurrentPhase()
       }
     } else {

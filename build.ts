@@ -69,7 +69,7 @@ for (const { url, outPath } of staticRoutes) {
 }
 
 // ── Performance budget ───────────────────────────────────
-const budgetConfig = JSON.parse(readFileSync('budget.json', 'utf-8')) as Array<{
+const budgetConfig = JSON.parse(readFileSync('config/budget.json', 'utf-8')) as Array<{
   resourceSizes?: Array<{
     resourceType: 'document' | 'stylesheet' | 'script' | 'total'
     budget: number

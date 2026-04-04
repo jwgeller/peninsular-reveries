@@ -1,6 +1,9 @@
 import { spawn } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const PORT = '4173'
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const env = {
   ...process.env,
   SITE_BASE_PATH: '',
@@ -11,6 +14,7 @@ function run(command, args, onExit) {
   const shellCommand = [command, ...args].join(' ')
 
   const child = spawn(shellCommand, {
+    cwd: repoRoot,
     env,
     shell: true,
     stdio: 'inherit',

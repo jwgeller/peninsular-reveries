@@ -31,8 +31,8 @@ export function announceCountdown(value: number): void {
   announce('Booster ignition. Liftoff.', 'assertive')
 }
 
-export function announceKeepHolding(): void {
-  announce('Still climbing. Hold a little longer before cutoff.', 'polite')
+export function announceContinueHolding(label: string): void {
+  announce(`${label} is still in motion. Hold a little longer.`, 'polite')
 }
 
 export function announceBurnResult(result: BurnResult): void {
