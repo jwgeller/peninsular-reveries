@@ -992,6 +992,28 @@ body.mission-orbit-game main {
   gap: 1rem;
 }
 
+.settings-select-row {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+}
+
+.settings-select-row select {
+  width: fit-content;
+  min-width: 10rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mission-copy);
+  font: inherit;
+}
+
+.settings-select-row select:focus-visible {
+  outline: 3px solid rgba(255, 209, 102, 0.8);
+  outline-offset: 2px;
+}
+
 .settings-toggle-row input[type='checkbox'] {
   width: 1.1rem;
   height: 1.1rem;

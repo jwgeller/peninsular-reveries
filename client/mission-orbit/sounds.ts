@@ -1,15 +1,30 @@
 import type { BurnGrade, MissionPhase } from './types.js'
+import {
+  getBundledMissionOrbitSamples,
+  getMissionOrbitSampleVariantId,
+  missionOrbitSampleManifest,
+  type MissionOrbitPhysicalSampleId,
+  type MissionOrbitSampleDefinition,
+  type MissionOrbitSampleId,
+} from './sample-manifest.js'
 
 let ctx: AudioContext | null = null
 let unlocked = false
 let musicEnabled = false
 let musicPreferenceLoaded = false
+let sfxIntensity: SoundIntensityMode = 'heavy'
+let sfxIntensityPreferenceLoaded = false
 let ambientInterval: number | null = null
 let outputBus: GainNode | null = null
 let compressor: DynamicsCompressorNode | null = null
 let noiseBuffer: AudioBuffer | null = null
+let sampleLoadPromise: Promise<void> | null = null
+
+const decodedSamples = new Map<MissionOrbitSampleId, AudioBuffer>()
+const failedSamples = new Set<MissionOrbitSampleId>()
 
 const MUSIC_STORAGE_KEY = 'mission-orbit-music-enabled'
+const SFX_INTENSITY_STORAGE_KEY = 'mission-orbit-sfx-intensity'
 const SPACE_MUSIC_PHASES = new Set<MissionPhase>([
   'high-earth-orbit',
   'trans-lunar-injection',
@@ -44,6 +59,17 @@ interface NoiseOptions {
   readonly q?: number
   readonly playbackRate?: number
 }
+
+interface SamplePlaybackOptions {
+  readonly whenOffset?: number
+  readonly volumeScale?: number
+  readonly playbackRate?: number
+  readonly duration?: number
+  readonly attack?: number
+  readonly release?: number
+}
+
+export type SoundIntensityMode = 'light' | 'heavy'
 
 function getCtx(): AudioContext | null {
   if (!ctx) {
@@ -185,6 +211,74 @@ function noise(options: NoiseOptions): void {
   source.stop(startTime + options.duration)
 }
 
+async function decodeSample(sample: MissionOrbitSampleDefinition): Promise<void> {
+  const audio = getCtx()
+  if (!audio || decodedSamples.has(sample.id) || failedSamples.has(sample.id)) return
+
+  try {
+    const response = await fetch(sample.url, { cache: 'force-cache' })
+    if (!response.ok) {
+      failedSamples.add(sample.id)
+      return
+    }
+
+    const audioData = await response.arrayBuffer()
+    const buffer = await audio.decodeAudioData(audioData.slice(0))
+    decodedSamples.set(sample.id, buffer)
+  } catch {
+    failedSamples.add(sample.id)
+  }
+}
+
+export function loadSamples(): Promise<void> {
+  const audio = getCtx()
+  if (!audio) return Promise.resolve()
+  if (sampleLoadPromise) return sampleLoadPromise
+
+  const bundledSamples = getBundledMissionOrbitSamples().filter((sample) => !decodedSamples.has(sample.id) && !failedSamples.has(sample.id))
+  if (bundledSamples.length === 0) {
+    return Promise.resolve()
+  }
+
+  sampleLoadPromise = Promise.all(bundledSamples.map((sample) => decodeSample(sample)))
+    .then(() => undefined)
+    .finally(() => {
+      sampleLoadPromise = null
+    })
+
+  return sampleLoadPromise
+}
+
+function playSample(sampleId: MissionOrbitSampleId, options: SamplePlaybackOptions = {}): boolean {
+  const audio = getCtx()
+  const sample = missionOrbitSampleManifest[sampleId]
+  const buffer = decodedSamples.get(sampleId)
+  if (!audio || !sample || !buffer) return false
+
+  const startTime = audio.currentTime + (options.whenOffset ?? 0)
+  const playbackRate = options.playbackRate ?? 1
+  const source = audio.createBufferSource()
+  const duration = options.duration ?? buffer.duration / playbackRate
+  const envelope = createEnvelope(
+    audio,
+    startTime,
+    duration,
+    sample.gain * (options.volumeScale ?? 1),
+    options.attack ?? 0.01,
+    options.release ?? Math.min(0.16, Math.max(duration * 0.45, 0.06)),
+  )
+
+  source.buffer = buffer
+  source.loop = sample.loop && duration > 0
+  source.playbackRate.setValueAtTime(playbackRate, startTime)
+  source.connect(envelope)
+  envelope.connect(getOutput(audio))
+
+  source.start(startTime)
+  source.stop(startTime + duration)
+  return true
+}
+
 function loadMusicPreference(): void {
   if (musicPreferenceLoaded) return
   musicPreferenceLoaded = true
@@ -193,6 +287,31 @@ function loadMusicPreference(): void {
   } catch {
     musicEnabled = false
   }
+}
+
+function loadSfxIntensityPreference(): void {
+  if (sfxIntensityPreferenceLoaded) return
+  sfxIntensityPreferenceLoaded = true
+  try {
+    const stored = window.localStorage.getItem(SFX_INTENSITY_STORAGE_KEY)
+    sfxIntensity = stored === 'light' ? 'light' : 'heavy'
+  } catch {
+    sfxIntensity = 'heavy'
+  }
+}
+
+function getHeavySoundMode(): boolean {
+  loadSfxIntensityPreference()
+  return sfxIntensity === 'heavy'
+}
+
+function playPhysicalSample(sampleId: MissionOrbitPhysicalSampleId, options: SamplePlaybackOptions = {}): boolean {
+  loadSfxIntensityPreference()
+
+  const preferredId = getMissionOrbitSampleVariantId(sampleId, sfxIntensity)
+  const fallbackId = getMissionOrbitSampleVariantId(sampleId, sfxIntensity === 'heavy' ? 'light' : 'heavy')
+
+  return playSample(preferredId, options) || playSample(fallbackId, options)
 }
 
 function chord(notes: readonly number[], duration: number, volume: number): void {
@@ -215,6 +334,13 @@ function chord(notes: readonly number[], duration: number, volume: number): void
 function playAmbientMeasure(): void {
   const audio = getCtx()
   if (!audio || audio.state === 'suspended') return
+
+  playPhysicalSample('space-ambience', {
+    duration: 2.6,
+    volumeScale: 1,
+    attack: 0.18,
+    release: 0.42,
+  })
 
   chord([174.61, 261.63, 392], 2.8, 0.008)
   tone({
@@ -300,11 +426,26 @@ export function getMusicEnabled(): boolean {
   return musicEnabled
 }
 
+export function getSfxIntensityMode(): SoundIntensityMode {
+  loadSfxIntensityPreference()
+  return sfxIntensity
+}
+
 export function setMusicEnabled(enabled: boolean): void {
   loadMusicPreference()
   musicEnabled = enabled
   try {
     window.localStorage.setItem(MUSIC_STORAGE_KEY, String(enabled))
+  } catch {
+    // Ignore localStorage failures.
+  }
+}
+
+export function setSfxIntensityMode(mode: SoundIntensityMode): void {
+  loadSfxIntensityPreference()
+  sfxIntensity = mode === 'light' ? 'light' : 'heavy'
+  try {
+    window.localStorage.setItem(SFX_INTENSITY_STORAGE_KEY, sfxIntensity)
   } catch {
     // Ignore localStorage failures.
   }
@@ -352,9 +493,12 @@ export function sfxCountdownBeep(value: number): void {
 }
 
 export function sfxEngineIgnition(): void {
+  const samplePlayed = playPhysicalSample('launch-rumble', { playbackRate: 0.9, duration: 0.52 })
+  const heavyMode = getHeavySoundMode()
+
   noise({
     duration: 0.48,
-    volume: 0.05,
+    volume: samplePlayed ? (heavyMode ? 0.028 : 0.018) : 0.05,
     filterType: 'lowpass',
     filterFrequency: 180,
     filterTargetFrequency: 420,
@@ -367,7 +511,7 @@ export function sfxEngineIgnition(): void {
     frequency: 84,
     duration: 0.52,
     type: 'sawtooth',
-    volume: 0.018,
+    volume: samplePlayed ? (heavyMode ? 0.012 : 0.008) : 0.018,
     detune: [-11, 0, 9],
     filterType: 'lowpass',
     filterFrequency: 280,
@@ -378,9 +522,12 @@ export function sfxEngineIgnition(): void {
 }
 
 export function sfxLiftoff(): void {
+  const samplePlayed = playPhysicalSample('launch-rumble', { playbackRate: 1, duration: 0.78 })
+  const heavyMode = getHeavySoundMode()
+
   noise({
     duration: 0.78,
-    volume: 0.075,
+    volume: samplePlayed ? (heavyMode ? 0.04 : 0.025) : 0.075,
     filterType: 'lowpass',
     filterFrequency: 220,
     filterTargetFrequency: 900,
@@ -391,7 +538,7 @@ export function sfxLiftoff(): void {
   })
   noise({
     duration: 0.62,
-    volume: 0.016,
+    volume: samplePlayed ? (heavyMode ? 0.01 : 0.006) : 0.016,
     whenOffset: 0.06,
     filterType: 'highpass',
     filterFrequency: 1200,
@@ -404,7 +551,7 @@ export function sfxLiftoff(): void {
     frequency: 62,
     duration: 0.7,
     type: 'sawtooth',
-    volume: 0.024,
+    volume: samplePlayed ? (heavyMode ? 0.015 : 0.01) : 0.024,
     detune: [-7, 0, 7],
     filterType: 'lowpass',
     filterFrequency: 220,
@@ -415,6 +562,10 @@ export function sfxLiftoff(): void {
 }
 
 export function sfxBurnPulse(): void {
+  if (playPhysicalSample('burn-thrust-pulse')) {
+    return
+  }
+
   noise({
     duration: 0.24,
     volume: 0.03,
@@ -623,6 +774,10 @@ export function sfxBurnResult(grade: BurnGrade): void {
 }
 
 export function sfxReentry(): void {
+  if (playPhysicalSample('reentry-texture')) {
+    return
+  }
+
   noise({
     duration: 0.62,
     volume: 0.048,
@@ -649,6 +804,10 @@ export function sfxReentry(): void {
 }
 
 export function sfxParachute(): void {
+  if (playPhysicalSample('parachute-deploy')) {
+    return
+  }
+
   noise({
     duration: 0.22,
     volume: 0.018,
@@ -675,32 +834,57 @@ export function sfxParachute(): void {
 }
 
 export function sfxSplashdown(): void {
+  const heavyMode = getHeavySoundMode()
+  if (playPhysicalSample('splashdown', { playbackRate: heavyMode ? 0.96 : 1, attack: 0.008, release: heavyMode ? 0.16 : 0.1 })) {
+    return
+  }
+
   tone({
     frequency: 160,
-    duration: 0.18,
+    duration: heavyMode ? 0.26 : 0.18,
     type: 'triangle',
-    volume: 0.02,
+    volume: heavyMode ? 0.028 : 0.02,
     detune: [-7, 0, 7],
     filterType: 'lowpass',
-    filterFrequency: 520,
-    filterTargetFrequency: 260,
+    filterFrequency: heavyMode ? 440 : 520,
+    filterTargetFrequency: heavyMode ? 180 : 260,
     attack: 0.004,
-    release: 0.1,
+    release: heavyMode ? 0.14 : 0.1,
   })
   noise({
-    duration: 0.28,
-    volume: 0.022,
+    duration: heavyMode ? 0.42 : 0.28,
+    volume: heavyMode ? 0.034 : 0.022,
     whenOffset: 0.02,
     filterType: 'bandpass',
-    filterFrequency: 720,
-    filterTargetFrequency: 260,
-    q: 0.9,
+    filterFrequency: heavyMode ? 560 : 720,
+    filterTargetFrequency: heavyMode ? 180 : 260,
+    q: heavyMode ? 0.8 : 0.9,
     attack: 0.005,
-    release: 0.16,
+    release: heavyMode ? 0.22 : 0.16,
   })
+
+  if (heavyMode) {
+    tone({
+      frequency: 104,
+      duration: 0.34,
+      type: 'sine',
+      volume: 0.018,
+      whenOffset: 0.03,
+      detune: [-4, 0, 4],
+      filterType: 'lowpass',
+      filterFrequency: 260,
+      filterTargetFrequency: 140,
+      attack: 0.01,
+      release: 0.18,
+    })
+  }
 }
 
 export function sfxCelebration(): void {
+  if (playPhysicalSample('celebration-accent', { attack: 0.01, release: 0.18 })) {
+    return
+  }
+
   chord([392, 523.25, 659.25], 0.36, 0.015)
   tone({
     frequency: 783.99,

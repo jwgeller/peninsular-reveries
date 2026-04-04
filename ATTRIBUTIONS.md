@@ -14,19 +14,118 @@
 
 - Slug: mission-orbit
 - Code license: GPL-3.0
-- Summary: Mission: Orbit uses original visuals and Web Audio API synthesis. Its in-game settings panel surfaces the same credit summary used here.
+- Summary: Mission: Orbit uses original visuals, browser-synthesized cue tones, and a bundled set of curated CC0 light/heavy sound-effect variants. Its in-game settings panel surfaces the same credit summary used here.
 
 #### Entries
 
-##### Mission audio bed and sound effects
+##### Mission interface cues and adaptive synth bed
 
 - Type: music
-- Used in: Mission: Orbit countdown, burns, coast phases, and splashdown
+- Used in: Mission: Orbit countdown, burn windows, cue bands, burn-result grades, stop-mo cue, and current coast-phase synthesized bed
 - Creator: Peninsular Reveries
 - Source: Generated in-browser with the Web Audio API
 - License: GPL-3.0
 - Modifications: Not applicable
-- Notes: The game synthesizes its sounds at runtime. No recorded loops, samples, or downloaded media files are bundled.
+- Notes: The synthesized cue tones remain in use alongside bundled CC0 light/heavy sample variants for launch, burn-thrust pulse, reentry, parachute deployment, splashdown, cabin ambience, and celebration. The settings panel defaults to the heavier physical-sound mix.
+
+##### Rocket Launch Rumble at Canaveral
+
+- Type: sound effect
+- Used in: Mission: Orbit launch ignition and liftoff light/heavy variants
+- Creator: felix.blume
+- Source: Freesound (https://freesound.org/people/felix.blume/sounds/613855/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Rendered into light/heavy mono OGG variants with distinct trims, low-pass filters, fades, and level matching for in-game use.
+
+##### Compressed Air-Short-6
+
+- Type: sound effect
+- Used in: Mission: Orbit burn-thrust pulse light mix
+- Creator: wavecal22
+- Source: Freesound (https://freesound.org/people/wavecal22/sounds/753135/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed to a short mono OGG puff, filtered, faded, and level-matched for the gentler burn-thrust variant.
+
+##### Compressed Air-Short-9
+
+- Type: sound effect
+- Used in: Mission: Orbit burn-thrust pulse heavy mix
+- Creator: wavecal22
+- Source: Freesound (https://freesound.org/people/wavecal22/sounds/753138/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed to a slightly fuller mono OGG burst, filtered, faded, and level-matched for the heavier burn-thrust variant.
+
+##### burning-towels.aif
+
+- Type: sound effect
+- Used in: Mission: Orbit reentry light/heavy variants
+- Creator: alienistcog
+- Source: Freesound (https://freesound.org/people/alienistcog/sounds/124579/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Rendered into light/heavy mono OGG variants with different trims, high-pass filtering, fades, and level matching for reentry.
+
+##### G39-19-Parachute Swish Snap.wav
+
+- Type: sound effect
+- Used in: Mission: Orbit parachute deployment light/heavy variants
+- Creator: craigsmith
+- Source: Freesound (https://freesound.org/people/craigsmith/sounds/438636/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Rendered into light/heavy mono OGG canopy-snap variants with distinct trims, fades, and level matching.
+
+##### WATRSplsh_Stick Throw Into Water_Jaku5.wav
+
+- Type: sound effect
+- Used in: Mission: Orbit splashdown light mix
+- Creator: jakubp.jp
+- Source: Freesound (https://freesound.org/people/jakubp.jp/sounds/554595/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed to a compact water impact, converted to mono OGG, and faded for in-game use.
+
+##### Water_Paddle_impact_001.wav
+
+- Type: sound effect
+- Used in: Mission: Orbit splashdown heavy mix
+- Creator: EpicWizard
+- Source: Freesound (https://freesound.org/people/EpicWizard/sounds/316572/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed to a stronger impact excerpt, converted to mono OGG, and faded for in-game use.
+
+##### Electric machine engine large air-conditioner hum noise
+
+- Type: sound effect
+- Used in: Mission: Orbit optional space ambience light mix
+- Creator: kentspublicdomain
+- Source: Freesound (https://freesound.org/people/kentspublicdomain/sounds/324665/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a shorter mono OGG cabin-hum loop, filtered, faded, and level-matched for the gentler ambience variant.
+
+##### Refridgerator electric machine engine noise
+
+- Type: sound effect
+- Used in: Mission: Orbit optional space ambience heavy mix
+- Creator: kentspublicdomain
+- Source: Freesound (https://freesound.org/people/kentspublicdomain/sounds/324666/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a fuller mono OGG cabin-hum loop, filtered, faded, and level-matched for the heavier ambience variant.
+
+##### Kalimba (C-note)
+
+- Type: sound effect
+- Used in: Mission: Orbit celebration accent light mix
+- Creator: foochie_foochie
+- Source: Freesound (https://freesound.org/people/foochie_foochie/sounds/331047/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a softer mono OGG kalimba accent, low-pass filtered, faded, and level-matched for the gentler celebration variant.
+
+##### MUSCTnprc-Blue Snowball Microphone, CU_Kalimba, Duo Note_Nicholas Judy_TDC
+
+- Type: sound effect
+- Used in: Mission: Orbit celebration accent heavy mix
+- Creator: designerschoice
+- Source: Freesound (https://freesound.org/people/designerschoice/sounds/824972/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed into a fuller mono OGG kalimba accent, low-pass filtered, faded, and level-matched for the heavier celebration variant.
 
 ### Super Word
 

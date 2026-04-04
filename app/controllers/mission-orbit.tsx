@@ -176,7 +176,15 @@ export async function missionOrbitAction() {
                 <span>Space ambience</span>
                 <input type="checkbox" id="music-enabled-toggle" />
               </label>
+              <label className="settings-select-row" htmlFor="sound-intensity-select">
+                <span>Physical sound intensity</span>
+                <select id="sound-intensity-select" defaultValue="heavy">
+                  <option value="heavy">Heavy</option>
+                  <option value="light">Light</option>
+                </select>
+              </label>
               <p className="settings-help">Cue tones and sound effects stay on. Ambient pads only play when you turn them on.</p>
+              <p className="settings-help">Heavy is the default mix and swaps in fuller light/heavy sample variants across launch, burns, reentry, parachute, splashdown, ambience, and celebration. Light keeps every physical sound gentler.</p>
             </section>
 
             <section className="settings-section">
