@@ -218,10 +218,6 @@ export function sfxWrong(): void {
   playSweep(260, 120, 0.2, 'sine', layered ? 0.04 : 0.08)
 }
 
-export function sfxStreakBonus(streak: number): void {
-  playTone(520 + streak * 60, 0.15, 'sine', 0.07)
-}
-
 export function sfxProblemAppear(): void {
   playSample('ui-tap', { playbackRate: 1.02, volumeScale: 0.9 })
 }

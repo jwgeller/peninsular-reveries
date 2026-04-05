@@ -12,6 +12,7 @@ Use this skill when producing plans that will be dispatched by the `@orchestrato
 
 Plans live in `/memories/repo/plans/active-plan.md` (Copilot memory, workspace-persistent, not in git). There must be exactly one active plan file — the orchestrator reads only this path.
 
+- At the start of a new planning session, check whether `/memories/repo/plans/active-plan.md` already exists. If it does, ask the user whether the previous plan should be cleaned up (deleted) before starting fresh. Do not silently create a plan in a different location.
 - When a new plan is approved, **delete** the existing `active-plan.md` first, then create the new one. Do not create separate named plan files — the orchestrator will not discover them.
 - When all WUs in a plan are `done` and the orchestrator has completed integration, delete the plan file so a stale completed plan is not mistaken for active work.
 

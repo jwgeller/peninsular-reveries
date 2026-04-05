@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import { test } from 'node:test'
 import { createInitialState, selectAnswer, resolveChomp, advanceRound, resetGame } from './state'
-import { SCENE_ITEM_COUNTS, START_LIVES, TOTAL_ROUNDS } from './types'
+import { POINTS_FOR_AREA, SCENE_ITEM_COUNTS, START_LIVES, TOTAL_ROUNDS } from './types'
+import type { Area, AreaLevel } from './types'
 
 const SEED = 0xc0ffee
 
 test('createInitialState produces valid initial state', () => {
-  const state = createInitialState('classic', 'addition', SEED)
+  const state = createInitialState('addition', 1, SEED)
 
   assert.equal(state.phase, 'playing')
   assert.equal(state.round, 1)
@@ -16,14 +17,16 @@ test('createInitialState produces valid initial state', () => {
   assert.equal(state.streak, 0)
   assert.equal(state.bestStreak, 0)
   assert.equal(state.correctCount, 0)
-  assert.equal(state.mode, 'classic')
-  assert.equal(state.difficulty, 'addition')
+  assert.equal(state.area, 'addition')
+  assert.equal(state.level, 1)
+  assert.ok(!('mode' in state), 'state should not have mode')
+  assert.ok(!('difficulty' in state), 'state should not have difficulty')
   assert.equal(state.sceneItems.length, SCENE_ITEM_COUNTS['addition'])
   assert.ok(state.sceneItems.some((item) => item.isCorrect), 'Expected at least one correct item')
 })
 
 test('correct answer flow: score increases, streak increments, advances to round 2', () => {
-  const state = createInitialState('classic', 'addition', SEED)
+  const state = createInitialState('addition', 1, SEED)
   const correctItem = state.sceneItems.find((item) => item.isCorrect)
   assert.ok(correctItem, 'Expected a correct item in scene')
 
@@ -45,7 +48,7 @@ test('correct answer flow: score increases, streak increments, advances to round
 })
 
 test('wrong answer flow: lives decrease, streak resets', () => {
-  const state = createInitialState('classic', 'addition', SEED)
+  const state = createInitialState('addition', 1, SEED)
   const wrongItem = state.sceneItems.find((item) => !item.isCorrect)
   assert.ok(wrongItem, 'Expected a wrong item in scene')
 
@@ -59,7 +62,7 @@ test('wrong answer flow: lives decrease, streak resets', () => {
 })
 
 test('game over after totalRounds', () => {
-  let state = createInitialState('classic', 'addition', SEED)
+  let state = createInitialState('addition', 1, SEED)
   assert.equal(state.totalRounds, TOTAL_ROUNDS)
 
   for (let i = 0; i < TOTAL_ROUNDS; i++) {
@@ -70,14 +73,14 @@ test('game over after totalRounds', () => {
 })
 
 test('game over early when lives reach 0', () => {
-  const state = createInitialState('classic', 'addition', SEED)
+  const state = createInitialState('addition', 1, SEED)
   const depleted = { ...state, lives: 0, phase: 'feedback' as const }
   const result = advanceRound(depleted)
   assert.equal(result.phase, 'gameover')
 })
 
 test('streak increments on consecutive correct answers and bestStreak tracks the max', () => {
-  let state = createInitialState('classic', 'multiplication', SEED)
+  let state = createInitialState('multiplication', 1, SEED)
 
   for (let round = 0; round < 4; round++) {
     const correctItem = state.sceneItems.find((item) => item.isCorrect)
@@ -91,7 +94,7 @@ test('streak increments on consecutive correct answers and bestStreak tracks the
 })
 
 test('wrong answer after a streak resets streak but preserves bestStreak', () => {
-  let state = createInitialState('classic', 'subtraction', SEED)
+  let state = createInitialState('subtraction', 1, SEED)
 
   // Get two correct answers to build a streak
   for (let round = 0; round < 2; round++) {
@@ -110,34 +113,51 @@ test('wrong answer after a streak resets streak but preserves bestStreak', () =>
   assert.equal(state.bestStreak, streakBeforeWrong)
 })
 
-test('score accumulation matches pointsForDifficulty per tier', () => {
-  const expectations: Array<[Parameters<typeof createInitialState>[1], number]> = [
-    ['counting', 5],
-    ['addition', 10],
-    ['subtraction', 10],
-    ['multiplication', 15],
-    ['division', 20],
+test('score accumulation matches POINTS_FOR_AREA', () => {
+  const areas: Array<[Area, AreaLevel]> = [
+    ['matching', 1],
+    ['counting', 1],
+    ['addition', 1],
+    ['subtraction', 1],
+    ['multiplication', 1],
+    ['division', 1],
   ]
 
-  for (const [difficulty, expectedPoints] of expectations) {
-    const state = createInitialState('classic', difficulty, SEED)
+  for (const [area, level] of areas) {
+    const expectedPoints = POINTS_FOR_AREA[area]
+    const state = createInitialState(area, level, SEED)
     const correctItem = state.sceneItems.find((item) => item.isCorrect)!
     const result = resolveChomp(selectAnswer(state, correctItem.id))
-    assert.equal(result.score, expectedPoints, `Expected ${expectedPoints} points for ${difficulty}`)
+    assert.equal(result.score, expectedPoints, `Expected ${expectedPoints} points for ${area}`)
   }
 })
 
-test('resetGame returns to round 1 with same mode and difficulty', () => {
-  let state = createInitialState('frenzy', 'division', SEED)
+test('resetGame returns to round 1 with same area and level', () => {
+  let state = createInitialState('division', 1, SEED)
   state = advanceRound({ ...state, phase: 'feedback' })
   state = advanceRound({ ...state, phase: 'feedback' })
   assert.equal(state.round, 3)
 
   const reset = resetGame(state)
   assert.equal(reset.round, 1)
-  assert.equal(reset.mode, 'frenzy')
-  assert.equal(reset.difficulty, 'division')
+  assert.equal(reset.area, 'division')
+  assert.equal(reset.level, 1)
   assert.equal(reset.phase, 'playing')
   assert.equal(reset.score, 0)
+})
+
+test('area: counting initial state has countingObjects on the problem', () => {
+  const state = createInitialState('counting', 1, SEED)
+  assert.equal(state.area, 'counting')
+  assert.equal(state.currentProblem.prompt, 'Count the objects')
+  assert.ok(Array.isArray(state.currentProblem.countingObjects), 'Expected countingObjects array')
+  assert.ok((state.currentProblem.countingObjects?.length ?? 0) > 0, 'Expected non-empty countingObjects')
+})
+
+test('area: matching initial state has a find-N prompt and no countingObjects', () => {
+  const state = createInitialState('matching', 1, SEED)
+  assert.equal(state.area, 'matching')
+  assert.match(state.currentProblem.prompt, /^Find \d+$/)
+  assert.equal(state.currentProblem.countingObjects, undefined)
 })
 

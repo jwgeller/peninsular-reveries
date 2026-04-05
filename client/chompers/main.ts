@@ -2,27 +2,13 @@ import { announceCorrect, announceGameOver, announceProblem, announceRound, anno
 import { animateCorrectFeedback, animateHippoChomp, animateNextRound, animateWrongFeedback, spawnPointsPopup } from './animations.js'
 import { moveFocusToFirstItem, setupInput, teardownInput } from './input.js'
 import { renderAll, renderEndScreen, renderHUD, renderHippo, renderProblem, renderScene, setupSettingsModal } from './renderer.js'
-import { ensureAudioUnlocked, sfxChomp, sfxCorrect, sfxGameOver, sfxProblemAppear, sfxStreakBonus, sfxWrong } from './sounds.js'
+import { ensureAudioUnlocked, sfxChomp, sfxCorrect, sfxGameOver, sfxProblemAppear, sfxWrong } from './sounds.js'
 import { advanceRound, createInitialState, resolveChomp, selectAnswer } from './state.js'
-import type { Difficulty, GameMode, GameState } from './types.js'
+import type { Area, AreaLevel, GameState } from './types.js'
 
 let state: GameState
 
 const settingsModal = setupSettingsModal()
-
-function getSelectedDifficulty(): Difficulty {
-  const val = document.querySelector<HTMLInputElement>('input[name="difficulty"]:checked')?.value
-  if (val === 'counting' || val === 'addition' || val === 'subtraction' || val === 'multiplication' || val === 'division') {
-    return val
-  }
-  return 'addition'
-}
-
-function getSelectedMode(): GameMode {
-  const val = document.querySelector<HTMLInputElement>('input[name="mode"]:checked')?.value
-  if (val === 'classic' || val === 'frenzy') return val
-  return 'classic'
-}
 
 function showScreen(screenId: string): void {
   for (const id of ['start-screen', 'game-screen', 'end-screen']) {
@@ -61,7 +47,6 @@ async function onSelectAnswer(itemId: string): Promise<void> {
 
   if (selectedItem.isCorrect) {
     sfxCorrect()
-    if (state.streak >= 3) sfxStreakBonus(state.streak)
     if (targetEl) await animateCorrectFeedback(targetEl)
     announceCorrect(selectedItem.value, state.streak)
     spawnPointsPopup(selectedItem.x, selectedItem.y, `+${selectedItem.value}`, 'positive')
@@ -96,9 +81,14 @@ function onOpenSettings(): void {
   settingsModal.open()
 }
 
-function onStartGame(difficulty: Difficulty, mode: GameMode): void {
+function onStartGame(): void {
   ensureAudioUnlocked()
-  state = createInitialState(mode, difficulty, Date.now())
+  const areaInput = document.querySelector<HTMLInputElement>('input[name="area"]:checked')
+  const area = (areaInput?.value ?? 'matching') as Area
+  const levelInput = document.querySelector<HTMLInputElement>(`input[name="level-${area}"]:checked`)
+  const level = (Number(levelInput?.value ?? '1') || 1) as AreaLevel
+  const safeLevel = ([1, 2, 3].includes(level) ? level : 1) as AreaLevel
+  state = createInitialState(area, safeLevel, Date.now())
   showScreen('game-screen')
   renderAll(state)
   sfxProblemAppear()
@@ -119,7 +109,18 @@ function showEndScreen(endState: GameState): void {
 
 function onReplay(): void {
   teardownInput()
-  onStartGame(state?.difficulty ?? 'addition', state?.mode ?? 'classic')
+  const replayArea = state?.area ?? 'matching'
+  const replayLevel = state?.level ?? 1
+  const areaInput = document.querySelector<HTMLInputElement>('input[name="area"]:checked')
+  if (areaInput) areaInput.value = replayArea
+  state = createInitialState(replayArea, replayLevel, Date.now())
+  showScreen('game-screen')
+  renderAll(state)
+  sfxProblemAppear()
+  setupInput({ onSelectAnswer, onOpenSettings })
+  announceProblem(state.currentProblem)
+  moveFocusAfterTransition('scene-items', 100)
+  window.setTimeout(() => moveFocusToFirstItem(), 200)
 }
 
 function onReturnToMenu(): void {
@@ -130,7 +131,7 @@ function onReturnToMenu(): void {
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('start-btn')?.addEventListener('click', () => {
-    onStartGame(getSelectedDifficulty(), getSelectedMode())
+    onStartGame()
   })
 
   document.getElementById('replay-btn')?.addEventListener('click', onReplay)

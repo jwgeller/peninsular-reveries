@@ -7,18 +7,18 @@ test.describe('SITE-08: Chompers', () => {
     await expect(page.locator('a[href*="chompers"]').first()).toBeVisible()
   })
 
-  test('start screen loads with difficulty picker and start button', async ({ page }) => {
+  test('start screen loads with area picker and start button', async ({ page }) => {
     await page.goto('/chompers/')
 
     await expect(page.locator('#start-screen')).toBeVisible()
-    await expect(page.locator('.difficulty-radio')).toHaveCount(5)
+    await expect(page.locator('.area-radio')).toHaveCount(6)
     await expect(page.getByRole('button', { name: 'Start Chomping' })).toBeVisible()
   })
 
-  test('counting difficulty is selected by default', async ({ page }) => {
+  test('matching area is selected by default', async ({ page }) => {
     await page.goto('/chompers/')
 
-    await expect(page.locator('input[name="difficulty"][value="counting"]')).toBeChecked()
+    await expect(page.locator('input[name="area"][value="matching"]')).toBeChecked()
   })
 
   test('start game shows game screen with problem and arena', async ({ page }) => {
@@ -62,7 +62,7 @@ test.describe('SITE-08: Chompers', () => {
     expect(lives).toBeLessThanOrEqual(3)
   })
 
-  test('settings modal opens and closes from game screen', async ({ page }) => {
+  test('menu modal opens and closes from game screen', async ({ page }) => {
     await page.goto('/chompers/')
 
     await page.getByRole('button', { name: 'Start Chomping' }).click()
@@ -70,6 +70,7 @@ test.describe('SITE-08: Chompers', () => {
 
     await page.locator('#settings-btn').click()
     await expect(page.locator('#settings-modal')).toBeVisible({ timeout: 3000 })
+    await expect(page.locator('#settings-modal h2')).toHaveText('Menu')
 
     await page.getByRole('button', { name: 'Close' }).click()
     await expect(page.locator('#settings-modal')).toBeHidden({ timeout: 3000 })
@@ -104,6 +105,63 @@ test.describe('SITE-08: Chompers', () => {
 
     expect(widths.documentWidth).toBeLessThanOrEqual(widths.windowWidth + 1)
     expect(widths.bodyWidth).toBeLessThanOrEqual(widths.windowWidth + 1)
+  })
+
+  test('level selection — addition level 2 shows addition problem', async ({ page }) => {
+    await page.goto('/chompers/')
+    await page.locator('input[name="area"][value="addition"]').check({ force: true })
+    await page.locator('input[name="level-addition"][value="2"]').check({ force: true })
+    await page.getByRole('button', { name: 'Start Chomping' }).click()
+    await expect(page.locator('#game-screen')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('#problem-prompt')).toContainText('+')
+  })
+
+  test('counting area shows counting objects in prompt', async ({ page }) => {
+    await page.goto('/chompers/')
+    await page.locator('input[name="area"][value="counting"]').check({ force: true })
+    await page.getByRole('button', { name: 'Start Chomping' }).click()
+    await expect(page.locator('#game-screen')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('#scene-items button').first()).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('.counting-object').first()).toBeVisible({ timeout: 3000 })
+  })
+
+  test('zoom reset button is present in game HUD', async ({ page }) => {
+    await page.goto('/chompers/')
+    await page.getByRole('button', { name: 'Start Chomping' }).click()
+    await expect(page.locator('#game-screen')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('#zoom-reset-btn')).toBeVisible()
+    await expect(page.locator('#zoom-reset-btn')).toHaveAttribute('aria-label', 'Reset zoom')
+  })
+
+  test('no scroll on start screen at 390x844', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/chompers/')
+
+    const scrollable = await page.evaluate(() => {
+      return document.documentElement.scrollHeight > document.documentElement.clientHeight
+    })
+    expect(scrollable).toBe(false)
+  })
+
+  test('reduced motion — mouth animates but no neck extension', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.goto('/chompers/')
+    await page.getByRole('button', { name: 'Start Chomping' }).click()
+    await expect(page.locator('#game-screen')).toBeVisible({ timeout: 5000 })
+    await page.locator('#scene-items button').first().waitFor({ state: 'visible', timeout: 5000 })
+
+    // Click a tile
+    await page.locator('#scene-items button').first().click()
+    await page.waitForTimeout(400)
+
+    // neck-extension should remain 0 (or at most very small) under reduced motion
+    const neckExt = await page.evaluate(() => {
+      const hippo = document.getElementById('hippo')
+      if (!hippo) return null
+      return getComputedStyle(hippo).getPropertyValue('--neck-extension').trim()
+    })
+    // Under reduced motion, neck extension should be 0 or empty
+    expect(neckExt === '0' || neckExt === '' || neckExt === null || parseFloat(neckExt ?? '0') < 0.1).toBe(true)
   })
 
   test('landscape 932x430 shows arena and hippo within viewport', async ({ page }) => {

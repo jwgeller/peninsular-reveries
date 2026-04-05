@@ -1,16 +1,48 @@
-export const DIFFICULTIES = ['counting', 'addition', 'subtraction', 'multiplication', 'division'] as const
+export const AREAS = ['matching', 'counting', 'addition', 'subtraction', 'multiplication', 'division'] as const
+export type Area = (typeof AREAS)[number]
+export type AreaLevel = 1 | 2 | 3
 
-export type Difficulty = (typeof DIFFICULTIES)[number]
-
-export type GameMode = 'classic' | 'frenzy'
+export const AREA_LEVEL_RANGES: Record<Area, Record<AreaLevel, { min: number; max: number }>> = {
+  matching: {
+    1: { min: 1, max: 5 },   // L1: pre-K — Clements & Sarama: cardinality ages 3-5
+    2: { min: 1, max: 10 },  // L2: K — CCSS K.CC: count to 100; NCTM Pre-K-2
+    3: { min: 1, max: 20 },  // L3: K-1 — CCSS 1.NBT: extend counting sequence
+  },
+  counting: {
+    1: { min: 1, max: 5 },   // L1: pre-K — Clements & Sarama: one-to-one correspondence
+    2: { min: 1, max: 10 },  // L2: K — CCSS K.CC.4: counting = cardinality
+    3: { min: 1, max: 15 },  // L3: K-1 — NCTM Pre-K-2: connect counting to quantity
+  },
+  addition: {
+    1: { min: 1, max: 4 },   // L1: K — CCSS K.OA: addition within 5
+    2: { min: 1, max: 9 },   // L2: K-1 — NCTM: whole number sense (sums ≤ 10)
+    3: { min: 1, max: 10 },  // L3: 1-2 — NMAP: fluency through 18 (sums ≤ 20)
+  },
+  subtraction: {
+    1: { min: 2, max: 5 },   // L1: K — CCSS K.OA: subtraction within 5
+    2: { min: 2, max: 10 },  // L2: K-1 — NCTM fluency; NMAP facts through 18
+    3: { min: 2, max: 20 },  // L3: 1-2 — CCSS 2.OA: add/subtract within 20
+  },
+  multiplication: {
+    1: { min: 2, max: 5 },   // L1: Grade 3 — CCSS 3.OA: multiply within 100
+    2: { min: 2, max: 9 },   // L2: Grade 3-4 — NCTM Focal Points: Grade 3 mult/div
+    3: { min: 2, max: 12 },  // L3: Grade 4-5 — NMAP: automatic recall of mult facts
+  },
+  division: {
+    1: { min: 2, max: 5 },   // L1: Grade 3 — CCSS 3.OA: divide within 100
+    2: { min: 2, max: 9 },   // L2: Grade 3-4 — NCTM: fluency with basic combinations
+    3: { min: 2, max: 12 },  // L3: Grade 4-5 — NMAP: automatic recall of division facts
+  },
+}
 
 export type GamePhase = 'playing' | 'chomping' | 'feedback' | 'gameover'
 
-export interface MathProblem {
+export interface Problem {
   readonly prompt: string
   readonly correctAnswer: number
   readonly operation: string
-  readonly difficulty: Difficulty
+  readonly area: Area
+  readonly countingObjects?: readonly string[]
 }
 
 export interface SceneItem {
@@ -32,9 +64,9 @@ export interface HippoState {
 
 export interface GameState {
   readonly phase: GamePhase
-  readonly mode: GameMode
-  readonly difficulty: Difficulty
-  readonly currentProblem: MathProblem
+  readonly area: Area
+  readonly level: AreaLevel
+  readonly currentProblem: Problem
   readonly sceneItems: readonly SceneItem[]
   readonly score: number
   readonly round: number
@@ -55,12 +87,22 @@ export interface ScenePosition {
 export const TOTAL_ROUNDS = 10
 export const START_LIVES = 3
 
-export const SCENE_ITEM_COUNTS: Record<Difficulty, number> = {
+export const POINTS_FOR_AREA: Record<Area, number> = {
+  matching: 1,
+  counting: 1,
+  addition: 1,
+  subtraction: 2,
+  multiplication: 3,
+  division: 3,
+}
+
+export const SCENE_ITEM_COUNTS: Record<Area, number> = {
+  matching: 6,
   counting: 6,
-  addition: 7,
-  subtraction: 7,
-  multiplication: 8,
-  division: 9,
+  addition: 6,
+  subtraction: 6,
+  multiplication: 6,
+  division: 6,
 }
 
 /**

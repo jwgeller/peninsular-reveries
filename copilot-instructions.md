@@ -36,6 +36,7 @@ For project architecture, game quality standards, and testing conventions, load 
 
 ## Plan Mode
 
+- At the start of any new planning session, check for an existing `active-plan.md` in `/memories/repo/plans/`. If one exists, ask the user whether to clean it up before creating a new plan. Never write plans to `/memories/session/` or any path other than the canonical `/memories/repo/plans/active-plan.md`.
 - When producing plans, write extremely detailed step-by-step plans with explicit file paths, function names, exact commands when helpful, contingency steps for likely failure points, and clear verification gates.
 - Include rollback or recovery notes for risky edits.
 - When producing plans intended for orchestrated execution, load the planning skill in `.github/skills/planning/` and output work units in its format. Embed the relevant project constraints (from the review skill references) directly into each work unit's intent so that dispatched sub-agents do not need to load skills independently.
