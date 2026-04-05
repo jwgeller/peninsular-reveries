@@ -325,8 +325,12 @@ function isCollectible(kind: FruitKind): boolean {
   return !FRUIT_DEFINITIONS[kind].hazard
 }
 
-function isCatchable(item: FallingItem, hippoX: number, arenaMetrics?: ArenaMetrics): boolean {
-  const laneMetrics = resolveChompLaneMetrics(1, arenaMetrics)
+function resolveCatchReachExtension(hippo: HippoState): number {
+  return hippo.chomping ? hippo.neckExtension : 1
+}
+
+function isCatchable(item: FallingItem, hippoX: number, neckExtension: number, arenaMetrics?: ArenaMetrics): boolean {
+  const laneMetrics = resolveChompLaneMetrics(neckExtension, arenaMetrics)
   const distanceX = Math.abs(percentToPixels(item.x, laneMetrics.width) - percentToPixels(hippoX, laneMetrics.width))
   return distanceX <= laneMetrics.halfWidthPx && item.y >= laneMetrics.topPercent && item.y <= HIPPO_Y
 }
@@ -454,8 +458,9 @@ export function attemptChomp(state: GameState, arenaMetrics?: ArenaMetrics): Cho
     }
   }
 
+  const catchReachExtension = resolveCatchReachExtension(state.hippo)
   const hitItem = [...state.items]
-    .filter((item) => isCatchable(item, state.hippo.x, arenaMetrics))
+    .filter((item) => isCatchable(item, state.hippo.x, catchReachExtension, arenaMetrics))
     .sort((left, right) => right.y - left.y)[0] ?? null
 
   let score = state.score

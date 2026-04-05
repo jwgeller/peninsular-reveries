@@ -97,6 +97,49 @@ test('short-landscape upper reach follows the visible full chomp lane', () => {
   assert.equal(aboveLaneMiss.hitItem, null)
 })
 
+test('follow-up chomps use the current mouth reach instead of the full lane', () => {
+  const state = createInitialState('rush')
+  const started = attemptChomp({
+    ...state,
+    items: [],
+    spawnTimerMs: 99_999,
+  }).state
+  const midChomp = tickState({
+    ...started,
+    spawnTimerMs: 99_999,
+  }, 40).state
+
+  const aboveCurrentReach = attemptChomp({
+    ...midChomp,
+    items: [{
+      id: 104,
+      kind: 'apple',
+      x: 50,
+      y: 40,
+      speed: 0,
+      rotation: 0,
+      rotationSpeed: 0,
+    }],
+  })
+
+  assert.equal(aboveCurrentReach.hitItem, null)
+
+  const insideCurrentReach = attemptChomp({
+    ...midChomp,
+    items: [{
+      id: 105,
+      kind: 'apple',
+      x: 50,
+      y: 58,
+      speed: 0,
+      rotation: 0,
+      rotationSpeed: 0,
+    }],
+  })
+
+  assert.equal(insideCurrentReach.hitItem?.id, 105)
+})
+
 test('survival misses cost lives and bombs cost a life on chomp', () => {
   const survivalState = createInitialState('survival')
   const missed = tickState({
