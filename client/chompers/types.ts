@@ -1,153 +1,113 @@
-export const GAME_MODES = ['rush', 'survival', 'zen'] as const
-export type GameMode = (typeof GAME_MODES)[number]
+export const DIFFICULTIES = ['counting', 'addition', 'subtraction', 'multiplication', 'division'] as const
 
-export type GamePhase = 'playing' | 'gameover'
+export type Difficulty = (typeof DIFFICULTIES)[number]
 
-export const FRUIT_KINDS = ['cherry', 'apple', 'orange', 'grapes', 'star', 'rotten', 'bomb'] as const
-export type FruitKind = (typeof FRUIT_KINDS)[number]
+export type GameMode = 'classic' | 'frenzy'
 
-export interface FruitDefinition {
-  readonly kind: FruitKind
-  readonly label: string
+export type GamePhase = 'playing' | 'chomping' | 'feedback' | 'gameover'
+
+export interface MathProblem {
+  readonly prompt: string
+  readonly correctAnswer: number
+  readonly operation: string
+  readonly difficulty: Difficulty
+}
+
+export interface SceneItem {
+  readonly id: string
+  readonly value: number
   readonly emoji: string
-  readonly points: number
-  readonly hazard: boolean
-  readonly rushWeight: number
-  readonly survivalWeight: number
-  readonly zenWeight: number
-}
-
-export const FRUIT_DEFINITIONS: Record<FruitKind, FruitDefinition> = {
-  cherry: {
-    kind: 'cherry',
-    label: 'Cherry',
-    emoji: '🍒',
-    points: 1,
-    hazard: false,
-    rushWeight: 28,
-    survivalWeight: 24,
-    zenWeight: 28,
-  },
-  apple: {
-    kind: 'apple',
-    label: 'Apple',
-    emoji: '🍎',
-    points: 2,
-    hazard: false,
-    rushWeight: 24,
-    survivalWeight: 22,
-    zenWeight: 24,
-  },
-  orange: {
-    kind: 'orange',
-    label: 'Orange',
-    emoji: '🍊',
-    points: 3,
-    hazard: false,
-    rushWeight: 18,
-    survivalWeight: 18,
-    zenWeight: 18,
-  },
-  grapes: {
-    kind: 'grapes',
-    label: 'Grapes',
-    emoji: '🍇',
-    points: 5,
-    hazard: false,
-    rushWeight: 10,
-    survivalWeight: 10,
-    zenWeight: 12,
-  },
-  star: {
-    kind: 'star',
-    label: 'Golden star',
-    emoji: '⭐',
-    points: 10,
-    hazard: false,
-    rushWeight: 2,
-    survivalWeight: 2,
-    zenWeight: 4,
-  },
-  rotten: {
-    kind: 'rotten',
-    label: 'Rotten fruit',
-    emoji: '🥀',
-    points: -3,
-    hazard: true,
-    rushWeight: 5,
-    survivalWeight: 8,
-    zenWeight: 0,
-  },
-  bomb: {
-    kind: 'bomb',
-    label: 'Bomb',
-    emoji: '💣',
-    points: 0,
-    hazard: true,
-    rushWeight: 0,
-    survivalWeight: 6,
-    zenWeight: 0,
-  },
-}
-
-export interface FallingItem {
-  readonly id: number
-  readonly kind: FruitKind
   readonly x: number
   readonly y: number
-  readonly speed: number
-  readonly rotation: number
-  readonly rotationSpeed: number
+  readonly isCorrect: boolean
 }
 
 export interface HippoState {
   readonly x: number
   readonly y: number
-  readonly targetX: number
-  readonly chomping: boolean
-  readonly chompTimerMs: number
-  readonly chompProgress: number
+  readonly targetItemId: string | null
+  readonly chompPhase: 'idle' | 'extending' | 'retracting'
   readonly neckExtension: number
 }
 
 export interface GameState {
   readonly phase: GamePhase
   readonly mode: GameMode
+  readonly difficulty: Difficulty
+  readonly currentProblem: MathProblem
+  readonly sceneItems: readonly SceneItem[]
   readonly score: number
-  readonly timeRemainingMs: number
+  readonly round: number
+  readonly totalRounds: number
   readonly lives: number
-  readonly items: readonly FallingItem[]
+  readonly streak: number
+  readonly bestStreak: number
   readonly hippo: HippoState
-  readonly spawnTimerMs: number
-  readonly difficultyLevel: number
-  readonly elapsedMs: number
-  readonly itemsChomped: number
-  readonly itemsMissed: number
-  readonly combo: number
-  readonly bestCombo: number
-  readonly nextItemId: number
+  readonly correctCount: number
   readonly rngSeed: number
 }
 
-export interface TickResult {
-  readonly state: GameState
-  readonly missedItems: readonly FallingItem[]
-  readonly countdownWarnings: readonly number[]
+export interface ScenePosition {
+  readonly x: number
+  readonly y: number
 }
 
-export interface ChompResult {
-  readonly state: GameState
-  readonly hitItem: FallingItem | null
-  readonly scoreDelta: number
-  readonly lifeDelta: number
-  readonly comboBroken: boolean
-}
-
-export const ROUND_TIME_MS = 60_000
+export const TOTAL_ROUNDS = 10
 export const START_LIVES = 3
-export const ZEN_ROUND_ITEMS = 30
-export const CHOMP_DURATION_MS = 280
-export const HIPPO_START_X = 50
-export const HIPPO_Y = 90
-export const ARENA_MIN_X = 10
-export const ARENA_MAX_X = 90
+
+export const SCENE_ITEM_COUNTS: Record<Difficulty, number> = {
+  counting: 6,
+  addition: 7,
+  subtraction: 7,
+  multiplication: 8,
+  division: 9,
+}
+
+/**
+ * Static position grids for 6, 7, 8, 9 items (percentage-based x/y).
+ * Arena sky zone: y 10–45%, ground zone: y 55–85%.
+ * Hippo occupies the left edge; items stay at x >= 20%.
+ * Each layout guarantees >= 12% x or >= 12% y separation between all peers.
+ */
+export const BASE_LAYOUTS: Record<number, readonly ScenePosition[]> = {
+  6: [
+    { x: 32, y: 15 },
+    { x: 55, y: 12 },
+    { x: 78, y: 18 },
+    { x: 28, y: 68 },
+    { x: 56, y: 62 },
+    { x: 82, y: 68 },
+  ],
+  7: [
+    { x: 26, y: 15 },
+    { x: 52, y: 12 },
+    { x: 78, y: 17 },
+    { x: 26, y: 65 },
+    { x: 47, y: 72 },
+    { x: 68, y: 65 },
+    { x: 88, y: 72 },
+  ],
+  8: [
+    { x: 24, y: 16 },
+    { x: 44, y: 12 },
+    { x: 64, y: 18 },
+    { x: 84, y: 14 },
+    { x: 24, y: 72 },
+    { x: 44, y: 65 },
+    { x: 64, y: 72 },
+    { x: 84, y: 65 },
+  ],
+  9: [
+    { x: 24, y: 14 },
+    { x: 44, y: 18 },
+    { x: 64, y: 12 },
+    { x: 84, y: 16 },
+    { x: 22, y: 68 },
+    { x: 39, y: 75 },
+    { x: 57, y: 65 },
+    { x: 74, y: 72 },
+    { x: 88, y: 65 },
+  ],
+}
+
+export const FRUIT_POOL = ['🍒', '🍎', '🍊', '🍇', '🍋', '🍑', '🍓', '🫐', '🥝', '🍌'] as const

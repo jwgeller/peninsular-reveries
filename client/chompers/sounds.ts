@@ -202,44 +202,32 @@ export function ensureAudioUnlocked(): void {
   void loadSamples()
 }
 
-export function sfxButton(): void {
-  const layered = playSample('ui-tap', { playbackRate: 1.06, volumeScale: 1 })
-  playTone(620, 0.06, 'sine', layered ? 0.02 : 0.05)
-}
-
 export function sfxChomp(): void {
   const layered = playSample('chomp-splash', { playbackRate: 0.92, volumeScale: 1.06 })
   playTone(170, 0.08, 'triangle', layered ? 0.07 : 0.11)
   playTone(130, 0.1, 'square', layered ? 0.035 : 0.06, 0.03)
 }
 
-export function sfxCollect(points: number): void {
-  const layered = playSample('collect-pop', {
-    playbackRate: points >= 8 ? 1.08 : 1,
-    volumeScale: 1 + Math.min(points, 12) / 28,
-  })
-  playTone(520 + points * 60, 0.12, 'sine', layered ? 0.045 : 0.09)
-  playTone(760 + points * 40, 0.12, 'sine', layered ? 0.035 : 0.07, 0.05)
+export function sfxCorrect(): void {
+  const layered = playSample('collect-pop', { playbackRate: 1.04, volumeScale: 1 })
+  playSweep(520, 680, 0.2, 'sine', layered ? 0.04 : 0.08)
 }
 
-export function sfxHazard(): void {
-  const layered = playSample('hazard-snap', { playbackRate: 0.94, volumeScale: 1.08 })
-  playSweep(260, 120, 0.22, 'square', layered ? 0.045 : 0.08)
-  playTone(92, 0.18, 'sawtooth', layered ? 0.018 : 0.03, 0.04)
+export function sfxWrong(): void {
+  const layered = playSample('hazard-snap', { playbackRate: 0.96, volumeScale: 0.9 })
+  playSweep(260, 120, 0.2, 'sine', layered ? 0.04 : 0.08)
 }
 
-export function sfxMiss(): void {
-  const layered = playSample('miss-plop', { playbackRate: 0.96, volumeScale: 0.96 })
-  playSweep(220, 90, 0.18, 'triangle', layered ? 0.035 : 0.07)
+export function sfxStreakBonus(streak: number): void {
+  playTone(520 + streak * 60, 0.15, 'sine', 0.07)
 }
 
-export function sfxCountdown(seconds: number): void {
-  const frequency = seconds <= 3 ? 900 : 640
-  const layered = playSample('ui-tap', {
-    playbackRate: seconds <= 3 ? 1.18 : 0.98,
-    volumeScale: seconds <= 3 ? 0.82 : 0.66,
-  })
-  playTone(frequency, 0.1, 'sine', layered ? 0.038 : 0.08)
+export function sfxProblemAppear(): void {
+  playSample('ui-tap', { playbackRate: 1.02, volumeScale: 0.9 })
+}
+
+export function sfxHippoWiggle(): void {
+  playSweep(440, 550, 0.15, 'sine', 0.06)
 }
 
 export function sfxGameOver(): void {

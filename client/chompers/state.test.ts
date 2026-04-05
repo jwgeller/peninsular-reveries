@@ -1,284 +1,143 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { attemptChomp, createInitialState, moveHippo, nudgeHippo, spawnItem, tickState } from './state'
-import { FRUIT_DEFINITIONS, ZEN_ROUND_ITEMS } from './types'
+import { createInitialState, selectAnswer, resolveChomp, advanceRound, resetGame } from './state'
+import { SCENE_ITEM_COUNTS, START_LIVES, TOTAL_ROUNDS } from './types'
 
-test('initial rush state opens with starter fruit and a centered hippo', () => {
-  const state = createInitialState('rush')
+const SEED = 0xc0ffee
 
-  assert.equal(state.mode, 'rush')
+test('createInitialState produces valid initial state', () => {
+  const state = createInitialState('classic', 'addition', SEED)
+
   assert.equal(state.phase, 'playing')
-  assert.equal(state.items.length, 3)
-  assert.ok(state.items.every((item) => item.y <= 10))
-  assert.equal(state.hippo.x, 50)
-  assert.equal(state.timeRemainingMs, 60_000)
+  assert.equal(state.round, 1)
+  assert.equal(state.totalRounds, TOTAL_ROUNDS)
+  assert.equal(state.lives, START_LIVES)
+  assert.equal(state.score, 0)
+  assert.equal(state.streak, 0)
+  assert.equal(state.bestStreak, 0)
+  assert.equal(state.correctCount, 0)
+  assert.equal(state.mode, 'classic')
+  assert.equal(state.difficulty, 'addition')
+  assert.equal(state.sceneItems.length, SCENE_ITEM_COUNTS['addition'])
+  assert.ok(state.sceneItems.some((item) => item.isCorrect), 'Expected at least one correct item')
 })
 
-test('opening chomp catches the centered apple after it drops into range', () => {
-  const opening = tickState({
-    ...createInitialState('rush'),
-    spawnTimerMs: 99_999,
-  }, 2_500)
-  const result = attemptChomp(opening.state)
+test('correct answer flow: score increases, streak increments, advances to round 2', () => {
+  const state = createInitialState('classic', 'addition', SEED)
+  const correctItem = state.sceneItems.find((item) => item.isCorrect)
+  assert.ok(correctItem, 'Expected a correct item in scene')
 
-  assert.equal(result.hitItem?.kind, 'apple')
-  assert.equal(result.scoreDelta, 2)
-  assert.equal(result.state.score, 2)
-  assert.equal(result.state.itemsChomped, 1)
-  assert.equal(result.state.combo, 1)
-  assert.equal(result.state.items.length, 2)
+  const chomping = selectAnswer(state, correctItem.id)
+  assert.equal(chomping.phase, 'chomping')
+  assert.equal(chomping.hippo.targetItemId, correctItem.id)
+
+  const feedback = resolveChomp(chomping)
+  assert.equal(feedback.phase, 'feedback')
+  assert.ok(feedback.score > 0, 'Expected score to increase')
+  assert.equal(feedback.streak, 1)
+  assert.equal(feedback.bestStreak, 1)
+  assert.equal(feedback.correctCount, 1)
+  assert.equal(feedback.lives, START_LIVES)
+
+  const next = advanceRound(feedback)
+  assert.equal(next.phase, 'playing')
+  assert.equal(next.round, 2)
 })
 
-test('landscape hit testing matches the visible chomp lane instead of a fixed arena percent', () => {
-  const state = createInitialState('rush')
+test('wrong answer flow: lives decrease, streak resets', () => {
+  const state = createInitialState('classic', 'addition', SEED)
+  const wrongItem = state.sceneItems.find((item) => !item.isCorrect)
+  assert.ok(wrongItem, 'Expected a wrong item in scene')
 
-  const wideMiss = attemptChomp({
-    ...state,
-    items: [{
-      id: 100,
-      kind: 'apple',
-      x: 59,
-      y: 60,
-      speed: 12,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  }, { width: 932, height: 430 })
+  const chomping = selectAnswer(state, wrongItem.id)
+  const feedback = resolveChomp(chomping)
 
-  assert.equal(wideMiss.hitItem, null)
-
-  const centeredHit = attemptChomp({
-    ...state,
-    items: [{
-      id: 101,
-      kind: 'apple',
-      x: 53,
-      y: 60,
-      speed: 12,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  }, { width: 932, height: 430 })
-
-  assert.equal(centeredHit.hitItem?.id, 101)
+  assert.equal(feedback.phase, 'feedback')
+  assert.equal(feedback.lives, START_LIVES - 1)
+  assert.equal(feedback.streak, 0)
+  assert.equal(feedback.score, 0)
 })
 
-test('short-landscape upper reach follows the visible full chomp lane', () => {
-  const state = createInitialState('rush')
+test('game over after totalRounds', () => {
+  let state = createInitialState('classic', 'addition', SEED)
+  assert.equal(state.totalRounds, TOTAL_ROUNDS)
 
-  const upperLaneHit = attemptChomp({
-    ...state,
-    items: [{
-      id: 102,
-      kind: 'apple',
-      x: 50,
-      y: 26,
-      speed: 12,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  }, { width: 932, height: 430 })
-
-  assert.equal(upperLaneHit.hitItem?.id, 102)
-
-  const aboveLaneMiss = attemptChomp({
-    ...state,
-    items: [{
-      id: 103,
-      kind: 'apple',
-      x: 50,
-      y: 22,
-      speed: 12,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  }, { width: 932, height: 430 })
-
-  assert.equal(aboveLaneMiss.hitItem, null)
-})
-
-test('follow-up chomps use the current mouth reach instead of the full lane', () => {
-  const state = createInitialState('rush')
-  const started = attemptChomp({
-    ...state,
-    items: [],
-    spawnTimerMs: 99_999,
-  }).state
-  const midChomp = tickState({
-    ...started,
-    spawnTimerMs: 99_999,
-  }, 40).state
-
-  const aboveCurrentReach = attemptChomp({
-    ...midChomp,
-    items: [{
-      id: 104,
-      kind: 'apple',
-      x: 50,
-      y: 40,
-      speed: 0,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  })
-
-  assert.equal(aboveCurrentReach.hitItem, null)
-
-  const insideCurrentReach = attemptChomp({
-    ...midChomp,
-    items: [{
-      id: 105,
-      kind: 'apple',
-      x: 50,
-      y: 58,
-      speed: 0,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  })
-
-  assert.equal(insideCurrentReach.hitItem?.id, 105)
-})
-
-test('survival misses cost lives and bombs cost a life on chomp', () => {
-  const survivalState = createInitialState('survival')
-  const missed = tickState({
-    ...survivalState,
-    items: [{
-      id: 99,
-      kind: 'orange',
-      x: 50,
-      y: 107,
-      speed: 18,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  }, 16)
-
-  assert.equal(missed.state.lives, 2)
-  assert.equal(missed.state.itemsMissed, 1)
-
-  const bombState = createInitialState('survival')
-  const bombHit = attemptChomp({
-    ...bombState,
-    items: [{
-      id: 77,
-      kind: 'bomb',
-      x: 50,
-      y: 72,
-      speed: 12,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  })
-
-  assert.equal(bombHit.hitItem?.kind, 'bomb')
-  assert.equal(bombHit.lifeDelta, -1)
-  assert.equal(bombHit.state.lives, 2)
-  assert.equal(bombHit.state.combo, 0)
-})
-
-test('movement clamps to the arena and spawning adds a new falling item', () => {
-  const state = createInitialState('rush')
-  const moved = moveHippo(state, 120)
-  assert.equal(moved.hippo.x, 90)
-
-  const nudged = nudgeHippo(moved, -100)
-  assert.equal(nudged.hippo.x, 10)
-
-  const spawned = spawnItem(state)
-  assert.equal(spawned.items.length, state.items.length + 1)
-  assert.equal(spawned.nextItemId, state.nextItemId + 1)
-})
-
-test('rush difficulty ramps more gently and no longer multiplies fall speed twice', () => {
-  const state = createInitialState('rush')
-  const result = tickState({
-    ...state,
-    elapsedMs: 79_900,
-    spawnTimerMs: 99_999,
-    items: [{
-      id: 40,
-      kind: 'apple',
-      x: 50,
-      y: 10,
-      speed: 20,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-  }, 100)
-
-  assert.equal(result.state.difficultyLevel, 3)
-  assert.equal(result.state.items[0]?.y, 12)
-})
-
-test('spawned fruit avoids a nearby rotten path when a conflict would feel unfair', () => {
-  const state = {
-    ...createInitialState('rush'),
-    items: [{
-      id: 99,
-      kind: 'rotten' as const,
-      x: 50,
-      y: 20,
-      speed: 18,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-    spawnTimerMs: 0,
+  for (let i = 0; i < TOTAL_ROUNDS; i++) {
+    state = advanceRound({ ...state, phase: 'feedback' })
   }
 
-  let probe = state
+  assert.equal(state.phase, 'gameover')
+})
 
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    const spawned = spawnItem(probe)
-    const item = spawned.items[spawned.items.length - 1]
+test('game over early when lives reach 0', () => {
+  const state = createInitialState('classic', 'addition', SEED)
+  const depleted = { ...state, lives: 0, phase: 'feedback' as const }
+  const result = advanceRound(depleted)
+  assert.equal(result.phase, 'gameover')
+})
 
-    if (!item) {
-      assert.fail('Expected spawnItem to add a falling item')
-    }
+test('streak increments on consecutive correct answers and bestStreak tracks the max', () => {
+  let state = createInitialState('classic', 'multiplication', SEED)
 
-    if (!FRUIT_DEFINITIONS[item.kind].hazard) {
-      assert.ok(Math.abs(item.x - 50) >= 14)
-      return
-    }
+  for (let round = 0; round < 4; round++) {
+    const correctItem = state.sceneItems.find((item) => item.isCorrect)
+    assert.ok(correctItem, `Expected correct item in round ${round + 1}`)
+    state = resolveChomp(selectAnswer(state, correctItem.id))
+    assert.equal(state.streak, round + 1, `Streak should be ${round + 1} after ${round + 1} correct answers`)
+    assert.equal(state.bestStreak, round + 1)
+    state = advanceRound(state)
+    if (state.phase === 'gameover') break
+  }
+})
 
-    probe = {
-      ...spawned,
-      items: state.items,
-      spawnTimerMs: 0,
-    }
+test('wrong answer after a streak resets streak but preserves bestStreak', () => {
+  let state = createInitialState('classic', 'subtraction', SEED)
+
+  // Get two correct answers to build a streak
+  for (let round = 0; round < 2; round++) {
+    const correctItem = state.sceneItems.find((item) => item.isCorrect)!
+    state = resolveChomp(selectAnswer(state, correctItem.id))
+    state = advanceRound(state)
   }
 
-  assert.fail('Expected a collectible spawn while probing overlap avoidance')
+  const streakBeforeWrong = state.bestStreak
+
+  // Now answer wrong
+  const wrongItem = state.sceneItems.find((item) => !item.isCorrect)!
+  state = resolveChomp(selectAnswer(state, wrongItem.id))
+
+  assert.equal(state.streak, 0)
+  assert.equal(state.bestStreak, streakBeforeWrong)
 })
 
-test('zen mode keeps a flat difficulty and ends after the final fruit resolves', () => {
-  const zenState = createInitialState('zen')
-  const calmTick = tickState({
-    ...zenState,
-    items: [],
-    spawnTimerMs: 99_999,
-  }, 120_000)
+test('score accumulation matches pointsForDifficulty per tier', () => {
+  const expectations: Array<[Parameters<typeof createInitialState>[1], number]> = [
+    ['counting', 5],
+    ['addition', 10],
+    ['subtraction', 10],
+    ['multiplication', 15],
+    ['division', 20],
+  ]
 
-  assert.equal(calmTick.state.phase, 'playing')
-  assert.equal(calmTick.state.difficultyLevel, 1)
-  assert.equal(calmTick.state.timeRemainingMs, 0)
-
-  const completionTick = tickState({
-    ...zenState,
-    nextItemId: ZEN_ROUND_ITEMS + 1,
-    itemsMissed: ZEN_ROUND_ITEMS - 1,
-    items: [{
-      id: 200,
-      kind: 'apple',
-      x: 50,
-      y: 107,
-      speed: 16,
-      rotation: 0,
-      rotationSpeed: 0,
-    }],
-    spawnTimerMs: 99_999,
-  }, 16)
-
-  assert.equal(completionTick.state.phase, 'gameover')
+  for (const [difficulty, expectedPoints] of expectations) {
+    const state = createInitialState('classic', difficulty, SEED)
+    const correctItem = state.sceneItems.find((item) => item.isCorrect)!
+    const result = resolveChomp(selectAnswer(state, correctItem.id))
+    assert.equal(result.score, expectedPoints, `Expected ${expectedPoints} points for ${difficulty}`)
+  }
 })
+
+test('resetGame returns to round 1 with same mode and difficulty', () => {
+  let state = createInitialState('frenzy', 'division', SEED)
+  state = advanceRound({ ...state, phase: 'feedback' })
+  state = advanceRound({ ...state, phase: 'feedback' })
+  assert.equal(state.round, 3)
+
+  const reset = resetGame(state)
+  assert.equal(reset.round, 1)
+  assert.equal(reset.mode, 'frenzy')
+  assert.equal(reset.difficulty, 'division')
+  assert.equal(reset.phase, 'playing')
+  assert.equal(reset.score, 0)
+})
+
