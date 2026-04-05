@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
 
-# Skip the full test suite when only non-code files are staged.
+# Only run the full test suite when actual code/config/test files are staged.
 STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
-CODE_FILES=$(echo "$STAGED" | grep -vE '^\.(github/agents|github/skills)/|^README\.md$|^ATTRIBUTIONS\.md$|^LICENSE$|^copilot-instructions\.md$|^\.instructions\.md$|^\.prompt\.md$')
+CODE_FILES=$(echo "$STAGED" | grep -E '\.(ts|tsx|mjs|css|json)$|^build\.ts$|^server\.ts$')
 
 if [ -z "$CODE_FILES" ]; then
-  echo "pre-commit: only docs/agent files staged — skipping test:local"
+  echo "pre-commit: no code files staged — skipping test:local"
   exit 0
 fi
 
