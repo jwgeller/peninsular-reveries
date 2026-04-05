@@ -1,140 +1,210 @@
-import type { GameMode, GameState } from './types.js'
-
 export interface InputCallbacks {
-  onStartGame: (mode: GameMode) => void
-  onReplay: () => void
-  onReturnToMenu: () => void
-  onMoveHippo: (x: number) => void
-  onNudgeHippo: (delta: number) => void
-  onChomp: () => void
+  onSelectAnswer: (itemId: string) => void
+  onOpenSettings: () => void
 }
 
-function isStartScreenActive(): boolean {
-  return document.getElementById('start-screen')?.classList.contains('active') ?? false
+let pointerHandler: ((event: PointerEvent) => void) | null = null
+let keydownHandler: ((event: KeyboardEvent) => void) | null = null
+let gamepadHandle: number | null = null
+let lastGamepadAction = 0
+
+function getActiveSceneItems(): HTMLElement[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>('.scene-item:not([disabled]):not([aria-hidden="true"])'),
+  )
 }
 
-function isGameScreenActive(): boolean {
-  return document.getElementById('game-screen')?.classList.contains('active') ?? false
-}
+function findNearestInDirection(
+  current: HTMLElement,
+  candidates: HTMLElement[],
+  direction: string,
+): HTMLElement | null {
+  const currentRect = current.getBoundingClientRect()
+  const cx = currentRect.left + currentRect.width / 2
+  const cy = currentRect.top + currentRect.height / 2
 
-function isEndScreenActive(): boolean {
-  return document.getElementById('end-screen')?.classList.contains('active') ?? false
-}
+  let best: HTMLElement | null = null
+  let bestDist = Infinity
 
-function selectedMode(): GameMode {
-  const selected = document.querySelector<HTMLInputElement>('input[name="game-mode"]:checked')?.value
-  if (selected === 'survival' || selected === 'zen') {
-    return selected
+  for (const candidate of candidates) {
+    if (candidate === current) continue
+    const rect = candidate.getBoundingClientRect()
+    const px = rect.left + rect.width / 2
+    const py = rect.top + rect.height / 2
+    const dx = px - cx
+    const dy = py - cy
+
+    let inDirection = false
+    switch (direction) {
+      case 'ArrowUp': inDirection = dy < -10; break
+      case 'ArrowDown': inDirection = dy > 10; break
+      case 'ArrowLeft': inDirection = dx < -10; break
+      case 'ArrowRight': inDirection = dx > 10; break
+    }
+
+    if (!inDirection) continue
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    if (dist < bestDist) {
+      bestDist = dist
+      best = candidate
+    }
   }
 
-  return 'rush'
+  return best
 }
 
-function isTextEntryTarget(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement
-    && ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'A'].includes(target.tagName)
+function getFocusedItem(): HTMLElement | null {
+  const focused = document.activeElement as HTMLElement | null
+  if (focused?.classList.contains('scene-item')) return focused
+  return null
 }
 
-export function setupInput(
-  _getState: () => GameState,
-  callbacks: InputCallbacks,
-  isModalOpen: () => boolean,
-): void {
-  const arena = document.getElementById('game-arena') as HTMLElement
-  const startButton = document.getElementById('start-btn') as HTMLButtonElement
-  const chompButton = document.getElementById('chomp-btn') as HTMLButtonElement
-  const replayButton = document.getElementById('replay-btn') as HTMLButtonElement
-  const menuButton = document.getElementById('menu-btn') as HTMLButtonElement
+export function moveFocusToFirstItem(): void {
+  const first = document.querySelector<HTMLElement>('.scene-item:not([disabled])')
+  if (first) first.focus()
+}
 
-  arena.style.touchAction = 'none'
-
-  function arenaPercentX(clientX: number): number {
-    const rect = arena.getBoundingClientRect()
-    const relative = rect.width > 0 ? (clientX - rect.left) / rect.width : 0.5
-    return relative * 100
+export function setupInput(callbacks: InputCallbacks): void {
+  pointerHandler = (event: PointerEvent) => {
+    const target = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-item-id]')
+    if (target && !target.disabled) {
+      const itemId = target.dataset.itemId
+      if (itemId) callbacks.onSelectAnswer(itemId)
+    }
   }
+  document.addEventListener('pointerup', pointerHandler)
 
-  startButton.addEventListener('click', () => {
-    callbacks.onStartGame(selectedMode())
-  })
-
-  chompButton.addEventListener('click', () => {
-    callbacks.onChomp()
-  })
-
-  replayButton.addEventListener('click', () => {
-    callbacks.onReplay()
-  })
-
-  menuButton.addEventListener('click', () => {
-    callbacks.onReturnToMenu()
-  })
-
-  arena.addEventListener('pointermove', (event: PointerEvent) => {
-    if (!isGameScreenActive() || isModalOpen()) return
-    callbacks.onMoveHippo(arenaPercentX(event.clientX))
-  })
-
-  arena.addEventListener('pointerdown', (event: PointerEvent) => {
-    if (!isGameScreenActive() || isModalOpen()) return
-    event.preventDefault()
-    callbacks.onMoveHippo(arenaPercentX(event.clientX))
-    callbacks.onChomp()
-  })
-
-  document.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (isModalOpen()) return
-    if (isTextEntryTarget(event.target)) return
-    if (!isGameScreenActive()) return
-
-    if (event.key === 'ArrowLeft') {
+  keydownHandler = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
       event.preventDefault()
-      callbacks.onNudgeHippo(-6)
+      callbacks.onOpenSettings()
       return
     }
 
-    if (event.key === 'ArrowRight') {
+    const arrows = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
+    if (arrows.includes(event.key)) {
       event.preventDefault()
-      callbacks.onNudgeHippo(6)
+      const items = getActiveSceneItems()
+      if (items.length <= 1) return
+
+      const focused = getFocusedItem()
+      if (!focused) {
+        moveFocusToFirstItem()
+        return
+      }
+
+      const nearest = findNearestInDirection(focused, items, event.key)
+      if (nearest) {
+        focused.tabIndex = -1
+        nearest.tabIndex = 0
+        nearest.focus()
+      }
       return
     }
 
-    if (event.key === ' ' || event.key === 'Enter') {
-      event.preventDefault()
-      callbacks.onChomp()
-    }
-  })
-
-  let previousPrimaryPressed = false
-  let previousStartPressed = false
-  requestAnimationFrame(function pollGamepad() {
-    const pad = navigator.getGamepads?.()[0]
-    const primaryPressed = pad?.buttons[0]?.pressed ?? false
-    const startPressed = pad?.buttons[9]?.pressed ?? false
-
-    if (pad && !isModalOpen()) {
-      if (isGameScreenActive()) {
-        const axis = pad.axes[0] ?? 0
-        const leftPressed = pad.buttons[14]?.pressed ?? false
-        const rightPressed = pad.buttons[15]?.pressed ?? false
-
-        if (Math.abs(axis) > 0.18) {
-          callbacks.onNudgeHippo(axis * 2.6)
-        }
-        if (leftPressed) callbacks.onNudgeHippo(-2.8)
-        if (rightPressed) callbacks.onNudgeHippo(2.8)
-        if (primaryPressed && !previousPrimaryPressed) callbacks.onChomp()
-        if (startPressed && !previousStartPressed) callbacks.onReturnToMenu()
-      } else if (isStartScreenActive()) {
-        if (primaryPressed && !previousPrimaryPressed) callbacks.onStartGame(selectedMode())
-      } else if (isEndScreenActive()) {
-        if (primaryPressed && !previousPrimaryPressed) callbacks.onReplay()
-        if (startPressed && !previousStartPressed) callbacks.onReturnToMenu()
+    if (event.key === 'Enter' || event.key === ' ') {
+      const focused = getFocusedItem()
+      if (focused) {
+        event.preventDefault()
+        const itemId = focused.dataset.itemId
+        if (itemId) callbacks.onSelectAnswer(itemId)
       }
     }
+  }
+  document.addEventListener('keydown', keydownHandler)
 
-    previousPrimaryPressed = primaryPressed
-    previousStartPressed = startPressed
-    requestAnimationFrame(pollGamepad)
-  })
+  let prevDpadUp = false
+  let prevDpadDown = false
+  let prevDpadLeft = false
+  let prevDpadRight = false
+  let prevBtnA = false
+  let prevBtnStart = false
+
+  function pollGamepad(): void {
+    const pads = navigator.getGamepads?.()
+    const pad = pads ? pads[0] : null
+
+    if (pad) {
+      const now = Date.now()
+      const debounce = 200
+
+      const dpadUp = pad.buttons[12]?.pressed ?? false
+      const dpadDown = pad.buttons[13]?.pressed ?? false
+      const dpadLeft = pad.buttons[14]?.pressed ?? false
+      const dpadRight = pad.buttons[15]?.pressed ?? false
+      const btnA = pad.buttons[0]?.pressed ?? false
+      const btnStart = pad.buttons[9]?.pressed ?? false
+      const axis0 = pad.axes[0] ?? 0
+      const axis1 = pad.axes[1] ?? 0
+
+      if (now - lastGamepadAction >= debounce) {
+        let direction: string | null = null
+
+        if (dpadUp && !prevDpadUp) direction = 'ArrowUp'
+        else if (dpadDown && !prevDpadDown) direction = 'ArrowDown'
+        else if (dpadLeft && !prevDpadLeft) direction = 'ArrowLeft'
+        else if (dpadRight && !prevDpadRight) direction = 'ArrowRight'
+        else if (axis1 < -0.5) direction = 'ArrowUp'
+        else if (axis1 > 0.5) direction = 'ArrowDown'
+        else if (axis0 < -0.5) direction = 'ArrowLeft'
+        else if (axis0 > 0.5) direction = 'ArrowRight'
+
+        if (direction) {
+          lastGamepadAction = now
+          const items = getActiveSceneItems()
+          const focused = getFocusedItem() ?? items[0]
+          if (focused && items.length > 1) {
+            const nearest = findNearestInDirection(focused, items, direction)
+            if (nearest) {
+              focused.tabIndex = -1
+              nearest.tabIndex = 0
+              nearest.focus()
+            }
+          }
+        }
+
+        if (btnA && !prevBtnA) {
+          lastGamepadAction = now
+          const focused = getFocusedItem()
+          if (focused) {
+            const itemId = focused.dataset.itemId
+            if (itemId) callbacks.onSelectAnswer(itemId)
+          }
+        }
+
+        if (btnStart && !prevBtnStart) {
+          lastGamepadAction = now
+          callbacks.onOpenSettings()
+        }
+      }
+
+      prevDpadUp = dpadUp
+      prevDpadDown = dpadDown
+      prevDpadLeft = dpadLeft
+      prevDpadRight = dpadRight
+      prevBtnA = btnA
+      prevBtnStart = btnStart
+    }
+
+    gamepadHandle = requestAnimationFrame(pollGamepad)
+  }
+
+  gamepadHandle = requestAnimationFrame(pollGamepad)
+}
+
+export function teardownInput(): void {
+  if (pointerHandler) {
+    document.removeEventListener('pointerup', pointerHandler)
+    pointerHandler = null
+  }
+
+  if (keydownHandler) {
+    document.removeEventListener('keydown', keydownHandler)
+    keydownHandler = null
+  }
+
+  if (gamepadHandle !== null) {
+    cancelAnimationFrame(gamepadHandle)
+    gamepadHandle = null
+  }
 }

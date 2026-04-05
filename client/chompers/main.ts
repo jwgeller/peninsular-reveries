@@ -1,199 +1,141 @@
-import { announceChomp, announceGameOver, announceGameStart, announceHazard, announceMiss, announceTimeWarning, moveFocusAfterTransition } from './accessibility.js'
-import { pulseElement, spawnPointsPopup } from './animations.js'
-import { setupInput } from './input.js'
-import type { InputCallbacks } from './input.js'
-import { renderEndScreen, renderGame, setupSettingsModal, showScreen } from './renderer.js'
-import { attemptChomp, createInitialState, isGameOver, moveHippo, nudgeHippo, tickState } from './state.js'
-import { ensureAudioUnlocked, sfxButton, sfxChomp, sfxCollect, sfxCountdown, sfxGameOver, sfxHazard, sfxMiss } from './sounds.js'
-import { FRUIT_DEFINITIONS } from './types.js'
-import type { GameMode, GameState } from './types.js'
+import { announceCorrect, announceGameOver, announceProblem, announceRound, announceWrong, moveFocusAfterTransition } from './accessibility.js'
+import { animateCorrectFeedback, animateHippoChomp, animateNextRound, animateWrongFeedback, spawnPointsPopup } from './animations.js'
+import { moveFocusToFirstItem, setupInput, teardownInput } from './input.js'
+import { renderAll, renderEndScreen, renderHUD, renderHippo, renderProblem, renderScene, setupSettingsModal } from './renderer.js'
+import { ensureAudioUnlocked, sfxChomp, sfxCorrect, sfxGameOver, sfxProblemAppear, sfxStreakBonus, sfxWrong } from './sounds.js'
+import { advanceRound, createInitialState, resolveChomp, selectAnswer } from './state.js'
+import type { Difficulty, GameMode, GameState } from './types.js'
 
-let gameState: GameState = createInitialState('rush')
-let frameHandle = 0
-let lastFrame = 0
+let state: GameState
 
-function setSelectedMode(mode: GameMode): void {
-  const radio = document.querySelector<HTMLInputElement>(`input[name="game-mode"][value="${mode}"]`)
-  if (radio) {
-    radio.checked = true
+const settingsModal = setupSettingsModal()
+
+function getSelectedDifficulty(): Difficulty {
+  const val = document.querySelector<HTMLInputElement>('input[name="difficulty"]:checked')?.value
+  if (val === 'counting' || val === 'addition' || val === 'subtraction' || val === 'multiplication' || val === 'division') {
+    return val
+  }
+  return 'addition'
+}
+
+function getSelectedMode(): GameMode {
+  const val = document.querySelector<HTMLInputElement>('input[name="mode"]:checked')?.value
+  if (val === 'classic' || val === 'frenzy') return val
+  return 'classic'
+}
+
+function showScreen(screenId: string): void {
+  for (const id of ['start-screen', 'game-screen', 'end-screen']) {
+    const el = document.getElementById(id)
+    if (!el) continue
+    if (id === screenId) {
+      el.hidden = false
+      el.removeAttribute('aria-hidden')
+    } else {
+      el.hidden = true
+      el.setAttribute('aria-hidden', 'true')
+    }
   }
 }
 
-function getState(): GameState {
-  return gameState
-}
+async function onSelectAnswer(itemId: string): Promise<void> {
+  if (state.phase !== 'playing') return
 
-function setState(nextState: GameState): void {
-  gameState = nextState
-}
+  state = selectAnswer(state, itemId)
+  renderHippo(state)
 
-function stopLoop(): void {
-  if (frameHandle !== 0) {
-    cancelAnimationFrame(frameHandle)
-    frameHandle = 0
+  // Disable all scene items to prevent double-selection
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.scene-item')) {
+    btn.disabled = true
   }
-  lastFrame = 0
+
+  const targetEl = document.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`)
+  const hippoEl = document.getElementById('hippo') as HTMLElement
+  const selectedItem = state.sceneItems.find((i) => i.id === itemId)
+  if (!selectedItem) return
+
+  sfxChomp()
+  await animateHippoChomp(hippoEl, targetEl, selectedItem.isCorrect)
+
+  state = resolveChomp(state)
+
+  if (selectedItem.isCorrect) {
+    sfxCorrect()
+    if (state.streak >= 3) sfxStreakBonus(state.streak)
+    if (targetEl) await animateCorrectFeedback(targetEl)
+    announceCorrect(selectedItem.value, state.streak)
+    spawnPointsPopup(selectedItem.x, selectedItem.y, `+${selectedItem.value}`, 'positive')
+  } else {
+    sfxWrong()
+    if (targetEl) await animateWrongFeedback(targetEl)
+    announceWrong(selectedItem.value, state.currentProblem.correctAnswer)
+    spawnPointsPopup(selectedItem.x, selectedItem.y, '✗', 'negative')
+  }
+
+  renderHUD(state)
+
+  await new Promise<void>((resolve) => window.setTimeout(resolve, 800))
+
+  state = advanceRound(state)
+
+  if (state.phase === 'gameover') {
+    showEndScreen(state)
+    return
+  }
+
+  await animateNextRound()
+  renderScene(state)
+  renderProblem(state)
+  sfxProblemAppear()
+  announceProblem(state.currentProblem)
+  announceRound(state.round, state.totalRounds)
+  moveFocusToFirstItem()
 }
 
-function startLoop(): void {
-  stopLoop()
-  frameHandle = requestAnimationFrame(tick)
+function onOpenSettings(): void {
+  settingsModal.open()
 }
 
-function finishGame(): void {
-  stopLoop()
-  renderGame(getState())
-  renderEndScreen(getState())
+function onStartGame(difficulty: Difficulty, mode: GameMode): void {
+  ensureAudioUnlocked()
+  state = createInitialState(mode, difficulty, Date.now())
+  showScreen('game-screen')
+  renderAll(state)
+  sfxProblemAppear()
+  setupInput({ onSelectAnswer, onOpenSettings })
+  announceProblem(state.currentProblem)
+  moveFocusAfterTransition('scene-items', 100)
+  window.setTimeout(() => moveFocusToFirstItem(), 200)
+}
+
+function showEndScreen(endState: GameState): void {
   showScreen('end-screen')
+  renderEndScreen(endState)
+  teardownInput()
   sfxGameOver()
-  announceGameOver(getState())
-  moveFocusAfterTransition('replay-btn', 320)
+  announceGameOver(endState)
+  moveFocusAfterTransition('replay-btn', 300)
 }
 
-function returnToMenu(): void {
-  stopLoop()
-  setSelectedMode(getState().mode)
+function onReplay(): void {
+  teardownInput()
+  onStartGame(state?.difficulty ?? 'addition', state?.mode ?? 'classic')
+}
+
+function onReturnToMenu(): void {
+  teardownInput()
   showScreen('start-screen')
   moveFocusAfterTransition('start-btn', 320)
 }
 
-function startGame(mode: GameMode): void {
-  ensureAudioUnlocked()
-  sfxButton()
-  setSelectedMode(mode)
-  setState(createInitialState(mode))
-  renderGame(getState())
-  showScreen('game-screen')
-  announceGameStart(mode)
-  moveFocusAfterTransition('chomp-btn', 320)
-  startLoop()
-}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('start-btn')?.addEventListener('click', () => {
+    onStartGame(getSelectedDifficulty(), getSelectedMode())
+  })
 
-function handleMissedItems(state: GameState, missedItems: readonly GameState['items'][number][]): void {
-  if (missedItems.length === 0) return
+  document.getElementById('replay-btn')?.addEventListener('click', onReplay)
+  document.getElementById('menu-btn')?.addEventListener('click', onReturnToMenu)
 
-  if (state.mode !== 'zen') {
-    sfxMiss()
-  }
-
-  announceMiss(state.mode, missedItems.length, state.lives)
-
-  for (const item of missedItems) {
-    const tone = state.mode === 'survival' && !FRUIT_DEFINITIONS[item.kind].hazard
-      ? 'danger'
-      : state.mode === 'zen'
-        ? 'positive'
-        : 'warning'
-    const text = state.mode === 'survival' && !FRUIT_DEFINITIONS[item.kind].hazard
-      ? '-1♥'
-      : state.mode === 'zen'
-        ? 'PASS'
-        : 'MISS'
-    spawnPointsPopup(item.x, 90, text, tone)
-  }
-
-  const combo = document.getElementById('combo-readout')
-  if (combo) pulseElement(combo, 'is-reset', 260)
-}
-
-function tick(now: number): void {
-  if (!lastFrame) {
-    lastFrame = now
-  }
-
-  const deltaMs = Math.min(now - lastFrame, 80)
-  lastFrame = now
-
-  const result = tickState(getState(), deltaMs)
-  setState(result.state)
-  renderGame(getState())
-
-  for (const seconds of result.countdownWarnings) {
-    sfxCountdown(seconds)
-    announceTimeWarning(seconds)
-  }
-
-  handleMissedItems(getState(), result.missedItems)
-
-  if (isGameOver(getState())) {
-    finishGame()
-    return
-  }
-
-  frameHandle = requestAnimationFrame(tick)
-}
-
-const settingsModal = setupSettingsModal()
-
-const callbacks: InputCallbacks = {
-  onStartGame(mode) {
-    startGame(mode)
-  },
-  onReplay() {
-    startGame(getState().mode)
-  },
-  onReturnToMenu() {
-    returnToMenu()
-  },
-  onMoveHippo(x) {
-    setState(moveHippo(getState(), x))
-    if (frameHandle === 0) {
-      renderGame(getState())
-    }
-  },
-  onNudgeHippo(delta) {
-    setState(nudgeHippo(getState(), delta))
-    if (frameHandle === 0) {
-      renderGame(getState())
-    }
-  },
-  onChomp() {
-    if (settingsModal.isOpen()) return
-
-    ensureAudioUnlocked()
-    sfxChomp()
-    const arena = document.getElementById('game-arena') as HTMLElement | null
-    const result = attemptChomp(getState(), arena
-      ? {
-        width: arena.clientWidth,
-        height: arena.clientHeight,
-      }
-      : undefined)
-    setState(result.state)
-    renderGame(getState())
-
-    const chompButton = document.getElementById('chomp-btn')
-    if (chompButton) pulseElement(chompButton, 'is-fired', 180)
-
-    if (result.hitItem) {
-      const item = FRUIT_DEFINITIONS[result.hitItem.kind]
-      if (item.hazard) {
-        sfxHazard()
-        announceHazard(result.hitItem.kind, getState().mode, getState().lives)
-        const label = result.hitItem.kind === 'bomb' ? 'BOOM' : `${result.scoreDelta}`
-        spawnPointsPopup(result.hitItem.x, result.hitItem.y, label, result.hitItem.kind === 'bomb' ? 'danger' : 'warning')
-      } else {
-        sfxCollect(result.scoreDelta)
-        announceChomp(result.hitItem.kind, result.scoreDelta, getState().combo)
-        const tone = result.hitItem.kind === 'star' ? 'bonus' : 'positive'
-        spawnPointsPopup(result.hitItem.x, result.hitItem.y, `+${result.scoreDelta}`, tone)
-
-        if (getState().combo > 1) {
-          const combo = document.getElementById('combo-readout')
-          if (combo) pulseElement(combo, 'is-hot', 320)
-        }
-      }
-    } else if (result.comboBroken) {
-      const combo = document.getElementById('combo-readout')
-      if (combo) pulseElement(combo, 'is-reset', 260)
-    }
-
-    if (isGameOver(getState())) {
-      finishGame()
-    }
-  },
-}
-
-setupInput(getState, callbacks, settingsModal.isOpen)
-renderGame(getState())
-showScreen('start-screen')
+  const settingsBtn = document.getElementById('settings-btn')
+  settingsBtn?.addEventListener('click', () => settingsModal.open(settingsBtn))
+})

@@ -1,11 +1,140 @@
-import { isReducedMotionEnabled } from '../preferences.js'
+export function isReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
 
+export function animateHippoChomp(
+  hippoEl: HTMLElement,
+  targetEl: HTMLElement | null,
+  isCorrect: boolean,
+): Promise<void> {
+  if (isReducedMotion()) {
+    const outcomeClass = isCorrect ? 'hippo-chomp-correct' : 'hippo-chomp-wrong'
+    hippoEl.classList.add(outcomeClass)
+    window.setTimeout(() => hippoEl.classList.remove(outcomeClass), 0)
+    return Promise.resolve()
+  }
+
+  return new Promise<void>((resolve) => {
+    // Calculate angle toward target item
+    let angle = 0
+    if (targetEl) {
+      const hippoRect = hippoEl.getBoundingClientRect()
+      const targetRect = targetEl.getBoundingClientRect()
+      const hippoX = hippoRect.right
+      const hippoY = hippoRect.top + hippoRect.height * 0.5
+      const targetX = targetRect.left + targetRect.width / 2
+      const targetY = targetRect.top + targetRect.height / 2
+      const dx = targetX - hippoX
+      const dy = targetY - hippoY
+      angle = Math.atan2(dy, Math.max(dx, 1)) * (180 / Math.PI)
+    }
+
+    hippoEl.style.setProperty('--neck-angle', `${angle}deg`)
+
+    // Phase 1: extend neck and open jaw over 300ms
+    hippoEl.style.setProperty('--neck-extension', '1')
+    hippoEl.style.setProperty('--jaw-angle', '1')
+
+    // Phase 2: close jaw at 400ms
+    window.setTimeout(() => {
+      hippoEl.style.setProperty('--jaw-angle', '0')
+    }, 400)
+
+    // Phase 3: retract neck at 600ms
+    window.setTimeout(() => {
+      hippoEl.style.setProperty('--neck-extension', '0')
+
+      const outcomeClass = isCorrect ? 'hippo-chomp-correct' : 'hippo-chomp-wrong'
+      hippoEl.classList.add(outcomeClass)
+
+      // Phase 4: remove outcome class and resolve at ~1200ms total
+      window.setTimeout(() => {
+        hippoEl.classList.remove(outcomeClass)
+        hippoEl.style.setProperty('--neck-angle', '0deg')
+        resolve()
+      }, 600)
+    }, 600)
+  })
+}
+
+export function animateCorrectFeedback(itemEl: HTMLElement): Promise<void> {
+  if (isReducedMotion()) return Promise.resolve()
+
+  return new Promise<void>((resolve) => {
+    itemEl.classList.add('item-correct')
+
+    const sparkle = document.createElement('span')
+    sparkle.textContent = '✨'
+    sparkle.setAttribute('aria-hidden', 'true')
+    sparkle.className = 'item-sparkle'
+    itemEl.appendChild(sparkle)
+
+    window.setTimeout(() => {
+      itemEl.classList.remove('item-correct')
+      sparkle.remove()
+      resolve()
+    }, 500)
+  })
+}
+
+export function animateWrongFeedback(itemEl: HTMLElement): Promise<void> {
+  if (isReducedMotion()) return Promise.resolve()
+
+  return new Promise<void>((resolve) => {
+    itemEl.classList.add('item-wrong')
+
+    window.setTimeout(() => {
+      itemEl.classList.remove('item-wrong')
+      resolve()
+    }, 400)
+  })
+}
+
+export function animateNextRound(): Promise<void> {
+  const container = document.getElementById('scene-items')
+  if (!container || isReducedMotion()) return Promise.resolve()
+
+  return new Promise<void>((resolve) => {
+    container.classList.add('round-exit')
+
+    window.setTimeout(() => {
+      container.classList.remove('round-exit')
+      resolve()
+    }, 300)
+  })
+}
+
+export function spawnPointsPopup(
+  x: number,
+  y: number,
+  text: string,
+  tone: 'positive' | 'negative',
+): void {
+  const layer = document.getElementById('effect-layer')
+  if (!layer) return
+
+  const popup = document.createElement('div')
+  popup.className = `points-popup tone-${tone}`
+  popup.textContent = text
+  popup.style.left = `${x}%`
+  popup.style.top = `${y}%`
+  popup.setAttribute('aria-hidden', 'true')
+  layer.appendChild(popup)
+
+  let removed = false
+  const cleanup = () => {
+    if (removed) return
+    removed = true
+    popup.remove()
+  }
+
+  popup.addEventListener('animationend', cleanup, { once: true })
+  window.setTimeout(cleanup, 1000)
+}
+
+// Legacy helper kept for compatibility — not used by new animations
 const pulseTimeouts = new WeakMap<HTMLElement, number>()
 const pulseFrames = new WeakMap<HTMLElement, number>()
-
-export function isReducedMotion(): boolean {
-  return isReducedMotionEnabled()
-}
 
 export function pulseElement(element: HTMLElement, className: string, durationMs: number = 320): void {
   const pendingFrame = pulseFrames.get(element)
@@ -33,37 +162,4 @@ export function pulseElement(element: HTMLElement, className: string, durationMs
   })
 
   pulseFrames.set(element, frame)
-}
-
-export function spawnPointsPopup(
-  x: number,
-  y: number,
-  text: string,
-  tone: 'positive' | 'bonus' | 'danger' | 'warning' = 'positive',
-): void {
-  const layer = document.getElementById('effect-layer')
-  if (!layer) return
-
-  const popup = document.createElement('div')
-  popup.className = `points-popup tone-${tone}`
-  popup.textContent = text
-  popup.style.left = `${x}%`
-  popup.style.top = `${y}%`
-  popup.setAttribute('aria-hidden', 'true')
-
-  if (isReducedMotion()) {
-    popup.style.opacity = '0.9'
-  }
-
-  layer.appendChild(popup)
-
-  let removed = false
-  const cleanup = () => {
-    if (removed) return
-    removed = true
-    popup.remove()
-  }
-
-  popup.addEventListener('animationend', cleanup, { once: true })
-  window.setTimeout(cleanup, isReducedMotion() ? 260 : 820)
 }

@@ -1,5 +1,4 @@
-import { FRUIT_DEFINITIONS } from './types.js'
-import type { FruitKind, GameMode, GameState } from './types.js'
+import type { GameState, MathProblem } from './types.js'
 
 function announce(message: string, priority: 'polite' | 'assertive'): void {
   const targetId = priority === 'assertive' ? 'game-feedback' : 'game-status'
@@ -7,79 +6,45 @@ function announce(message: string, priority: 'polite' | 'assertive'): void {
   if (target) target.textContent = message
 }
 
-function modeLabel(mode: GameMode): string {
-  if (mode === 'survival') {
-    return 'Survival'
-  }
+function promptToSpeech(prompt: string): string {
+  // Counting prompts are already natural language questions
+  if (!prompt.includes('=')) return prompt
 
-  if (mode === 'zen') {
-    return 'Zen'
-  }
-
-  return 'Rush'
+  const text = prompt
+    .replace(/\s*=\s*\?$/, '')
+    .replace(/\+/g, 'plus')
+    .replace(/\u2212/g, 'minus')
+    .replace(/\u00d7/g, 'times')
+    .replace(/\u00f7/g, 'divided by')
+  return `What is ${text}?`
 }
 
-export function announceGameStart(mode: GameMode): void {
-  if (mode === 'survival') {
-    announce('Survival mode. Three hearts. Missed fruit costs a life. Good luck.', 'polite')
-    return
-  }
-
-  if (mode === 'zen') {
-    announce('Zen mode. No hazards, no speed ramp, and thirty slow fruit to clear at your own pace.', 'polite')
-    return
-  }
-
-  announce('Rush mode. Sixty seconds on the clock. Start chomping.', 'polite')
+export function announceProblem(problem: MathProblem): void {
+  announce(promptToSpeech(problem.prompt), 'polite')
 }
 
-export function announceChomp(kind: FruitKind, scoreDelta: number, combo: number): void {
-  const fruit = FRUIT_DEFINITIONS[kind]
-  const comboText = combo > 1 ? ` Combo ${combo}.` : ''
-  announce(`Chomped ${fruit.label}. ${scoreDelta > 0 ? `+${scoreDelta}` : scoreDelta} points.${comboText}`, 'assertive')
+export function announceCorrect(answer: number, streak: number): void {
+  const streakText = streak >= 3 ? ` ${streak} in a row!` : ''
+  announce(`Correct! ${answer} is right.${streakText}`, 'assertive')
 }
 
-export function announceHazard(kind: FruitKind, mode: GameMode, lives: number): void {
-  const item = FRUIT_DEFINITIONS[kind]
-  if (kind === 'bomb' && mode === 'survival') {
-    announce(`Boom. ${item.label}. ${lives} hearts left.`, 'assertive')
-    return
-  }
-
-  announce(`Oof. ${item.label}. Watch the hazards.`, 'assertive')
+export function announceWrong(selected: number, correct: number): void {
+  announce(`Not quite. You picked ${selected}. The answer is ${correct}.`, 'assertive')
 }
 
-export function announceMiss(mode: GameMode, count: number, lives: number): void {
-  if (count <= 0) return
-
-  if (mode === 'survival') {
-    announce(`${count} fruit ${count === 1 ? 'splatted' : 'splatted'}. ${lives} hearts left.`, 'assertive')
-    return
-  }
-
-  if (mode === 'zen') {
-    announce(`${count} fruit ${count === 1 ? 'drifted by' : 'drifted by'}. No pressure.`, 'polite')
-    return
-  }
-
-  announce(`${count} fruit ${count === 1 ? 'got away' : 'got away'}. Keep moving.`, 'polite')
-}
-
-export function announceTimeWarning(seconds: number): void {
-  announce(`${seconds} seconds left.`, 'assertive')
+export function announceRound(round: number, total: number): void {
+  announce(`Round ${round} of ${total}`, 'polite')
 }
 
 export function announceGameOver(state: GameState): void {
-  announce(`Game over. ${modeLabel(state.mode)} mode finished with ${state.score} points and a best combo of ${state.bestCombo}.`, 'assertive')
+  announce(
+    `Game over. You got ${state.correctCount} out of ${state.totalRounds} right. Score: ${state.score}.`,
+    'assertive',
+  )
 }
 
-export function moveFocus(element: HTMLElement): void {
-  requestAnimationFrame(() => element.focus())
-}
-
-export function moveFocusAfterTransition(elementId: string, delayMs: number = 300): void {
+export function moveFocusAfterTransition(elementId: string, delayMs: number): void {
   window.setTimeout(() => {
-    const target = document.getElementById(elementId)
-    if (target) requestAnimationFrame(() => target.focus())
+    document.getElementById(elementId)?.focus()
   }, delayMs)
 }
