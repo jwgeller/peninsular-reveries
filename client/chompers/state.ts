@@ -1,13 +1,17 @@
-import type { Difficulty, GameMode, GameState, HippoState } from './types.js'
-import { START_LIVES, TOTAL_ROUNDS } from './types.js'
+import type { Area, AreaLevel, GameState, HippoState } from './types.js'
+import { POINTS_FOR_AREA, START_LIVES, TOTAL_ROUNDS } from './types.js'
 import { buildSceneItems, generateProblem } from './problems.js'
 
-const POINTS_FOR_DIFFICULTY: Record<Difficulty, number> = {
-  counting: 5,
-  addition: 10,
-  subtraction: 10,
-  multiplication: 15,
-  division: 20,
+function seededRng(seed: number): [() => number, () => number] {
+  let s = seed >>> 0
+  const rng = (): number => {
+    s = (s + 0x6d2b79f5) >>> 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) >>> 0
+    return ((t ^ (t >>> 14)) >>> 0) / 0x100000000
+  }
+  const getSeed = (): number => s
+  return [rng, getSeed]
 }
 
 function createHippo(): HippoState {
@@ -20,19 +24,17 @@ function createHippo(): HippoState {
   }
 }
 
-export function createInitialState(mode: GameMode, difficulty: Difficulty, seed: number): GameState {
-  let rng = seed
-  const problemResult = generateProblem(difficulty, rng)
-  rng = problemResult.rng
-  const sceneResult = buildSceneItems(problemResult.problem, difficulty, rng)
-  rng = sceneResult.rng
+export function createInitialState(area: Area, level: AreaLevel, seed: number): GameState {
+  const [rng, getSeed] = seededRng(seed)
+  const problem = generateProblem(area, level, rng)
+  const sceneItems = buildSceneItems(problem, area, rng)
 
   return {
     phase: 'playing',
-    mode,
-    difficulty,
-    currentProblem: problemResult.problem,
-    sceneItems: sceneResult.items,
+    area,
+    level,
+    currentProblem: problem,
+    sceneItems,
     score: 0,
     round: 1,
     totalRounds: TOTAL_ROUNDS,
@@ -41,7 +43,7 @@ export function createInitialState(mode: GameMode, difficulty: Difficulty, seed:
     bestStreak: 0,
     hippo: createHippo(),
     correctCount: 0,
-    rngSeed: rng,
+    rngSeed: getSeed(),
   }
 }
 
@@ -74,7 +76,7 @@ export function resolveChomp(state: GameState): GameState {
   }
 
   if (targetItem.isCorrect) {
-    const points = POINTS_FOR_DIFFICULTY[state.difficulty]
+    const points = POINTS_FOR_AREA[state.area]
     const streak = state.streak + 1
     return {
       ...state,
@@ -110,27 +112,25 @@ export function advanceRound(state: GameState): GameState {
     }
   }
 
-  let rng = state.rngSeed
-  const problemResult = generateProblem(state.difficulty, rng)
-  rng = problemResult.rng
-  const sceneResult = buildSceneItems(problemResult.problem, state.difficulty, rng)
-  rng = sceneResult.rng
+  const [rng, getSeed] = seededRng(state.rngSeed)
+  const problem = generateProblem(state.area, state.level, rng)
+  const sceneItems = buildSceneItems(problem, state.area, rng)
 
   return {
     ...state,
     phase: 'playing',
     round: state.round + 1,
     bestStreak,
-    currentProblem: problemResult.problem,
-    sceneItems: sceneResult.items,
+    currentProblem: problem,
+    sceneItems,
     hippo: createHippo(),
-    rngSeed: rng,
+    rngSeed: getSeed(),
   }
 }
 
-/** Restart from the same mode, difficulty, and original seed. */
+/** Restart from the same area, level, and seed. */
 export function resetGame(state: GameState): GameState {
-  return createInitialState(state.mode, state.difficulty, state.rngSeed)
+  return createInitialState(state.area, state.level, state.rngSeed)
 }
 
 export function isGameOver(state: GameState): boolean {

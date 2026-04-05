@@ -1,4 +1,7 @@
 export function isReducedMotion(): boolean {
+  const override = document.documentElement.dataset.reduceMotion
+  if (override === 'reduce') return true
+  if (override === 'no-preference') return false
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
@@ -8,15 +11,26 @@ export function animateHippoChomp(
   isCorrect: boolean,
 ): Promise<void> {
   if (isReducedMotion()) {
-    const outcomeClass = isCorrect ? 'hippo-chomp-correct' : 'hippo-chomp-wrong'
-    hippoEl.classList.add(outcomeClass)
-    window.setTimeout(() => hippoEl.classList.remove(outcomeClass), 0)
-    return Promise.resolve()
+    // Reduced motion: jaw-only animation, no neck extension
+    return new Promise<void>((resolve) => {
+      hippoEl.style.setProperty('--jaw-angle', '1')
+      window.setTimeout(() => {
+        hippoEl.style.setProperty('--jaw-angle', '0')
+        const outcomeClass = isCorrect ? 'hippo-chomp-correct' : 'hippo-chomp-wrong'
+        hippoEl.classList.add(outcomeClass)
+        window.setTimeout(() => {
+          hippoEl.classList.remove(outcomeClass)
+          resolve()
+        }, 320)
+      }, 280)
+    })
   }
 
   return new Promise<void>((resolve) => {
     // Calculate angle toward target item
     let angle = 0
+    let neckExt = 0.8 // default extension
+
     if (targetEl) {
       const hippoRect = hippoEl.getBoundingClientRect()
       const targetRect = targetEl.getBoundingClientRect()
@@ -27,12 +41,20 @@ export function animateHippoChomp(
       const dx = targetX - hippoX
       const dy = targetY - hippoY
       angle = Math.atan2(dy, Math.max(dx, 1)) * (180 / Math.PI)
+
+      // Scale neck extension to distance, normalized by arena width
+      const arenaEl = document.getElementById('game-arena')
+      if (arenaEl) {
+        const arenaRect = arenaEl.getBoundingClientRect()
+        const reach = (targetX - hippoX) / (arenaRect.right - hippoX)
+        neckExt = Math.min(Math.max(reach * 1.2, 0.2), 1)
+      }
     }
 
     hippoEl.style.setProperty('--neck-angle', `${angle}deg`)
 
     // Phase 1: extend neck and open jaw over 300ms
-    hippoEl.style.setProperty('--neck-extension', '1')
+    hippoEl.style.setProperty('--neck-extension', String(neckExt))
     hippoEl.style.setProperty('--jaw-angle', '1')
 
     // Phase 2: close jaw at 400ms

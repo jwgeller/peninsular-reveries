@@ -15,6 +15,7 @@ Use this skill for substantial work in this repository.
 - Load [file size](./references/file-size.md) when a task involves large files, refactors, or deciding whether to split a module.
 - Load [testing](./references/testing.md) for test organization, validation gates, CI behavior, and attribution sync requirements.
 - Load [security](./references/security.md) for secret-handling, review-before-push, and remediation expectations when credentials or generated env files are involved.
+- Load [educational research](./references/educational-research.md) when a game involves learning objectives, age-appropriate content, or difficulty progression.
 
 ## Usage Notes
 

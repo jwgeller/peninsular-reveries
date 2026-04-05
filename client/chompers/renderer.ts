@@ -51,7 +51,20 @@ export function renderScene(state: GameState, container?: HTMLElement): void {
 
 export function renderProblem(state: GameState): void {
   const el = document.getElementById('problem-prompt')
-  if (el) el.textContent = state.currentProblem.prompt
+  if (!el) return
+
+  if (state.currentProblem.area === 'counting' && state.currentProblem.countingObjects?.length) {
+    el.innerHTML = ''
+    for (const obj of state.currentProblem.countingObjects) {
+      const span = document.createElement('span')
+      span.className = 'counting-object'
+      span.setAttribute('aria-hidden', 'true')
+      span.textContent = obj
+      el.appendChild(span)
+    }
+  } else {
+    el.textContent = state.currentProblem.prompt
+  }
 }
 
 export function renderHippo(state: GameState): void {
@@ -86,6 +99,9 @@ export function renderHUD(state: GameState): void {
       streakEl.hidden = true
     }
   }
+
+  const chipEl = document.getElementById('area-chip')
+  if (chipEl) chipEl.textContent = `${state.area} · L${state.level}`
 }
 
 export function renderEndScreen(state: GameState): void {
@@ -119,7 +135,23 @@ function getFocusableElements(container: HTMLElement): HTMLElement[] {
   ).filter((element) => !element.hasAttribute('disabled') && !element.getAttribute('aria-hidden'))
 }
 
+export function setupZoomReset(): void {
+  const buttons = document.querySelectorAll<HTMLElement>('[aria-label="Reset zoom"]')
+  for (const btn of buttons) {
+    btn.addEventListener('click', () => {
+      const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]')
+      if (!meta) return
+      const original = meta.content
+      meta.content = `${original}, maximum-scale=1`
+      requestAnimationFrame(() => {
+        meta.content = original
+      })
+    })
+  }
+}
+
 export function setupSettingsModal(): SettingsModalController {
+  setupZoomReset()
   const modal = document.getElementById('settings-modal') as HTMLElement | null
   const closeButton = document.getElementById('settings-close') as HTMLButtonElement | null
   const triggers = Array.from(document.querySelectorAll<HTMLElement>('[data-settings-open="true"]'))

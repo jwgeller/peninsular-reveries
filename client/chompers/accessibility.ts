@@ -1,4 +1,4 @@
-import type { GameState, MathProblem } from './types.js'
+import type { GameState, Problem } from './types.js'
 
 function announce(message: string, priority: 'polite' | 'assertive'): void {
   const targetId = priority === 'assertive' ? 'game-feedback' : 'game-status'
@@ -19,8 +19,18 @@ function promptToSpeech(prompt: string): string {
   return `What is ${text}?`
 }
 
-export function announceProblem(problem: MathProblem): void {
-  announce(promptToSpeech(problem.prompt), 'polite')
+export function announceProblem(problem: Problem): void {
+  let text: string
+
+  if (problem.area === 'counting') {
+    text = 'Count the objects. How many are there?'
+  } else if (problem.area === 'matching') {
+    text = `Find the number ${problem.correctAnswer}.`
+  } else {
+    text = promptToSpeech(problem.prompt)
+  }
+
+  announce(text, 'polite')
 }
 
 export function announceCorrect(answer: number, streak: number): void {

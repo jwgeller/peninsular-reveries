@@ -38,72 +38,93 @@ export async function chompersAction() {
             <h1 id="start-heading" className="start-title">Chompers</h1>
             <p className="start-kicker">Pick the right answer and feed the hippo!</p>
 
-            <fieldset className="difficulty-picker">
-              <legend>Choose level:</legend>
+            <fieldset className="area-picker">
+              <legend>Choose a math area:</legend>
 
-              <label className="difficulty-card" htmlFor="diff-counting" aria-label="Counting: Find and count numbers">
-                <input id="diff-counting" type="radio" name="difficulty" value="counting" className="difficulty-radio" checked />
-                <span className="difficulty-card-copy">
-                  <strong>Counting ⭐</strong>
-                  <span>Find and count numbers</span>
-                </span>
-              </label>
+              <div className="area-picker-grid">
+                <label className="area-card" htmlFor="area-matching" aria-label="Matching: Find the displayed number">
+                  <input id="area-matching" type="radio" name="area" value="matching" className="area-radio" checked />
+                  <span className="area-card-copy">
+                    <strong>Matching ⭐</strong>
+                    <span>Find the number</span>
+                  </span>
+                  <div className="level-selector" role="group" aria-label="Level for Matching">
+                    <label><input type="radio" name="level-matching" value="1" checked /><span>L1</span></label>
+                    <label><input type="radio" name="level-matching" value="2" /><span>L2</span></label>
+                    <label><input type="radio" name="level-matching" value="3" /><span>L3</span></label>
+                  </div>
+                </label>
 
-              <label className="difficulty-card" htmlFor="diff-addition" aria-label="Addition: Add numbers together">
-                <input id="diff-addition" type="radio" name="difficulty" value="addition" className="difficulty-radio" />
-                <span className="difficulty-card-copy">
-                  <strong>Addition ➕</strong>
-                  <span>Add numbers together</span>
-                </span>
-              </label>
+                <label className="area-card" htmlFor="area-counting" aria-label="Counting: Count the objects">
+                  <input id="area-counting" type="radio" name="area" value="counting" className="area-radio" />
+                  <span className="area-card-copy">
+                    <strong>Counting 🔢</strong>
+                    <span>Count the objects</span>
+                  </span>
+                  <div className="level-selector" role="group" aria-label="Level for Counting">
+                    <label><input type="radio" name="level-counting" value="1" checked /><span>L1</span></label>
+                    <label><input type="radio" name="level-counting" value="2" /><span>L2</span></label>
+                    <label><input type="radio" name="level-counting" value="3" /><span>L3</span></label>
+                  </div>
+                </label>
 
-              <label className="difficulty-card" htmlFor="diff-subtraction" aria-label="Subtraction: Take numbers away">
-                <input id="diff-subtraction" type="radio" name="difficulty" value="subtraction" className="difficulty-radio" />
-                <span className="difficulty-card-copy">
-                  <strong>Subtraction ➖</strong>
-                  <span>Take numbers away</span>
-                </span>
-              </label>
+                <label className="area-card" htmlFor="area-addition" aria-label="Addition: Add numbers together">
+                  <input id="area-addition" type="radio" name="area" value="addition" className="area-radio" />
+                  <span className="area-card-copy">
+                    <strong>Addition ➕</strong>
+                    <span>Add numbers together</span>
+                  </span>
+                  <div className="level-selector" role="group" aria-label="Level for Addition">
+                    <label><input type="radio" name="level-addition" value="1" checked /><span>L1</span></label>
+                    <label><input type="radio" name="level-addition" value="2" /><span>L2</span></label>
+                    <label><input type="radio" name="level-addition" value="3" /><span>L3</span></label>
+                  </div>
+                </label>
 
-              <label className="difficulty-card" htmlFor="diff-multiplication" aria-label="Multiplication: Times tables">
-                <input id="diff-multiplication" type="radio" name="difficulty" value="multiplication" className="difficulty-radio" />
-                <span className="difficulty-card-copy">
-                  <strong>Multiplication ✖️</strong>
-                  <span>Times tables</span>
-                </span>
-              </label>
+                <label className="area-card" htmlFor="area-subtraction" aria-label="Subtraction: Take numbers away">
+                  <input id="area-subtraction" type="radio" name="area" value="subtraction" className="area-radio" />
+                  <span className="area-card-copy">
+                    <strong>Subtraction ➖</strong>
+                    <span>Take numbers away</span>
+                  </span>
+                  <div className="level-selector" role="group" aria-label="Level for Subtraction">
+                    <label><input type="radio" name="level-subtraction" value="1" checked /><span>L1</span></label>
+                    <label><input type="radio" name="level-subtraction" value="2" /><span>L2</span></label>
+                    <label><input type="radio" name="level-subtraction" value="3" /><span>L3</span></label>
+                  </div>
+                </label>
 
-              <label className="difficulty-card" htmlFor="diff-division" aria-label="Division: Split numbers up">
-                <input id="diff-division" type="radio" name="difficulty" value="division" className="difficulty-radio" />
-                <span className="difficulty-card-copy">
-                  <strong>Division ➗</strong>
-                  <span>Split numbers up</span>
-                </span>
-              </label>
-            </fieldset>
+                <label className="area-card" htmlFor="area-multiplication" aria-label="Multiplication: Times tables">
+                  <input id="area-multiplication" type="radio" name="area" value="multiplication" className="area-radio" />
+                  <span className="area-card-copy">
+                    <strong>Multiplication ✖️</strong>
+                    <span>Times tables</span>
+                  </span>
+                  <div className="level-selector" role="group" aria-label="Level for Multiplication">
+                    <label><input type="radio" name="level-multiplication" value="1" checked /><span>L1</span></label>
+                    <label><input type="radio" name="level-multiplication" value="2" /><span>L2</span></label>
+                    <label><input type="radio" name="level-multiplication" value="3" /><span>L3</span></label>
+                  </div>
+                </label>
 
-            <fieldset className="mode-picker">
-              <legend>Game mode:</legend>
-
-              <label className="mode-card" htmlFor="mode-classic" aria-label="Classic: 10 rounds, take your time">
-                <input id="mode-classic" type="radio" name="mode" value="classic" className="mode-radio" checked />
-                <span className="mode-card-copy">
-                  <strong>Classic</strong>
-                  <span>10 rounds, take your time</span>
-                </span>
-              </label>
-
-              <label className="mode-card" htmlFor="mode-frenzy" aria-label="Frenzy: Speed bonus on every correct pick">
-                <input id="mode-frenzy" type="radio" name="mode" value="frenzy" className="mode-radio" />
-                <span className="mode-card-copy">
-                  <strong>Frenzy</strong>
-                  <span>Speed bonus on every correct pick</span>
-                </span>
-              </label>
+                <label className="area-card" htmlFor="area-division" aria-label="Division: Split numbers up">
+                  <input id="area-division" type="radio" name="area" value="division" className="area-radio" />
+                  <span className="area-card-copy">
+                    <strong>Division ➗</strong>
+                    <span>Split numbers up</span>
+                  </span>
+                  <div className="level-selector" role="group" aria-label="Level for Division">
+                    <label><input type="radio" name="level-division" value="1" checked /><span>L1</span></label>
+                    <label><input type="radio" name="level-division" value="2" /><span>L2</span></label>
+                    <label><input type="radio" name="level-division" value="3" /><span>L3</span></label>
+                  </div>
+                </label>
+              </div>
             </fieldset>
 
             <div className="start-actions">
               <button id="start-btn" className="chomp-btn chomp-btn-primary">Start Chomping</button>
+              <button id="start-zoom-reset-btn" className="chomp-btn chomp-btn-icon zoom-reset-btn" aria-label="Reset zoom">🔍</button>
               <button data-settings-open="true" className="chomp-btn chomp-btn-secondary" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>
             </div>
           </div>
@@ -111,14 +132,14 @@ export async function chompersAction() {
 
         {/* Game Screen */}
         <section id="game-screen" className="game-screen game-screen-play" aria-labelledby="game-screen-label" hidden aria-hidden="true">
-          <h2 id="game-screen-label" className="sr-only">Chompers game screen</h2>
+          <h2 id="game-screen-label" className="sr-only">Chompers</h2>
 
           <div id="game-hud" className="game-hud" aria-label="Game status">
             <span id="score" className="hud-score" aria-label="Score: 0">0</span>
             <span id="round-progress" className="hud-pill">1 / 10</span>
             <span id="lives" className="hud-lives" aria-label="Lives: 3">♥♥♥</span>
             <span id="streak" className="hud-streak" hidden>🔥0</span>
-            <span id="difficulty-chip" className="hud-chip">counting</span>
+            <span id="area-chip" className="hud-chip">matching · L1</span>
             <button
               id="settings-btn"
               className="chomp-btn chomp-btn-icon"
@@ -126,8 +147,13 @@ export async function chompersAction() {
               aria-haspopup="dialog"
               aria-controls="settings-modal"
               aria-expanded="false"
-              aria-label="Settings"
-            >⚙</button>
+              aria-label="Menu"
+            >☰</button>
+            <button
+              id="zoom-reset-btn"
+              className="chomp-btn chomp-btn-icon"
+              aria-label="Reset zoom"
+            >🔍</button>
           </div>
 
           <p id="problem-prompt" className="problem-prompt" role="status" aria-live="polite">Loading…</p>
@@ -136,6 +162,8 @@ export async function chompersAction() {
             <div id="scene-items" className="scene-items"></div>
 
             <div id="hippo" aria-hidden="true">
+              <div className="hippo-ear hippo-ear-left"></div>
+              <div className="hippo-ear hippo-ear-right"></div>
               <div className="hippo-body"></div>
               <div className="hippo-neck">
                 <div className="hippo-head">
@@ -183,7 +211,7 @@ export async function chompersAction() {
         </section>
       </div>
 
-      <GameSettingsModal title="Settings" overlayStyles={chompersModalOverlayStyles}>
+      <GameSettingsModal title="Menu" overlayStyles={chompersModalOverlayStyles}>
 
         <section className="settings-section">
           <h3>Controls</h3>
@@ -191,9 +219,10 @@ export async function chompersAction() {
         </section>
 
         <section className="settings-section">
-          <h3>Difficulty levels</h3>
+          <h3>Math areas</h3>
           <ul className="settings-list">
-            <li><strong>Counting ⭐</strong> — Find and count numbers</li>
+            <li><strong>Matching ⭐</strong> — Find the displayed number among tiles</li>
+            <li><strong>Counting 🔢</strong> — Count objects and tap the matching number</li>
             <li><strong>Addition ➕</strong> — Add numbers together</li>
             <li><strong>Subtraction ➖</strong> — Take numbers away</li>
             <li><strong>Multiplication ✖️</strong> — Times tables</li>
