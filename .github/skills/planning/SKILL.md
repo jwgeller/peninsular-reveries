@@ -152,6 +152,10 @@ Guides the orchestrator's sub-agent configuration and **model selection**:
 ### Owned files
 The exhaustive list of files the sub-agent is allowed to modify. Use globs sparingly and only for asset directories (e.g., `public/game/audio/*`). Never split a single file across multiple WUs — exactly one WU owns each file.
 
+**E2E impact check.** When a WU changes user-visible text (button labels, modal content, link text, aria labels), grep E2E specs (`e2e/**/*.spec.ts`) for assertions on that text and include matching spec files in the owned-file list.
+
+**Verification step.** During Draft/Workshop, do a quick grep of proposed owned files to confirm the code to be changed actually lives there. If the target code (e.g., a CSS property, function call, or selector) doesn't appear in the listed files, fix the owned-file list before finalizing.
+
 ### Read-only
 Files the sub-agent should read for reference but must not modify. Include a reason so the sub-agent understands why.
 
