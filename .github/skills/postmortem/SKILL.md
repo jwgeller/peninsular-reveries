@@ -116,7 +116,7 @@ Get user approval before applying changes.
 
 After user approval:
 
-1. **Append to active plan.** Add a `## Post-Mortem` section to `/memories/repo/plans/active-plan.md` with the findings. This section persists so the next planner reads it and incorporates corrections. Structure:
+1. **Append to active plan.** Add a `## Post-Mortem` section to `/memories/repo/plans/active-plan.md` with the findings. Structure:
 
 ```markdown
 ## Post-Mortem
@@ -143,13 +143,15 @@ Evaluated by: user + agent
 
    Only update files where the findings warrant a change. Don't make drive-by improvements.
 
-3. **Report.** Summarize what was updated and confirm the plan file now has its post-mortem section.
+3. **Archive the plan.** Rename `/memories/repo/plans/active-plan.md` to `/memories/repo/plans/archive/<YYYY-MM-DD>-<slug>.md` where `<slug>` is the plan title slugified (e.g., `2026-04-06-project-cleanup-consistency.md`). This frees the active-plan path for the next planning session and preserves the full plan + post-mortem for historical reference.
+
+4. **Report.** Summarize what was updated, confirm the plan was archived, and state the archive path.
 
 ---
 
 ## Key Rules
 
-- **Do not delete the active plan.** The plan with its post-mortem section stays in place until the next planning session reads it and replaces it.
+- **Archive, don't delete.** After appending the post-mortem section and updating process files, rename the plan to the archive path. The active-plan slot should be empty when the postmortem is done.
 - **Evidence over opinion.** Every finding should reference a specific WU, commit diff, or production observation — not just "this could be better."
 - **Actionable corrections only.** Each correction must be concrete enough that a future planner or orchestrator can act on it without interpretation. "Be more specific" is not actionable. "Include viewport checkpoint list for any WU that touches CSS layout" is.
 - **Don't over-correct.** If 13 of 14 WUs executed cleanly, the process is working. Focus on the gaps, not the defaults.
