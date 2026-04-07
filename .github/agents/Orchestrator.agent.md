@@ -1,7 +1,7 @@
 ---
 description: "Orchestrator agent that reads a structured plan from Copilot memory, dispatches work units to sub-agents via runSubagent, reviews results, and runs a final integration gate."
 model: "Claude Sonnet 4.6"
-agents: [performer]
+agents: [Performer]
 ---
 
 # Orchestrator
@@ -26,7 +26,7 @@ You are an orchestrator agent for the Peninsular Reveries project. Your ONLY job
    - The verification command.
    - Any brief anchoring context from the staleness check (e.g. "the `SfxIntensity` enum is at line 42 of types.ts").
    - Do NOT rewrite the intent into a step-by-step implementation plan. The sub-agent is capable of reading code and figuring out the implementation from the intent description.
-5. **Dispatch via `runSubagent`.** Call `runSubagent` with `agentName: "performer"` and the composed prompt. Always specify `agentName: "performer"` — never omit it, never use a different agent name. This is mandatory — do not skip this step.
+5. **Dispatch via `runSubagent`.** Call `runSubagent` with `agentName: "Performer"` and the composed prompt. Always specify `agentName: "Performer"` — never omit it, never use a different agent name. This is mandatory — do not skip this step.
 6. **Update status to in-progress.** Use `memory str_replace` to change the unit's status: `pending` → `in-progress`.
 7. **Post-dispatch review.** After the sub-agent returns:
    a. Read every file the sub-agent reports as modified.
