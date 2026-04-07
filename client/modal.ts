@@ -38,6 +38,8 @@ export function setupTabbedModal(modalId: string = 'settings-modal'): { open(): 
 
   function open(): void {
     previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    // Always reset to the first tab (Settings) on open
+    if (tabBtns.length > 0) activateTab(tabBtns[0])
     modal.hidden = false
     for (const openButton of openButtons) {
       openButton.setAttribute('aria-expanded', 'true')

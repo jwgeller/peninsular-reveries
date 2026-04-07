@@ -1,7 +1,8 @@
 ---
 name: compose
 description: "Structured plan format for orchestrated multi-agent execution. Use when composing plans intended for the @orchestrator agent to dispatch as movements via runSubagent."
-user-invocable: false
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Compose

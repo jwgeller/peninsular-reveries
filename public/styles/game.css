@@ -276,6 +276,12 @@ body.gamepad-active .music-toggle-btn:focus {
   gap: var(--game-space-xs);
 }
 
+@media (max-width: 400px) {
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .controls-column h4 {
   font-size: 0.75rem;
   margin: 0 0 2px;
@@ -308,6 +314,49 @@ body.gamepad-active .music-toggle-btn:focus {
 
 .settings-actions > * {
   flex: 1 1 0;
+}
+
+.settings-restart-btn,
+.settings-quit-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 50px;
+  font-family: var(--game-font);
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 150ms ease;
+}
+
+.settings-restart-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--game-white);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.settings-restart-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.settings-quit-link {
+  background: rgba(255, 80, 80, 0.18);
+  color: var(--game-white);
+  border: 2px solid rgba(255, 80, 80, 0.35);
+}
+
+.settings-quit-link:hover {
+  background: rgba(255, 80, 80, 0.3);
+}
+
+.settings-restart-btn:focus-visible,
+.settings-quit-link:focus-visible {
+  outline: 3px solid var(--game-white);
+  outline-offset: 2px;
 }
 
 .info-more-link {
@@ -457,6 +506,7 @@ body.gamepad-active .music-toggle-btn:focus {
   flex-wrap: nowrap;
   min-width: 0;
   overflow: hidden;
+  gap: 0.25rem;
 }
 
 .puzzle-counter {
@@ -850,6 +900,18 @@ body.gamepad-active .gamepad-start-hint {
   color: var(--game-purple-dark);
   font-size: clamp(1.15rem, 4vw, 1.5rem);
   box-shadow: 0 4px 0 var(--game-yellow-dark);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--game-white);
+  font-size: clamp(0.95rem, 3vw, 1.1rem);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .btn-check {

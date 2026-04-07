@@ -45,15 +45,23 @@ test.describe('SITE-04: Accessibility', () => {
     const dialog = page.getByRole('dialog', { name: 'Menu' })
     await expect(dialog).toBeVisible()
     await expect(page.locator('#settings-close-btn')).toBeFocused()
-    await expect(page.locator('#difficulty-select')).toHaveValue('hero')
-    await expect(page.locator('#music-enabled-toggle')).toBeChecked()
-    await expect(dialog).toContainText('Audio')
-    await expect(dialog).toContainText('Difficulty')
 
     await page.keyboard.press('Escape')
 
     await expect(dialog).toBeHidden()
     await expect(settingsButton).toBeFocused()
+  })
+
+  test('settings dialog shows expected sections and defaults', async ({ page }) => {
+    await page.goto('/super-word/')
+
+    await page.getByRole('button', { name: 'Menu' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Menu' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog).toContainText('Audio')
+    await expect(dialog).toContainText('Level')
+    await expect(page.locator('#difficulty-select')).toHaveValue('hero')
+    await expect(page.locator('#music-enabled-toggle')).toBeChecked()
   })
 
   test('settings music toggle is discoverable and controls audio preference', async ({ page }) => {

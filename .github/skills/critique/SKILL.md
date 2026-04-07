@@ -1,7 +1,8 @@
 ---
 name: critique
 description: "Evaluate completed work against intent and production behavior. Two modes: (1) plan critique — evaluates active score after orchestrator push; (2) field review (--field-review / --fr) — captures user production-testing observations independent of any plan, triages them, implements fixes, and archives findings."
-user-invocable: false
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Critique
@@ -73,7 +74,7 @@ Ordered list of fixes to implement, with files and approach for each.
 Items marked "Design question" are flagged but not implemented — the user decides.
 
 ### Process Observations
-If findings reveal a gap in the compose/orchestrator/performer workflow, note the process-level correction. Otherwise omit.
+If findings reveal a gap in any skill, agent, or workflow file, note the process-level correction. All skills — including the critique skill itself — are eligible for improvement. Otherwise omit.
 ```
 
 ### FR Phase 4 — Implement
@@ -109,8 +110,8 @@ Collect everything needed for evaluation before engaging the user:
 
 1. **Read the active score.** Use `memory` to view `/memories/repo/plans/active-score.md`. Parse all MVTs, their intents, owned files, dispatch order, and status. Look for the `## Implementation` section — it contains the commit SHA the orchestrator recorded after pushing.
 2. **Read the implementation commit(s).** If the plan has an `## Implementation` section, use that SHA directly. Otherwise, run `git log --oneline -5` to find the commit(s) that landed the plan. Then run `git show <sha> --stat` for a file-level summary and `git diff <sha>~1 <sha> -- <specific files>` for targeted diffs when evaluating individual MVTs.
-3. **Verify deployment.** Fetch the production root service worker at `https://jwgeller.github.io/peninsular-reveries/sw.js` using `fetch_webpage`. Extract the SHA from the `CACHE_NAME` value (format: `<prefix>-<sha>`). Compare it against the plan's implementation commit SHA. If they match, deployment is confirmed. If they don't match, warn the user that production may still be running an older build — the critique can still proceed but production observations may not reflect the plan's changes. When the SHA does not match, also check the GitHub Actions deployment status: use `fetch_webpage` to load `https://github.com/jwgeller/peninsular-reveries/actions` and look for the most recent workflow run. If the run failed or is still in progress, report the status. A failed deployment is a **blocker** — flag it as a critical finding in Phase 4 and recommend the user investigate the Actions log before proceeding with the critique. If GitHub Pages is still deploying (404 or stale SHA), note this and suggest re-checking later.
-4. **Fetch production pages.** Use `fetch_webpage` to load the relevant game/site pages at `https://jwgeller.github.io/peninsular-reveries/` and note any obvious issues (broken layout, missing content, error states).
+3. **Verify deployment.** Fetch the production service worker at `https://ironloon.github.io/peninsular-reveries/sw.js` using `fetch_webpage`. Extract the SHA from the `CACHE_NAME` value (format: `<prefix>-<sha>`). Compare it against the expected commit SHA. If they don't match, check deployment status via `gh run list --limit 3 --json status,conclusion,headSha` (faster than scraping the Actions page). A failed deployment is a **blocker**.
+4. **Fetch production pages.** Use `fetch_webpage` to load the relevant game/site pages at `https://ironloon.github.io/peninsular-reveries/` and note any obvious issues (broken layout, missing content, error states).
 5. **Read process files.** Skim the current versions of:
    - `.github/skills/compose/SKILL.md`
    - `.github/agents/orchestrator.agent.md`
@@ -193,12 +194,15 @@ Evaluated by: user + agent
 - ...
 ```
 
-2. **Update process files.** Apply approved changes to the relevant files:
+2. **Update process files.** Apply approved changes to the relevant files. Every skill, agent, and instruction file is eligible — not just the ones most commonly touched:
    - `.github/skills/compose/SKILL.md` — MVT structure rules, intent requirements, scoping guidelines
-   - `.github/agents/orchestrator.agent.md` — dispatch protocol, review steps, staleness checks
+   - `.github/skills/critique/SKILL.md` — this skill itself: triage categories, phase workflow, archive format
+   - `.github/skills/review/SKILL.md` — quality standards, testing conventions, architecture references
+   - `.github/skills/wayback/SKILL.md` — archive browsing, plan history search
+   - `.github/skills/creative-assets/SKILL.md` — asset sourcing, licensing, attribution workflow
+   - `.github/agents/Orchestrator.agent.md` — dispatch protocol, review steps, staleness checks
    - `.github/agents/performer.agent.md` — constraints, output format
    - `copilot-instructions.md` — session expectations, workflow rules
-   - `.github/skills/review/references/*.md` — architecture, game quality, testing conventions
 
    Only update files where the findings warrant a change. Don't make drive-by improvements.
 

@@ -50,8 +50,7 @@ export async function superWordAction() {
             <button id="start-btn" className="btn btn-primary">Let's Go! 🚀</button>
           </div>
           <p id="gamepad-start-hint" className="gamepad-start-hint" hidden>Press Ⓐ to Start</p>
-          <button data-settings-open="true" className="settings-toggle-btn" aria-label="Menu" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>
-          <p className="inspiration">Inspired by <a href="https://pbskids.org/superwhy" target="_blank" rel="noopener">Super Why!</a> from PBS Kids</p>
+          <button id="start-menu-btn" data-settings-open="true" className="btn btn-secondary" aria-label="Menu" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>
         </GameScreen>
 
         {/* Game Screen */}
@@ -99,14 +98,14 @@ export async function superWordAction() {
           overlayStyles={superWordModalOverlayStyles}
           quitHref={homePath}
           settingsContent={<>
-            <SettingsSection title="🎵 Audio">
+            <SettingsSection title="Audio">
               <SettingsToggle id="music-enabled-toggle" label="Music" helpId="music-enabled-help" defaultChecked={true} />
               <SettingsToggle id="sfx-enabled-toggle" label="Sound Effects" helpId="sfx-enabled-help" defaultChecked={true} />
               <SettingsToggle id="reduce-motion-toggle" label="Reduce Motion" helpId="reduce-motion-help" />
             </SettingsSection>
-            <SettingsSection title="📚 Difficulty">
-              <label htmlFor="difficulty-select" className="settings-label">Word difficulty</label>
-              <select id="difficulty-select" className="settings-select" defaultValue="hero">
+            <SettingsSection title="Level">
+              <label htmlFor="difficulty-select" className="settings-label">Level</label>
+              <select id="difficulty-select" className="puzzle-select" defaultValue="hero">
                 <option value="sidekick">⭐ Sidekick</option>
                 <option value="hero">🦸 Hero</option>
                 <option value="super">💫 Super</option>
@@ -114,7 +113,7 @@ export async function superWordAction() {
                 <option value="legend">🏆 Legend</option>
               </select>
             </SettingsSection>
-            <SettingsSection title="🎮 Controls">
+            <SettingsSection title="Controls">
               <div className="controls-grid">
                 <div className="controls-column">
                   <h4>Keyboard / Touch</h4>
@@ -140,7 +139,7 @@ export async function superWordAction() {
               <p>Find the letters hidden in the scene to spell each word. Words are organized by phonemic complexity — from simple words like CAT to multi-syllable words like GARDEN.</p>
               <p>Inspired by <a href="https://pbskids.org/superwhy" target="_blank" rel="noopener">Super Why!</a> from PBS Kids.</p>
             </InfoSection>
-            <p className="info-more-link"><a href={infoPagePath}>More info, credits &amp; attributions →</a></p>
+            <p className="info-more-link"><a href={`${infoPagePath}#super-word`}>More info, credits &amp; attributions →</a></p>
           </>}
         />
 

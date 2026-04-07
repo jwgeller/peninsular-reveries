@@ -55,7 +55,7 @@ For project architecture, game quality standards, and testing conventions, load 
 
 - Dev OS: Windows
 - CI OS: Ubuntu (`ubuntu-latest`)
-- Shell: PowerShell
+- Shell: PowerShell — set `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` at session start to avoid mojibake with Unicode characters (e.g. `→` rendering as `ΓåÆ`).
 - Node: `24.14.1`
 - npm: `11.12.0`
 - Editor: VS Code with GitHub Copilot

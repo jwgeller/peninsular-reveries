@@ -109,6 +109,7 @@ function refreshGameScreen(): void {
 
 function onStartGame(): void {
   ensureAudioUnlocked()
+  syncMusicPlayback()
   sfxButton()
   const difficultySelect = document.getElementById('difficulty-select') as HTMLSelectElement | null
 

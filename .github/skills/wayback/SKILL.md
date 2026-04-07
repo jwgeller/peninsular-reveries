@@ -1,7 +1,7 @@
 ---
 name: wayback
 description: "Browse and search archived plans and critiques. Use when the user wants to review past work: what was planned, what shipped, what went wrong, or how a specific game or area was handled before."
-user-invocable: true
+user-invocable: false
 ---
 
 # Wayback
