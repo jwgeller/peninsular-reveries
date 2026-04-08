@@ -1,4 +1,4 @@
-import { bindReduceMotionToggle } from '../preferences.js'
+import { bindReduceMotionToggle } from '../../client/preferences.js'
 import type { FrenzyState, GameState, NpcHippo } from './types.js'
 
 export interface SettingsModalController {

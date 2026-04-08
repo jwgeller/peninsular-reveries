@@ -1,6 +1,6 @@
 import { css } from '@remix-run/component'
 import { renderToString } from '@remix-run/component/server'
-import { getGameAttribution, repositoryCodeLicense } from '../data/attributions/index.js'
+import { getGameAttribution, repositoryCodeLicense } from '../data/attribution-index.js'
 import { Document } from '../ui/document.js'
 import { getSiteBasePath } from '../site-config.js'
 import { withBasePath } from '../site-paths.js'
@@ -30,7 +30,7 @@ export async function gameInfoAction(slug: string) {
     >
       <div className="page-stack" mix={[css(pageStackStyles)]}>
         <section className="page-hero" mix={[css(pageHeroStyles)]}>
-          <a href={gamePath} className="page-home-link" mix={[css(pageHomeLinkStyles)]}>← Back to {game.name}</a>
+          <a href={gamePath} className="page-home-link" mix={[css(pageHomeLinkStyles)]}>▶ Play {game.name}</a>
           <h1>{game.name}</h1>
           <p><span className="section-label" mix={[css(sectionLabelStyles)]}>Code license:</span> {game.codeLicense}</p>
         </section>

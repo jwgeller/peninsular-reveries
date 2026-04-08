@@ -1,6 +1,6 @@
 import type { TransportType } from './types.js'
-import { getAudioContext, createSfxBus } from '../audio.js'
-import { getSfxEnabled } from '../preferences.js'
+import { getAudioContext, createSfxBus } from '../../client/audio.js'
+import { getSfxEnabled } from '../../client/preferences.js'
 
 let _sfxBus: GainNode | null = null
 let travelLoopStopper: (() => void) | null = null
@@ -101,7 +101,7 @@ function createTravelLoop(transport: TransportType): () => void {
   }
 }
 
-export { ensureAudioUnlocked } from '../audio.js'
+export { ensureAudioUnlocked } from '../../client/audio.js'
 
 export function sfxButton(): void {
   tone(660, 110, { volume: 0.03 })

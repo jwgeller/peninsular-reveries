@@ -58,12 +58,25 @@ await esbuild.build({
     'client/shell.ts',
     'client/home.ts',
     'client/404.ts',
-    'client/mission-orbit/main.ts',
-    'client/super-word/main.ts',
-    'client/chompers/main.ts',
-    'client/pixel-passport/main.ts',
   ],
   bundle: true,
+  outdir: join(outputDir, 'client'),
+  format: 'esm',
+  target: 'es2022',
+  minify: true,
+  sourcemap: true,
+})
+
+// ── Bundle game code ─────────────────────────────────────
+await esbuild.build({
+  entryPoints: [
+    'games/mission-orbit/main.ts',
+    'games/super-word/main.ts',
+    'games/chompers/main.ts',
+    'games/pixel-passport/main.ts',
+  ],
+  bundle: true,
+  outbase: 'games',
   outdir: join(outputDir, 'client'),
   format: 'esm',
   target: 'es2022',

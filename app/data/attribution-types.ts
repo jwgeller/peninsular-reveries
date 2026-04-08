@@ -15,8 +15,11 @@ export interface GameAttribution {
   readonly slug: string
   readonly name: string
   readonly codeLicense: string
-  readonly summary: string
   readonly entries: readonly AttributionEntry[]
+}
+
+export interface GameInfo {
+  readonly summary: string
 }
 
 export const attributionsPagePath = '/attributions/'

@@ -22,6 +22,7 @@ export default [
     files: [
       'app/**/*.{ts,tsx}',
       'client/**/*.{ts,tsx}',
+      'games/**/*.{ts,tsx}',
       'config/**/*.ts',
       'config/**/*.mjs',
       'e2e/**/*.ts',

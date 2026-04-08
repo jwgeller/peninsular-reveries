@@ -1,5 +1,5 @@
-import { bindReduceMotionToggle, bindMusicToggle, bindSfxToggle } from '../preferences.js'
-import { setupTabbedModal } from '../modal.js'
+import { bindReduceMotionToggle, bindMusicToggle, bindSfxToggle } from '../../client/preferences.js'
+import { setupTabbedModal } from '../../client/modal.js'
 import {
   announceClue,
   announceDestination,

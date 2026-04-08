@@ -1,10 +1,10 @@
 import { renderToString } from '@remix-run/component/server'
-import { DESTINATIONS } from '../../client/pixel-passport/destinations.js'
-import { getGameAttribution } from '../data/attributions/index.js'
-import { getSiteBasePath } from '../site-config.js'
-import { withBasePath } from '../site-paths.js'
-import { Document } from '../ui/document.js'
-import { GameHeader, GameHeaderPill, GameScreen, GameTabbedModal, InfoSection, InfoAttribution, SettingsSection, SettingsToggle, SrOnly } from '../ui/game-shell.js'
+import { DESTINATIONS } from './destinations.js'
+import { getGameAttribution } from '../../app/data/attribution-index.js'
+import { getSiteBasePath } from '../../app/site-config.js'
+import { withBasePath } from '../../app/site-paths.js'
+import { Document } from '../../app/ui/document.js'
+import { GameHeader, GameHeaderPill, GameScreen, GameTabbedModal, InfoSection, InfoAttribution, SettingsSection, SettingsToggle, SrOnly } from '../../app/ui/game-shell.js'
 
 const pixelPassportModalOverlayStyles = {
   zIndex: 100,
@@ -46,8 +46,6 @@ export async function pixelPassportAction() {
       bodyClass="pixel-passport-game"
       viewportFitCover
       manifestPath="/pixel-passport/manifest.json"
-      serviceWorkerPath="/pixel-passport/sw.js"
-      serviceWorkerScope="/pixel-passport/"
     >
       <div className="scene-track">
         <GameScreen id="start-screen" className="active" labelledBy="passport-title" padded>

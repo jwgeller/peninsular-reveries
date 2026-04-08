@@ -1,11 +1,10 @@
-import type { GameAttribution } from './types.js'
-import { repositoryCodeLicense } from './types.js'
+import type { GameAttribution } from '../../app/data/attribution-types.js'
+import { repositoryCodeLicense } from '../../app/data/attribution-types.js'
 
 export const superWordAttribution: GameAttribution = {
   slug: 'super-word',
   name: 'Super Word',
   codeLicense: repositoryCodeLicense,
-  summary: 'The deployed game shows credits in Settings. Its word bank groups concrete, imageable vocabulary into a research-backed reading progression using public early-literacy references including Dolch sight words (1936), Fry Instant Words (1979), systematic phonics progressions summarized by the National Reading Panel (2000), and Common Core K–3 Foundational Skills patterns. Starter words focus on high-frequency two-letter terms; later tiers move through CVC words, consonant blends, long-vowel patterns, and six-letter fluent-reader vocabulary. No third-party media assets are currently bundled for Super Word.',
   entries: [
     {
       title: 'Ambient synth soundtrack',

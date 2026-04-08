@@ -1,4 +1,4 @@
-import { isReducedMotionEnabled } from '../preferences.js'
+import { isReducedMotionEnabled } from '../../client/preferences.js'
 
 export function isReducedMotion(): boolean {
   return isReducedMotionEnabled()

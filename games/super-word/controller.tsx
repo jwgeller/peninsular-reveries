@@ -1,9 +1,10 @@
 import { renderToString } from '@remix-run/component/server'
-import { Document } from '../ui/document.js'
-import { GameHeader, GameHeaderPill, GameScreen, GameTabbedModal, InfoSection, SettingsSection, SettingsToggle, SrOnly } from '../ui/game-shell.js'
+import { getGameInfo } from '../../app/data/attribution-index.js'
+import { Document } from '../../app/ui/document.js'
+import { GameHeader, GameHeaderPill, GameScreen, GameTabbedModal, InfoSection, SettingsSection, SettingsToggle, SrOnly } from '../../app/ui/game-shell.js'
 
-import { getSiteBasePath } from '../site-config.js'
-import { withBasePath } from '../site-paths.js'
+import { getSiteBasePath } from '../../app/site-config.js'
+import { withBasePath } from '../../app/site-paths.js'
 
 const superWordScreenStyles = {
   transition: 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -18,6 +19,7 @@ export async function superWordAction() {
   const siteBasePath = getSiteBasePath()
   const homePath = withBasePath('/', siteBasePath)
   const infoPagePath = withBasePath('/super-word/info/', siteBasePath)
+  const info = getGameInfo('super-word')
   const html = await renderToString(
     <Document
       title="Super Word"
@@ -32,8 +34,6 @@ export async function superWordAction() {
       viewportFitCover
       faviconPath="/favicon-game-super-word.svg"
       manifestPath="/super-word/manifest.json"
-      serviceWorkerPath="/super-word/sw.js"
-      serviceWorkerScope="/super-word/"
     >
       <div className="scene-track">
 
@@ -49,7 +49,6 @@ export async function superWordAction() {
             <button id="start-btn" className="btn btn-primary">Let's Go! 🚀</button>
           </div>
           <p id="gamepad-start-hint" className="gamepad-start-hint" hidden>Press Ⓐ to Start</p>
-          <button id="start-menu-btn" data-settings-open="true" className="btn btn-secondary" aria-label="Menu" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>
         </GameScreen>
 
         {/* Game Screen */}
@@ -134,8 +133,7 @@ export async function superWordAction() {
           </>}
           infoContent={<>
             <InfoSection title="About Super Word">
-              <p>Find hidden letters in the scene to spell each word. The word bank groups concrete, imageable vocabulary into a research-backed reading progression — from simple CVC words like CAT through consonant blends, long-vowel patterns, and multi-syllable words like GARDEN.</p>
-              <p>Inspired by <a href="https://pbskids.org/superwhy" target="_blank" rel="noopener">Super Why!</a> from PBS Kids.</p>
+              <p>{info.summary}</p>
             </InfoSection>
             <p className="info-more-link"><a href={infoPagePath}>More info, credits &amp; attributions →</a></p>
           </>}

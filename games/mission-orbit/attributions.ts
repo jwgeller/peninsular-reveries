@@ -1,11 +1,10 @@
-import type { GameAttribution } from './types.js'
-import { repositoryCodeLicense } from './types.js'
+import type { GameAttribution } from '../../app/data/attribution-types.js'
+import { repositoryCodeLicense } from '../../app/data/attribution-types.js'
 
 export const missionOrbitAttribution: GameAttribution = {
   slug: 'mission-orbit',
   name: 'Mission: Orbit',
   codeLicense: repositoryCodeLicense,
-  summary: 'Mission: Orbit uses original visuals, browser-synthesized ambience, a bundled set of curated CC0 light/heavy sound-effect variants, and public-domain Artemis II crew information from NASA. Its in-game settings panel surfaces the same credit summary used here.',
   entries: [
     {
       title: 'Mission ambience and interface synth bed',

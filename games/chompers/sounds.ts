@@ -1,6 +1,6 @@
 import { chompersSampleManifest, getBundledChompersSamples, type ChompersSampleDefinition, type ChompersSampleId } from './sample-manifest.js'
-import { getAudioContext, ensureAudioUnlocked as baseEnsureAudioUnlocked, createMusicBus, createSfxBus } from '../audio.js'
-import { getMusicEnabled } from '../preferences.js'
+import { getAudioContext, ensureAudioUnlocked as baseEnsureAudioUnlocked, createMusicBus, createSfxBus } from '../../client/audio.js'
+import { getMusicEnabled } from '../../client/preferences.js'
 
 let _musicBus: GainNode | null = null
 let _sfxBus: GainNode | null = null

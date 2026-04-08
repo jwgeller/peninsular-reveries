@@ -28,6 +28,8 @@ test.describe('SITE-02: Navigation', () => {
 
   test('game page exposes Quit inside the Menu', async ({ page }) => {
     await page.goto('/super-word/');
+    await page.getByRole('button', { name: /let's go/i }).click();
+    await page.locator('#scene-a11y .sr-overlay-btn[tabindex="0"]').first().waitFor();
     await page.getByRole('button', { name: 'Menu' }).click();
     await expect(page.getByRole('link', { name: 'Quit' })).toBeVisible();
   });

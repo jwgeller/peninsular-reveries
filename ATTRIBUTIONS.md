@@ -1,6 +1,6 @@
 # Attributions
 
-> This file is generated from `app/data/attributions/`. Update the per-game files there, then run `npm run sync:attributions`.
+> This file is generated from per-game files in `games/*/attributions.ts`. Run `npm run sync:attributions` after changes.
 
 ## Repository
 
@@ -14,7 +14,7 @@
 
 - Slug: mission-orbit
 - Code license: GPL-3.0
-- Summary: Mission: Orbit uses original visuals, browser-synthesized ambience, a bundled set of curated CC0 light/heavy sound-effect variants, and public-domain Artemis II crew information from NASA. Its in-game settings panel surfaces the same credit summary used here.
+- Summary: Guide a crew through the phases of a real Artemis-style Moon mission — from launch countdown through splashdown. Mission: Orbit uses original visuals, browser-synthesized ambience, curated CC0 sound-effect variants, and public-domain Artemis II crew information from NASA.
 
 #### Entries
 
@@ -141,7 +141,7 @@
 
 - Slug: super-word
 - Code license: GPL-3.0
-- Summary: The deployed game shows credits in Settings. Its word bank groups concrete, imageable vocabulary into a research-backed reading progression using public early-literacy references including Dolch sight words (1936), Fry Instant Words (1979), systematic phonics progressions summarized by the National Reading Panel (2000), and Common Core K–3 Foundational Skills patterns. Starter words focus on high-frequency two-letter terms; later tiers move through CVC words, consonant blends, long-vowel patterns, and six-letter fluent-reader vocabulary. No third-party media assets are currently bundled for Super Word.
+- Summary: Find hidden letters in the scene to spell each word. The word bank groups concrete, imageable vocabulary into a research-backed reading progression — from simple CVC words like CAT through consonant blends, long-vowel patterns, and multi-syllable words like GARDEN. Inspired by Super Why! from PBS Kids.
 
 #### Entries
 
@@ -169,7 +169,7 @@
 
 - Slug: chompers
 - Code license: GPL-3.0
-- Summary: Chompers uses geometric CSS artwork, a browser synth bed, and a small curated CC0 sample set for taps, chomps, collects, misses, and hazards. The in-game settings panel shows the same credits summary surfaced here.
+- Summary: Pick the right answer and feed the hippo a tasty fruit! Chompers uses geometric CSS artwork, a browser synth bed, and a small curated CC0 sample set for taps, chomps, collects, misses, and hazards.
 
 #### Entries
 
@@ -232,7 +232,7 @@
 
 - Slug: pixel-passport
 - Code license: GPL-3.0
-- Summary: Pixel Passport uses original DOM-rendered pixel scenes, original clue writing, and browser-synthesized travel tones. No third-party art, photo, or audio assets are bundled for the game.
+- Summary: Solve clues to discover world destinations and stamp your passport! Pixel Passport uses original DOM-rendered pixel scenes, original clue writing, and browser-synthesized travel tones. No third-party art, photo, or audio assets are bundled.
 
 #### Entries
 

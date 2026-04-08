@@ -1,7 +1,7 @@
 // ── Sound Effects (Web Audio API — no external files) ────────
 
-import { getAudioContext, createMusicBus, createSfxBus, ensureAudioUnlocked } from '../audio.js'
-import { getMusicEnabled } from '../preferences.js'
+import { getAudioContext, createMusicBus, createSfxBus, ensureAudioUnlocked } from '../../client/audio.js'
+import { getMusicEnabled } from '../../client/preferences.js'
 
 export { ensureAudioUnlocked }
 

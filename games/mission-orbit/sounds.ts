@@ -1,5 +1,5 @@
-import { getAudioContext, createSfxBus } from '../audio.js'
-import { getSfxEnabled } from '../preferences.js'
+import { getAudioContext, createSfxBus } from '../../client/audio.js'
+import { getSfxEnabled } from '../../client/preferences.js'
 
 let _sfxBus: GainNode | null = null
 let holdOscillator: OscillatorNode | null = null

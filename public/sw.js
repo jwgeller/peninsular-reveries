@@ -1,4 +1,4 @@
-const CACHE_NAME = 'site-v2'
+const CACHE_NAME = 'site-v3'
 const APP_SHELL_URL = new URL('./', self.registration.scope).toString()
 const ASSETS = [
   APP_SHELL_URL,
@@ -14,6 +14,7 @@ const ASSETS = [
   new URL('./apple-touch-icon.png', self.registration.scope).toString(),
   new URL('./manifest.json', self.registration.scope).toString(),
   new URL('./chompers/', self.registration.scope).toString(),
+  new URL('./chompers/info/', self.registration.scope).toString(),
   new URL('./styles/chompers.css', self.registration.scope).toString(),
   new URL('./client/chompers/main.js', self.registration.scope).toString(),
   new URL('./chompers/manifest.json', self.registration.scope).toString(),
@@ -23,6 +24,7 @@ const ASSETS = [
   new URL('./chompers/audio/miss-plop.ogg', self.registration.scope).toString(),
   new URL('./chompers/audio/ui-tap.ogg', self.registration.scope).toString(),
   new URL('./mission-orbit/', self.registration.scope).toString(),
+  new URL('./mission-orbit/info/', self.registration.scope).toString(),
   new URL('./styles/mission-orbit.css', self.registration.scope).toString(),
   new URL('./client/mission-orbit/main.js', self.registration.scope).toString(),
   new URL('./mission-orbit/manifest.json', self.registration.scope).toString(),
@@ -40,7 +42,13 @@ const ASSETS = [
   new URL('./mission-orbit/audio/space-ambience-heavy.ogg', self.registration.scope).toString(),
   new URL('./mission-orbit/audio/celebration-accent-light.ogg', self.registration.scope).toString(),
   new URL('./mission-orbit/audio/celebration-accent-heavy.ogg', self.registration.scope).toString(),
+  new URL('./pixel-passport/', self.registration.scope).toString(),
+  new URL('./pixel-passport/info/', self.registration.scope).toString(),
+  new URL('./styles/pixel-passport.css', self.registration.scope).toString(),
+  new URL('./client/pixel-passport/main.js', self.registration.scope).toString(),
+  new URL('./pixel-passport/manifest.json', self.registration.scope).toString(),
   new URL('./super-word/', self.registration.scope).toString(),
+  new URL('./super-word/info/', self.registration.scope).toString(),
   new URL('./styles/game.css', self.registration.scope).toString(),
   new URL('./client/super-word/main.js', self.registration.scope).toString(),
   new URL('./super-word/manifest.json', self.registration.scope).toString(),

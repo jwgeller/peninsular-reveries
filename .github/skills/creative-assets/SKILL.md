@@ -3,6 +3,7 @@ name: creative-assets
 description: 'Source, adapt, attribute, and integrate CC0 or public-domain visual and audio assets for games and pages in Peninsular Reveries. Use when researching photos, illustrations, icons, NASA imagery, SVG art, pixel art from emoji, CC0 sound effects, or any creative asset that needs license verification, budget discipline, and an ATTRIBUTIONS.md entry.'
 argument-hint: 'asset type and context, for example mission-orbit launch sound, pixel-passport destination scene Tokyo, or homepage CC0 illustration'
 user-invocable: true
+disable-model-invocation: false
 ---
 
 # Creative Assets

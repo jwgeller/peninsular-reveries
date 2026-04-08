@@ -21,4 +21,4 @@
 
 ## Attribution Sync
 
-- If a change updates files in `app/data/attributions/`, run `npm run sync:attributions` before considering the work human-ready.
+- If a change updates attribution or info files in `games/*/`, run `npm run sync:attributions` before considering the work human-ready.

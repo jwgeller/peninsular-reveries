@@ -2,8 +2,8 @@
 
 ## Size Targets
 
-- Pixel Passport destination scenes in [client/pixel-passport/destinations.ts](../../../../client/pixel-passport/destinations.ts) currently use `20x14` rows.
-- Pixel Passport vehicles in [client/pixel-passport/art.ts](../../../../client/pixel-passport/art.ts) use `10x6` rows.
+- Pixel Passport destination scenes in [games/pixel-passport/destinations.ts](../../../../games/pixel-passport/destinations.ts) currently use `20x14` rows.
+- Pixel Passport vehicles in [games/pixel-passport/art.ts](../../../../games/pixel-passport/art.ts) use `10x6` rows.
 - Small reusable sprites usually stay readable between `8x8` and `12x12`.
 
 ## Per-Size Example Commands

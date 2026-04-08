@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const pages = [
   { name: 'homepage', path: '/', role: 'link', text: 'Open Super Word' },
-  { name: 'game page', path: '/super-word/', role: 'button', text: 'Menu' },
+  { name: 'game page', path: '/super-word/', role: 'button', text: "Let's Go!" },
   { name: '404 page', path: '/404.html', role: 'link', text: 'Back to the homepage →' },
 ];
 

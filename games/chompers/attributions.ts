@@ -1,11 +1,10 @@
-import type { GameAttribution } from './types.js'
-import { repositoryCodeLicense } from './types.js'
+import type { GameAttribution } from '../../app/data/attribution-types.js'
+import { repositoryCodeLicense } from '../../app/data/attribution-types.js'
 
 export const chompersAttribution: GameAttribution = {
   slug: 'chompers',
   name: 'Chompers',
   codeLicense: repositoryCodeLicense,
-  summary: 'Chompers uses geometric CSS artwork, a browser synth bed, and a small curated CC0 sample set for taps, chomps, collects, misses, and hazards. The in-game settings panel shows the same credits summary surfaced here.',
   entries: [
     {
       title: 'Fruit-chomping synth bed',

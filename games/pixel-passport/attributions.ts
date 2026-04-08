@@ -1,11 +1,10 @@
-import type { GameAttribution } from './types.js'
-import { repositoryCodeLicense } from './types.js'
+import type { GameAttribution } from '../../app/data/attribution-types.js'
+import { repositoryCodeLicense } from '../../app/data/attribution-types.js'
 
 export const pixelPassportAttribution: GameAttribution = {
   slug: 'pixel-passport',
   name: 'Pixel Passport',
   codeLicense: repositoryCodeLicense,
-  summary: 'Pixel Passport uses original DOM-rendered pixel scenes, original clue writing, and browser-synthesized travel tones. No third-party art, photo, or audio assets are bundled for the game.',
   entries: [
     {
       title: 'Pixel Passport globe, destination scenes, Pip sprite, and vehicle sprites',

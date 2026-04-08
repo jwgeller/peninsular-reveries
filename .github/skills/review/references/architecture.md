@@ -43,15 +43,26 @@ config/                  toolchain and repo config
 app/                     server and build-time code
   routes.ts              route map
   router.ts              router setup
-  controllers/           page controllers
+  controllers/           shared page controllers (home, not-found, attributions, game-info)
   ui/                    document shell, shared UI, and shared style helpers
-  data/                  registry and content data
+  data/                  registry, attribution types, and attribution index
 
-client/                  browser code bundled into dist/client/
+games/                   per-game directories (colocated code + data)
+  <game>/
+    main.ts              browser entry point (esbuild bundles this)
+    controller.tsx        page controller (SSR at build time)
+    attributions.ts       credit entries for ATTRIBUTIONS.md and info page
+    info.ts               summary text for info tab and info page
+    state.ts, renderer.ts, input.ts, ...
+    *.test.ts             colocated logic/data tests
+
+client/                  shared browser utilities bundled into dist/client/
   shell.ts               theme toggle and service worker registration
+  audio.ts               Web Audio API helpers
+  modal.ts               tabbed modal setup
+  preferences.ts         persisted preferences (music, SFX, reduce-motion)
+  home.ts                home page interactivity
   404.ts                 random 404 tagline
-  <game>/                game code modules
-    *.test.ts            colocated logic/data tests for that game when useful
 
 e2e/                     Playwright browser specs for rendered-site behavior
   site-*.spec.ts         responsive, navigation, semantic HTML, a11y, and gameplay UI checks
@@ -67,24 +78,29 @@ server.ts                dev server with live reload
 
 ## Adding a New Game
 
-1. Create `client/[game-slug]/main.ts`.
+1. Create `games/[game-slug]/main.ts` with the game entry point.
 2. Add the game to `app/data/game-registry.ts` with `status: 'live'`.
-3. Create `app/controllers/[game-slug].tsx`.
-4. Add the route in `app/routes.ts` and wire it in `app/router.ts`.
-5. Add esbuild entries in `build.ts` and `server.ts`.
-6. Add `public/styles/[game-slug].css` when the game needs substantial game-specific art, animation, or client-runtime class hooks; use shared `app/ui/` helpers and `css()` mixins for repeated shell/layout rules.
-7. Add the static route to `build.ts`.
-8. Add scoped PWA assets in `public/[game-slug]/manifest.json` and `public/[game-slug]/sw.js`.
-9. Pass `includeNav={false}` and `includeFooter={false}` from the game controller.
-10. Add a `Menu` overlay with Home, controls help, settings, reduce-motion, and credits when needed.
-11. If media attributions change, update the relevant file in `app/data/attributions/` and run `npm run sync:attributions`.
-12. Add both unit and e2e tests for new logic and UI behavior.
+3. Create `games/[game-slug]/controller.tsx` for the page controller.
+4. Create `games/[game-slug]/attributions.ts` and `games/[game-slug]/info.ts`.
+5. Wire the attribution and info into `app/data/attribution-index.ts`.
+6. Add the route in `app/routes.ts` and wire it in `app/router.ts`.
+7. Add esbuild entries in `build.ts` and `server.ts`.
+8. Add `public/styles/[game-slug].css` when the game needs substantial game-specific art, animation, or client-runtime class hooks; use shared `app/ui/` helpers and `css()` mixins for repeated shell/layout rules.
+9. Add the static route to `build.ts`.
+10. Add scoped PWA assets in `public/[game-slug]/manifest.json` and `public/[game-slug]/sw.js`.
+11. Pass `includeNav={false}` and `includeFooter={false}` from the game controller.
+12. Add a `Menu` overlay with Home, controls help, settings, reduce-motion, and credits when needed.
+13. Run `npm run sync:attributions` to regenerate ATTRIBUTIONS.md.
+14. Add both unit and e2e tests for new logic and UI behavior.
 
 ## Game Module Contract
 
-Every game in `client/` follows this pattern:
+Every game in `games/` follows this pattern:
 
 - `main.ts` — entry point and loop coordination
+- `controller.tsx` — page controller (SSR at build time)
+- `attributions.ts` — credit entries for the game
+- `info.ts` — summary text for info tab and info page
 - `types.ts` — TypeScript interfaces and constants
 - `state.ts` — pure state transitions
 - `renderer.ts` — DOM rendering and updates

@@ -1,9 +1,9 @@
 import { renderToString } from '@remix-run/component/server'
-import { getGameAttribution } from '../data/attributions/index.js'
-import { getSiteBasePath } from '../site-config.js'
-import { withBasePath } from '../site-paths.js'
-import { Document } from '../ui/document.js'
-import { GameHeader, GameHeaderPill, GameTabbedModal, InfoSection, InfoAttribution, SettingsSection, SettingsToggle, SrOnly } from '../ui/game-shell.js'
+import { getGameAttribution } from '../../app/data/attribution-index.js'
+import { getSiteBasePath } from '../../app/site-config.js'
+import { withBasePath } from '../../app/site-paths.js'
+import { Document } from '../../app/ui/document.js'
+import { GameHeader, GameHeaderPill, GameTabbedModal, InfoSection, InfoAttribution, SettingsSection, SettingsToggle, SrOnly } from '../../app/ui/game-shell.js'
 
 const chompersModalOverlayStyles = {
   zIndex: 100,
@@ -27,8 +27,6 @@ export async function chompersAction() {
       bodyClass="chompers-game"
       viewportFitCover
       manifestPath="/chompers/manifest.json"
-      serviceWorkerPath="/chompers/sw.js"
-      serviceWorkerScope="/chompers/"
     >
       <div className="scene-track">
 

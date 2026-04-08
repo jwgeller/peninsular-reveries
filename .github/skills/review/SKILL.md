@@ -2,6 +2,7 @@
 name: review
 description: "Project architecture, game quality standards, and testing conventions for Peninsular Reveries. Use when building features, reviewing code, fixing bugs, auditing layout, checking game quality, testing, adding games, modifying build or deploy behavior, or polishing UX in this repo."
 user-invocable: true
+disable-model-invocation: false
 ---
 
 # Review

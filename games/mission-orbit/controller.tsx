@@ -1,9 +1,9 @@
 ﻿import { renderToString } from '@remix-run/component/server'
-import { getGameAttribution } from '../data/attributions/index.js'
-import { MISSION_CREW_ROSTER } from '../data/mission-orbit-data.js'
-import { getSiteBasePath } from '../site-config.js'
-import { withBasePath } from '../site-paths.js'
-import { Document } from '../ui/document.js'
+import { getGameAttribution } from '../../app/data/attribution-index.js'
+import { MISSION_CREW_ROSTER } from '../../app/data/mission-orbit-data.js'
+import { getSiteBasePath } from '../../app/site-config.js'
+import { withBasePath } from '../../app/site-paths.js'
+import { Document } from '../../app/ui/document.js'
 import {
   GameHeader,
   GameScreen,
@@ -13,7 +13,7 @@ import {
   SettingsSection,
   SettingsToggle,
   SrOnly,
-} from '../ui/game-shell.js'
+} from '../../app/ui/game-shell.js'
 
 const missionOrbitModalOverlayStyles = {
   zIndex: 100,
@@ -37,8 +37,6 @@ export async function missionOrbitAction() {
       bodyClass="mission-orbit-game"
       viewportFitCover
       manifestPath="/mission-orbit/manifest.json"
-      serviceWorkerPath="/mission-orbit/sw.js"
-      serviceWorkerScope="/mission-orbit/"
     >
       <div className="scene-track">
         <GameScreen id="start-screen" className="active" labelledBy="mission-title" padded>

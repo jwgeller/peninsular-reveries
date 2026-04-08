@@ -6,12 +6,12 @@ import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import {
   getDownloadableChompersSamples,
-} from '../../../../client/chompers/sample-manifest.js'
+} from '../../../../games/chompers/sample-manifest.js'
 import {
   getDownloadableMissionOrbitSamples,
   type MissionOrbitSampleDefinition,
   type MissionOrbitSampleProcessingPlan,
-} from '../../../../client/mission-orbit/sample-manifest.js'
+} from '../../../../games/mission-orbit/sample-manifest.js'
 
 interface FreesoundPreviewSet {
   readonly 'preview-hq-ogg'?: string

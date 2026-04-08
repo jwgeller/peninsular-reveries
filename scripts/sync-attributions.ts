@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs'
-import { renderAttributionsMarkdown } from '../app/data/attributions/index.js'
+import { renderAttributionsMarkdown } from '../app/data/attribution-index.js'
 
 writeFileSync('ATTRIBUTIONS.md', renderAttributionsMarkdown(), 'utf-8')
-console.log('Synced ATTRIBUTIONS.md from app/data/attributions/')
+console.log('Synced ATTRIBUTIONS.md from games/*/attributions.ts')

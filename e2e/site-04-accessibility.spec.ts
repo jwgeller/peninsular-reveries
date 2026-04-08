@@ -36,7 +36,7 @@ test.describe('SITE-04: Accessibility', () => {
   }
 
   test('settings dialog is keyboard accessible and restores focus when closed', async ({ page }) => {
-    await page.goto('/super-word/')
+    await startGame(page)
 
     const settingsButton = page.getByRole('button', { name: 'Menu' })
     await settingsButton.focus()
@@ -53,7 +53,7 @@ test.describe('SITE-04: Accessibility', () => {
   })
 
   test('settings dialog shows expected sections and defaults', async ({ page }) => {
-    await page.goto('/super-word/')
+    await startGame(page)
 
     await page.getByRole('button', { name: 'Menu' }).click()
     const dialog = page.getByRole('dialog', { name: 'Menu' })
@@ -65,7 +65,7 @@ test.describe('SITE-04: Accessibility', () => {
   })
 
   test('settings music toggle is discoverable and controls audio preference', async ({ page }) => {
-    await page.goto('/super-word/')
+    await startGame(page)
 
     await page.getByRole('button', { name: 'Menu' }).click()
 

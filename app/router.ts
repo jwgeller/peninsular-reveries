@@ -1,13 +1,13 @@
 import { createRouter } from '@remix-run/fetch-router'
 import { routes } from './routes.js'
 import { attributionsAction } from './controllers/attributions.js'
-import { chompersAction } from './controllers/chompers.js'
 import { gameInfoAction } from './controllers/game-info.js'
 import { homeAction } from './controllers/home.js'
-import { missionOrbitAction } from './controllers/mission-orbit.js'
 import { notFoundAction } from './controllers/not-found.js'
-import { pixelPassportAction } from './controllers/pixel-passport.js'
-import { superWordAction } from './controllers/super-word.js'
+import { chompersAction } from '../games/chompers/controller.js'
+import { missionOrbitAction } from '../games/mission-orbit/controller.js'
+import { pixelPassportAction } from '../games/pixel-passport/controller.js'
+import { superWordAction } from '../games/super-word/controller.js'
 
 export function createAppRouter() {
   const router = createRouter()

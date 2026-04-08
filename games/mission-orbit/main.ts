@@ -28,8 +28,8 @@ import {
   playSceneChime,
   playMissionCompleteSound,
 } from './sounds.js'
-import { setupTabbedModal } from '../modal.js'
-import { bindMusicToggle, bindSfxToggle, bindReduceMotionToggle } from '../preferences.js'
+import { setupTabbedModal } from '../../client/modal.js'
+import { bindMusicToggle, bindSfxToggle, bindReduceMotionToggle } from '../../client/preferences.js'
 import { setupInput, type InputCallbacks } from './input.js'
 
 // State

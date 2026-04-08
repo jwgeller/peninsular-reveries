@@ -27,10 +27,6 @@ const ctx = await esbuild.context({
     'client/shell.ts',
     'client/home.ts',
     'client/404.ts',
-    'client/mission-orbit/main.ts',
-    'client/super-word/main.ts',
-    'client/chompers/main.ts',
-    'client/pixel-passport/main.ts',
   ],
   bundle: true,
   outdir: esbuildOutdir,
@@ -39,7 +35,23 @@ const ctx = await esbuild.context({
   sourcemap: true,
 })
 
+const gameCtx = await esbuild.context({
+  entryPoints: [
+    'games/mission-orbit/main.ts',
+    'games/super-word/main.ts',
+    'games/chompers/main.ts',
+    'games/pixel-passport/main.ts',
+  ],
+  bundle: true,
+  outbase: 'games',
+  outdir: esbuildOutdir,
+  format: 'esm',
+  target: 'es2022',
+  sourcemap: true,
+})
+
 await ctx.watch()
+await gameCtx.watch()
 console.log('esbuild watching client code...')
 
 // ── SSE clients for live reload ───────────────────────────
@@ -47,7 +59,7 @@ const sseClients = new Set<http.ServerResponse>()
 
 // Watch for source changes to trigger reload
 const { watch } = await import('node:fs')
-for (const dir of ['app', 'client', 'public']) {
+for (const dir of ['app', 'client', 'games', 'public']) {
   watch(dir, { recursive: true }, () => {
     for (const client of sseClients) {
       client.write('data: change\n\n')

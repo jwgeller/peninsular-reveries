@@ -20,7 +20,7 @@ import {
   renderWinScreen,
   setCheckButtonEnabled,
 } from './renderer.js'
-import { setupTabbedModal } from '../modal.js'
+import { setupTabbedModal } from '../../client/modal.js'
 import { setupInput } from './input.js'
 import type { InputCallbacks } from './input.js'
 import {
@@ -54,7 +54,7 @@ import {
   ensureAudioUnlocked,
   syncMusicPlayback,
 } from './sounds.js'
-import { bindMusicToggle, bindSfxToggle, bindReduceMotionToggle } from '../preferences.js'
+import { bindMusicToggle, bindSfxToggle, bindReduceMotionToggle } from '../../client/preferences.js'
 
 const DEFAULT_DIFFICULTY: Difficulty = 'hero'
 
@@ -119,25 +119,18 @@ function onStartGame(): void {
   pendingFlightIndices.clear()
   gameState = createInitialState(activePuzzles.length, false)
 
-  // Show the game screen first, then render the scene once the browser
-  // has committed layout and the canvas has real dimensions.
-  // Double-rAF ensures post-layout; the follow-up re-render handles iOS
-  // Safari's canvas emoji warm-up (first fillText with emoji fonts may
-  // produce invisible glyphs until the font is primed).
+  // Show the game screen, then render once the browser has
+  // committed layout and the canvas has real dimensions.
   showScreen('game-screen')
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      refreshGameScreen()
-      syncMusicPlayback()
-      announceNextPuzzle(
-        getState().currentPuzzleIndex + 1,
-        activePuzzles.length,
-        currentPuzzle().prompt,
-      )
-      moveFocusToFirstSceneItem(300)
-      // Re-render after one more frame to catch emoji font warm-up on iOS
-      requestAnimationFrame(() => refreshGameScreen())
-    })
+    refreshGameScreen()
+    syncMusicPlayback()
+    announceNextPuzzle(
+      getState().currentPuzzleIndex + 1,
+      activePuzzles.length,
+      currentPuzzle().prompt,
+    )
+    moveFocusToFirstSceneItem(300)
   })
 }
 
