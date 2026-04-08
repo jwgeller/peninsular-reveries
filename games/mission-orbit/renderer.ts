@@ -1,4 +1,7 @@
 import { SCENES, type MissionState } from './types.js'
+import { isReducedMotion } from './animations.js'
+
+let _lastContinuePhase = ''
 
 export function renderScene(state: MissionState): void {
   const scene = SCENES[state.sceneIndex]
@@ -24,6 +27,24 @@ export function renderNarrativePane(state: MissionState): void {
     } else {
       promptEl.textContent = ''
       promptEl.setAttribute('hidden', '')
+    }
+  }
+
+  // Continue prompt: shown during briefing and cinematic phases
+  const continueEl = document.querySelector<HTMLElement>('.continue-prompt')
+  if (continueEl) {
+    const wantContinue = state.scenePhase === 'briefing' || state.scenePhase === 'cinematic'
+    if (!wantContinue) {
+      continueEl.classList.remove('continue-visible')
+      _lastContinuePhase = ''
+    } else if (_lastContinuePhase !== state.scenePhase) {
+      // Phase just changed to briefing or cinematic — restart animation/delay
+      continueEl.classList.remove('continue-visible')
+      if (!isReducedMotion()) {
+        void continueEl.offsetWidth // force reflow to reset transition
+      }
+      continueEl.classList.add('continue-visible')
+      _lastContinuePhase = state.scenePhase
     }
   }
 }

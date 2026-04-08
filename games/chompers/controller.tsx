@@ -200,27 +200,105 @@ export async function chompersAction() {
             <div id="scene-items" className="scene-items"></div>
 
             {/* Frenzy NPC hippos (hidden until frenzy mode active) */}
-            <div className="hippo npc-hippo" id="npc-hippo-0" hidden aria-hidden="true"></div>
-            <div className="hippo npc-hippo" id="npc-hippo-1" hidden aria-hidden="true"></div>
-            <div className="hippo npc-hippo" id="npc-hippo-2" hidden aria-hidden="true"></div>
-            <div className="hippo npc-hippo" id="npc-hippo-3" hidden aria-hidden="true"></div>
-            <div className="hippo npc-hippo" id="npc-hippo-4" hidden aria-hidden="true"></div>
+            <div className="npc-hippo" id="npc-hippo-0" hidden aria-hidden="true">
+              <div className="hippo-head">
+                <div className="hippo-ear-left"></div>
+                <div className="hippo-ear-right"></div>
+                <div className="hippo-eye-left"></div>
+                <div className="hippo-eye-right"></div>
+                <div className="hippo-nostril-left"></div>
+                <div className="hippo-nostril-right"></div>
+                <div className="hippo-jaw">
+                  <div className="hippo-tooth-left"></div>
+                  <div className="hippo-tooth-right"></div>
+                </div>
+              </div>
+              <div className="hippo-neck"></div>
+              <div className="hippo-body"></div>
+            </div>
+            <div className="npc-hippo" id="npc-hippo-1" hidden aria-hidden="true">
+              <div className="hippo-head">
+                <div className="hippo-ear-left"></div>
+                <div className="hippo-ear-right"></div>
+                <div className="hippo-eye-left"></div>
+                <div className="hippo-eye-right"></div>
+                <div className="hippo-nostril-left"></div>
+                <div className="hippo-nostril-right"></div>
+                <div className="hippo-jaw">
+                  <div className="hippo-tooth-left"></div>
+                  <div className="hippo-tooth-right"></div>
+                </div>
+              </div>
+              <div className="hippo-neck"></div>
+              <div className="hippo-body"></div>
+            </div>
+            <div className="npc-hippo" id="npc-hippo-2" hidden aria-hidden="true">
+              <div className="hippo-head">
+                <div className="hippo-ear-left"></div>
+                <div className="hippo-ear-right"></div>
+                <div className="hippo-eye-left"></div>
+                <div className="hippo-eye-right"></div>
+                <div className="hippo-nostril-left"></div>
+                <div className="hippo-nostril-right"></div>
+                <div className="hippo-jaw">
+                  <div className="hippo-tooth-left"></div>
+                  <div className="hippo-tooth-right"></div>
+                </div>
+              </div>
+              <div className="hippo-neck"></div>
+              <div className="hippo-body"></div>
+            </div>
+            <div className="npc-hippo" id="npc-hippo-3" hidden aria-hidden="true">
+              <div className="hippo-head">
+                <div className="hippo-ear-left"></div>
+                <div className="hippo-ear-right"></div>
+                <div className="hippo-eye-left"></div>
+                <div className="hippo-eye-right"></div>
+                <div className="hippo-nostril-left"></div>
+                <div className="hippo-nostril-right"></div>
+                <div className="hippo-jaw">
+                  <div className="hippo-tooth-left"></div>
+                  <div className="hippo-tooth-right"></div>
+                </div>
+              </div>
+              <div className="hippo-neck"></div>
+              <div className="hippo-body"></div>
+            </div>
+            <div className="npc-hippo" id="npc-hippo-4" hidden aria-hidden="true">
+              <div className="hippo-head">
+                <div className="hippo-ear-left"></div>
+                <div className="hippo-ear-right"></div>
+                <div className="hippo-eye-left"></div>
+                <div className="hippo-eye-right"></div>
+                <div className="hippo-nostril-left"></div>
+                <div className="hippo-nostril-right"></div>
+                <div className="hippo-jaw">
+                  <div className="hippo-tooth-left"></div>
+                  <div className="hippo-tooth-right"></div>
+                </div>
+              </div>
+              <div className="hippo-neck"></div>
+              <div className="hippo-body"></div>
+            </div>
 
             {/* Frenzy scoreboard */}
             <div id="frenzy-scoreboard" hidden aria-hidden="true"></div>
 
             <div id="hippo" aria-hidden="true">
-              <div className="hippo-ear hippo-ear-left"></div>
-              <div className="hippo-ear hippo-ear-right"></div>
-              <div className="hippo-body"></div>
-              <div className="hippo-neck">
-                <img
-                  src={withBasePath('/chompers/hippo-head.svg', siteBasePath)}
-                  className="hippo-head"
-                  alt=""
-                  aria-hidden="true"
-                />
+              <div className="hippo-head">
+                <div className="hippo-ear-left"></div>
+                <div className="hippo-ear-right"></div>
+                <div className="hippo-eye-left"></div>
+                <div className="hippo-eye-right"></div>
+                <div className="hippo-nostril-left"></div>
+                <div className="hippo-nostril-right"></div>
+                <div className="hippo-jaw">
+                  <div className="hippo-tooth-left"></div>
+                  <div className="hippo-tooth-right"></div>
+                </div>
               </div>
+              <div className="hippo-neck"></div>
+              <div className="hippo-body"></div>
             </div>
 
             <div id="effect-layer" aria-hidden="true"></div>

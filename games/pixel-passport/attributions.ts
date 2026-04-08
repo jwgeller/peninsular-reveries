@@ -9,7 +9,7 @@ export const pixelPassportAttribution: GameAttribution = {
     {
       title: 'Pixel Passport globe, destination scenes, Pip sprite, and vehicle sprites',
       type: 'illustration',
-      usedIn: 'Pixel Passport title screen, globe hub, travel scenes, destination scenes, room shelf, and mystery screens',
+      usedIn: 'Pixel Passport title screen, globe hub, travel scenes, destination scenes, and room shelf',
       creator: 'Peninsular Reveries',
       source: 'Original DOM-rendered pixel art defined in the repository',
       license: repositoryCodeLicense,

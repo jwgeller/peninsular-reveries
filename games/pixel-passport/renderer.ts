@@ -1,5 +1,5 @@
 import { GLOBE_ART, PIP_SPRITES, VEHICLE_SPRITES } from './art.js'
-import { DESTINATIONS, getDestination, pickNextMysteryTarget } from './destinations.js'
+import { DESTINATIONS, getDestination } from './destinations.js'
 import type { Destination, DestinationVisualTheme, GamePhase, GameState, PixelArt, PipPose, VehiclePose } from './types.js'
 
 let activeScreenId = 'start-screen'
@@ -24,8 +24,7 @@ function screenIdForPhase(phase: GamePhase): string {
     case 'explore': return 'explore-screen'
     case 'memory-collect': return 'memory-screen'
     case 'room': return 'room-screen'
-    case 'mystery-clue': return 'mystery-screen'
-    case 'mystery-result': return 'mystery-result-screen'
+
   }
 }
 
@@ -133,13 +132,10 @@ function renderTitle(state: GameState): void {
   renderPip('title-pip', 'wave')
 
   element('title-memory-count').textContent = formatCount(state.collectedMemories.length, 'memory')
-  element('title-mystery-count').textContent = formatCount(state.mysteryCompleted.length, 'mystery')
 
-  const guideText = state.mysteryCompleted.length >= DESTINATIONS.length
-    ? 'Pip says: We solved them all!'
-    : state.collectedMemories.length > 0
-      ? 'Pip says: Ready for another trip?'
-      : 'Pip says: Let\'s roll!'
+  const guideText = state.collectedMemories.length > 0
+    ? 'Pip says: Ready for another trip?'
+    : 'Pip says: Let\'s roll!'
   element('title-guide-text').textContent = guideText
 }
 
@@ -155,7 +151,6 @@ function renderGlobe(state: GameState): void {
     : 'Pick any place for your first ride.'
   element('globe-selected-copy').textContent = `${selected.name}, ${selected.country}`
   element('globe-memory-pill').textContent = formatCount(state.collectedMemories.length, 'memory')
-  element('globe-mystery-pill').textContent = formatCount(state.mysteryCompleted.length, 'mystery')
 }
 
 function renderTravel(state: GameState): void {
@@ -258,10 +253,7 @@ function renderMemory(state: GameState): void {
     ? `Pip says: We found a ${destination.memoryLabel}!`
     : `Pip says: We still remember the ${destination.memoryLabel}.`
 
-  const nextMystery = pickNextMysteryTarget(state.mysteryCompleted)
-  element<HTMLButtonElement>('memory-continue-btn').textContent = state.mode === 'mystery' && nextMystery
-    ? 'Next mystery →'
-    : 'Back to globe →'
+  element<HTMLButtonElement>('memory-continue-btn').textContent = 'Back to globe →'
 }
 
 function renderRoom(state: GameState): void {
@@ -284,48 +276,6 @@ function renderRoom(state: GameState): void {
   }
 }
 
-function renderMysteryClue(state: GameState): void {
-  const destination = getDestination(state.mysteryTarget)
-  if (!destination) return
-
-  ensureGlobeTrack('mystery-map-track')
-  updateMarkerGroup('mystery', state)
-  renderPip('mystery-pip', 'think')
-
-  element('mystery-attempt-pill').textContent = `Clue ${state.mysteryClueIndex + 1} of 3`
-  element('mystery-clue-text').textContent = destination.clues[state.mysteryClueIndex] ?? destination.clues[0]
-  element('mystery-selected-copy').textContent = `Maybe it is ${selectedDestination(state).name}?`
-}
-
-function renderMysteryResult(state: GameState): void {
-  const destination = getDestination(state.mysteryTarget)
-  if (!destination) return
-
-  renderPip('mystery-result-pip', state.lastGuessCorrect || state.revealedDestination ? 'cheer' : 'think')
-
-  const heading = element('mystery-result-heading')
-  const copy = element('mystery-result-copy')
-  const button = element<HTMLButtonElement>('mystery-result-btn')
-
-  if (state.lastGuessCorrect) {
-    heading.textContent = 'You got it!'
-    copy.textContent = `Yes! The clue was ${destination.name}. Let's ride there.`
-    button.textContent = 'Ride there →'
-    return
-  }
-
-  if (state.revealedDestination) {
-    heading.textContent = 'There it is!'
-    copy.textContent = `This clue was ${destination.name}. Let's visit it together.`
-    button.textContent = 'Ride there →'
-    return
-  }
-
-  heading.textContent = 'Not yet!'
-  copy.textContent = 'Pip found another clue.'
-  button.textContent = 'Next clue →'
-}
-
 export function renderGame(state: GameState): void {
   renderTitle(state)
   renderGlobe(state)
@@ -333,8 +283,6 @@ export function renderGame(state: GameState): void {
   renderExplore(state)
   renderMemory(state)
   renderRoom(state)
-  renderMysteryClue(state)
-  renderMysteryResult(state)
 }
 
 export function showScreen(screenId: string): void {
@@ -358,8 +306,7 @@ export function syncScreenForState(state: GameState): void {
   showScreen(screenIdForPhase(state.phase))
 }
 
-export function focusSelectedMarker(phase: 'globe' | 'mystery-clue'): void {
-  const group = phase === 'globe' ? 'globe' : 'mystery'
-  const button = document.querySelector<HTMLButtonElement>(`#${group}-screen .destination-marker.is-selected`)
+export function focusSelectedMarker(): void {
+  const button = document.querySelector<HTMLButtonElement>('#globe-screen .destination-marker.is-selected')
   button?.focus()
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { DESTINATIONS, getDestination, getTransportType, pickNextMysteryTarget } from './destinations'
+import { DESTINATIONS, getDestination, getTransportType } from './destinations'
 import { DESTINATION_IDS } from './types'
 
 test('destination data stays internally consistent', () => {
@@ -10,7 +10,6 @@ test('destination data stays internally consistent', () => {
     assert.ok(destination.name.length > 0)
     assert.ok(destination.country.length > 0)
     assert.equal(destination.facts.length, 3)
-    assert.equal(destination.clues.length, 3)
     assert.equal(destination.scene.pixels.length, destination.scene.width * destination.scene.height)
     assert.ok(destination.scene.pixels.every((pixel) => pixel >= 0 && pixel < destination.scene.palette.length))
     assert.ok(destination.scene.pixels.filter((pixel) => pixel !== 0).length >= 45)
@@ -42,12 +41,6 @@ test('transport selection reaches every vehicle type', () => {
   assert.equal(getTransportType(cairo, nairobi), 'train')
   assert.equal(getTransportType(newYork, rio), 'boat')
   assert.equal(getTransportType(tokyo, rio), 'plane')
-})
-
-test('mystery targeting advances in a stable order', () => {
-  assert.equal(pickNextMysteryTarget([]), 'paris')
-  assert.equal(pickNextMysteryTarget(['paris', 'cairo']), 'tokyo')
-  assert.equal(pickNextMysteryTarget(DESTINATIONS.map((destination) => destination.id)), null)
 })
 
 test('every destination has a non-empty memoryEmoji', () => {

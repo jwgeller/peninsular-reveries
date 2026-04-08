@@ -8,15 +8,12 @@ declare global {
 
 export interface InputCallbacks {
   onStartExplore: () => void
-  onStartMystery: () => void
   onSelectDestination: (destinationId: DestinationId) => void
   onAdvanceFact: () => void
   onContinueMemory: () => void
   onEnterRoom: () => void
   onExitRoom: () => void
   onNavigateGlobe: (direction: NavigationDirection) => void
-  onSubmitGuess: (destinationId: DestinationId) => void
-  onMysteryResultContinue: () => void
 }
 
 function isModalOpen(): boolean {
@@ -35,13 +32,10 @@ function currentSelectedDestination(state: GameState): DestinationId {
 
 export function setupInput(getState: () => GameState, callbacks: InputCallbacks): void {
   document.getElementById('start-explore-btn')?.addEventListener('click', callbacks.onStartExplore)
-  document.getElementById('start-mystery-btn')?.addEventListener('click', callbacks.onStartMystery)
   document.getElementById('globe-room-btn')?.addEventListener('click', callbacks.onEnterRoom)
-  document.getElementById('globe-mystery-btn')?.addEventListener('click', callbacks.onStartMystery)
   document.getElementById('room-back-btn')?.addEventListener('click', callbacks.onExitRoom)
   document.getElementById('explore-next-btn')?.addEventListener('click', callbacks.onAdvanceFact)
   document.getElementById('memory-continue-btn')?.addEventListener('click', callbacks.onContinueMemory)
-  document.getElementById('mystery-result-btn')?.addEventListener('click', callbacks.onMysteryResultContinue)
 
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-destination-id]')) {
     button.addEventListener('click', () => {
@@ -49,11 +43,6 @@ export function setupInput(getState: () => GameState, callbacks: InputCallbacks)
       if (!destinationId) return
 
       const state = getState()
-      if (state.phase === 'mystery-clue') {
-        callbacks.onSubmitGuess(destinationId)
-        return
-      }
-
       if (state.phase === 'globe') {
         callbacks.onSelectDestination(destinationId)
       }
@@ -70,7 +59,7 @@ export function setupInput(getState: () => GameState, callbacks: InputCallbacks)
     if (isModalOpen()) return
 
     const state = getState()
-    const inGlobe = state.phase === 'globe' || state.phase === 'mystery-clue'
+    const inGlobe = state.phase === 'globe'
     const interactiveTarget = isInteractiveTarget(event.target)
 
     if (inGlobe && (event.key === 'ArrowRight' || event.key === 'ArrowDown')) {
@@ -98,12 +87,6 @@ export function setupInput(getState: () => GameState, callbacks: InputCallbacks)
         return
       }
 
-      if (state.phase === 'mystery-clue') {
-        event.preventDefault()
-        callbacks.onSubmitGuess(currentSelectedDestination(state))
-        return
-      }
-
       if (state.phase === 'explore') {
         event.preventDefault()
         callbacks.onAdvanceFact()
@@ -121,11 +104,6 @@ export function setupInput(getState: () => GameState, callbacks: InputCallbacks)
         callbacks.onExitRoom()
         return
       }
-
-      if (state.phase === 'mystery-result') {
-        event.preventDefault()
-        callbacks.onMysteryResultContinue()
-      }
     }
   })
 
@@ -142,11 +120,11 @@ export function setupInput(getState: () => GameState, callbacks: InputCallbacks)
     const actionPressed = Boolean(pad?.buttons[0]?.pressed)
     const startPressed = Boolean(pad?.buttons[9]?.pressed)
 
-    if ((state.phase === 'globe' || state.phase === 'mystery-clue') && rightPressed && !previousRightPressed) {
+    if (state.phase === 'globe' && rightPressed && !previousRightPressed) {
       callbacks.onNavigateGlobe('next')
     }
 
-    if ((state.phase === 'globe' || state.phase === 'mystery-clue') && leftPressed && !previousLeftPressed) {
+    if (state.phase === 'globe' && leftPressed && !previousLeftPressed) {
       callbacks.onNavigateGlobe('previous')
     }
 
@@ -155,16 +133,12 @@ export function setupInput(getState: () => GameState, callbacks: InputCallbacks)
         callbacks.onStartExplore()
       } else if (state.phase === 'globe') {
         callbacks.onSelectDestination(currentSelectedDestination(state))
-      } else if (state.phase === 'mystery-clue') {
-        callbacks.onSubmitGuess(currentSelectedDestination(state))
       } else if (state.phase === 'explore') {
         callbacks.onAdvanceFact()
       } else if (state.phase === 'memory-collect') {
         callbacks.onContinueMemory()
       } else if (state.phase === 'room') {
         callbacks.onExitRoom()
-      } else if (state.phase === 'mystery-result') {
-        callbacks.onMysteryResultContinue()
       }
     }
 

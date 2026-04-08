@@ -1,11 +1,4 @@
-import { bindReduceMotionToggle } from '../../client/preferences.js'
 import type { FrenzyState, GameState, NpcHippo } from './types.js'
-
-export interface SettingsModalController {
-  isOpen: () => boolean
-  open: (trigger?: HTMLElement | null) => void
-  close: () => void
-}
 
 const EMOJI_NAMES: Record<string, string> = {
   '🍒': 'Cherry',
@@ -71,9 +64,11 @@ export function renderHippo(state: GameState): void {
   const hippoEl = document.getElementById('hippo')
   if (!hippoEl) return
 
-  hippoEl.style.setProperty('--neck-extension', String(state.hippo.neckExtension))
-  hippoEl.style.setProperty('--neck-angle', '0deg')
+  const color = state.frenzy?.config.playerColor ?? '#8BC34A'
+  hippoEl.style.setProperty('--hippo-color', color)
+  hippoEl.style.setProperty('--neck-height', '20px')
   hippoEl.style.setProperty('--jaw-angle', '0')
+  hippoEl.style.left = '50%'
 }
 
 export function renderHUD(state: GameState): void {
@@ -129,109 +124,6 @@ export function renderAll(state: GameState): void {
   renderScene(state)
 }
 
-function getFocusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
-  ).filter((element) => !element.hasAttribute('disabled') && !element.getAttribute('aria-hidden'))
-}
-
-export function setupZoomReset(): void {
-  const buttons = document.querySelectorAll<HTMLElement>('[aria-label="Reset zoom"]')
-  for (const btn of buttons) {
-    btn.addEventListener('click', () => {
-      const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]')
-      if (!meta) return
-      const original = meta.content
-      meta.content = `${original}, maximum-scale=1`
-      requestAnimationFrame(() => {
-        meta.content = original
-      })
-    })
-  }
-}
-
-export function setupSettingsModal(): SettingsModalController {
-  setupZoomReset()
-  const modal = document.getElementById('settings-modal') as HTMLElement | null
-  const closeButton = document.getElementById('settings-close') as HTMLButtonElement | null
-  const triggers = Array.from(document.querySelectorAll<HTMLElement>('[data-settings-open="true"]'))
-  const reduceMotionToggle = document.getElementById('reduce-motion-toggle') as HTMLInputElement | null
-  const reduceMotionHelp = document.getElementById('reduce-motion-help') as HTMLElement | null
-
-  let open = false
-  let lastFocused: HTMLElement | null = null
-
-  const setExpanded = (expanded: boolean) => {
-    for (const trigger of triggers) {
-      trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false')
-    }
-  }
-
-  const close = () => {
-    if (!open || !modal) return
-    open = false
-    modal.hidden = true
-    document.body.classList.remove('modal-open')
-    setExpanded(false)
-    lastFocused?.focus()
-  }
-
-  const openModal = (trigger?: HTMLElement | null) => {
-    if (open || !modal) return
-    open = true
-    lastFocused = trigger ?? (document.activeElement as HTMLElement | null)
-    modal.hidden = false
-    document.body.classList.add('modal-open')
-    setExpanded(true)
-    if (closeButton) requestAnimationFrame(() => closeButton.focus())
-  }
-
-  for (const trigger of triggers) {
-    trigger.addEventListener('click', () => openModal(trigger))
-  }
-
-  closeButton?.addEventListener('click', close)
-
-  bindReduceMotionToggle(reduceMotionToggle, reduceMotionHelp)
-
-  if (modal) {
-    modal.addEventListener('click', (event) => {
-      if (event.target === modal) close()
-    })
-
-    modal.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        close()
-        return
-      }
-
-      if (event.key !== 'Tab') return
-
-      const focusable = getFocusableElements(modal)
-      if (focusable.length === 0) return
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      const active = document.activeElement as HTMLElement | null
-
-      if (event.shiftKey && active === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    })
-  }
-
-  return {
-    isOpen: () => open,
-    open: openModal,
-    close,
-  }
-}
-
 // ── Frenzy render helpers ──────────────────────────────────────────────────────
 
 export function renderNpcHippos(npcs: NpcHippo[]): void {
@@ -244,7 +136,6 @@ export function renderNpcHippos(npcs: NpcHippo[]): void {
       el.removeAttribute('aria-hidden')
       el.style.setProperty('--hippo-color', npc.color)
       el.style.setProperty('--hippo-x', `${npc.position.x}%`)
-      el.style.setProperty('--hippo-y', `${npc.position.y}%`)
       el.dataset.target = String(npc.targetFruitIndex ?? '')
     } else {
       el.hidden = true

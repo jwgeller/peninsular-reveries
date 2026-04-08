@@ -10,7 +10,7 @@ export function animateHippoChomp(
   isCorrect: boolean,
 ): Promise<void> {
   if (isReducedMotion()) {
-    // Reduced motion: jaw-only animation, no neck extension
+    // Reduced motion: jaw-only animation, no slide or neck extend
     return new Promise<void>((resolve) => {
       hippoEl.style.setProperty('--jaw-angle', '1')
       window.setTimeout(() => {
@@ -26,55 +26,51 @@ export function animateHippoChomp(
   }
 
   return new Promise<void>((resolve) => {
-    // Calculate angle toward target item
-    let angle = 0
-    let neckExt = 0.8 // default extension
+    const arenaEl = document.getElementById('game-arena')
+    let targetXPct = 50
+    let neckH = 20
 
-    if (targetEl) {
-      const hippoRect = hippoEl.getBoundingClientRect()
+    if (arenaEl && targetEl) {
+      const arenaRect = arenaEl.getBoundingClientRect()
       const targetRect = targetEl.getBoundingClientRect()
-      const hippoX = hippoRect.right
-      const hippoY = hippoRect.top + hippoRect.height * 0.5
-      const targetX = targetRect.left + targetRect.width / 2
-      const targetY = targetRect.top + targetRect.height / 2
-      const dx = targetX - hippoX
-      const dy = targetY - hippoY
-      angle = Math.atan2(dy, Math.max(dx, 1)) * (180 / Math.PI)
+      const targetCenterX = targetRect.left + targetRect.width / 2
+      const targetCenterY = targetRect.top + targetRect.height / 2
+      targetXPct = ((targetCenterX - arenaRect.left) / arenaRect.width) * 100
 
-      // Scale neck extension to distance, normalized by arena width
-      const arenaEl = document.getElementById('game-arena')
-      if (arenaEl) {
-        const arenaRect = arenaEl.getBoundingClientRect()
-        const reach = (targetX - hippoX) / (arenaRect.right - hippoX)
-        neckExt = Math.min(Math.max(reach * 1.5, 0.2), 1.8)
-      }
+      // Neck height: distance from arena bottom to target, minus body+head heights
+      const bodyEl = hippoEl.querySelector<HTMLElement>('.hippo-body')
+      const headEl = hippoEl.querySelector<HTMLElement>('.hippo-head')
+      const bodyH = bodyEl?.offsetHeight ?? 40
+      const headH = headEl?.offsetHeight ?? 48
+      neckH = Math.max(20, arenaRect.bottom - targetCenterY - bodyH - headH / 2)
     }
 
-    hippoEl.style.setProperty('--neck-angle', `${angle}deg`)
+    // Phase 1: slide to align under target (200ms CSS transition)
+    hippoEl.style.left = `${targetXPct}%`
 
-    // Phase 1: extend neck and open jaw over 300ms
-    hippoEl.style.setProperty('--neck-extension', String(neckExt))
-    hippoEl.style.setProperty('--jaw-angle', '1')
+    // Phase 2: after slide, extend neck + open jaw (300ms neck transition)
+    window.setTimeout(() => {
+      hippoEl.style.setProperty('--neck-height', `${neckH}px`)
+      hippoEl.style.setProperty('--jaw-angle', '1')
+    }, 200)
 
-    // Phase 2: close jaw at 400ms
+    // Phase 3: close jaw at 500ms
     window.setTimeout(() => {
       hippoEl.style.setProperty('--jaw-angle', '0')
-    }, 400)
+    }, 500)
 
-    // Phase 3: retract neck at 600ms
+    // Phase 4: retract neck at 700ms, apply outcome class
     window.setTimeout(() => {
-      hippoEl.style.setProperty('--neck-extension', '0')
-
+      hippoEl.style.setProperty('--neck-height', '20px')
       const outcomeClass = isCorrect ? 'hippo-chomp-correct' : 'hippo-chomp-wrong'
       hippoEl.classList.add(outcomeClass)
 
-      // Phase 4: remove outcome class and resolve at ~1200ms total
+      // Phase 5: remove outcome class and resolve
       window.setTimeout(() => {
         hippoEl.classList.remove(outcomeClass)
-        hippoEl.style.setProperty('--neck-angle', '0deg')
         resolve()
       }, 600)
-    }, 600)
+    }, 700)
   })
 }
 

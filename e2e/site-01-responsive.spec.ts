@@ -128,14 +128,10 @@ test.describe('SITE-01: Responsive layout', () => {
     await page.getByRole('button', { name: /begin mission/i }).click();
     await expect(page.locator('#game-screen')).toHaveClass(/active/);
 
-    // Wait for the interaction phase so tap-btn becomes visible
-    await page.waitForFunction(
-      () => {
-        const btn = document.getElementById('tap-btn');
-        return btn && !btn.hasAttribute('hidden');
-      },
-      { timeout: 8000 }
-    );
+    // Advance briefing → cinematic → interaction so tap-btn becomes visible
+    await page.locator('#narrative-pane').click();
+    await page.locator('#narrative-pane').click();
+    await expect(page.locator('#tap-btn')).toBeVisible();
 
     const controlsFit = await page.evaluate(() => {
       const narrativePane = document.getElementById('narrative-pane');

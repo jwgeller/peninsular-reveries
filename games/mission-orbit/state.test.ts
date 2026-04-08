@@ -115,22 +115,6 @@ describe('tickState — hold progress', () => {
   })
 })
 
-describe('tickState — briefing auto-advance', () => {
-  test('briefing advances to cinematic after 2500ms', () => {
-    let s = createInitialState()
-    strictEqual(s.scenePhase, 'briefing')
-    s = tickState(s, 2500)
-    strictEqual(s.scenePhase, 'cinematic')
-    strictEqual(s.elapsedMs, 0)
-  })
-
-  test('briefing does not advance before 2500ms', () => {
-    let s = createInitialState()
-    s = tickState(s, 2499)
-    strictEqual(s.scenePhase, 'briefing')
-  })
-})
-
 describe('isSceneComplete / isMissionComplete', () => {
   test('isSceneComplete returns false initially', () => {
     const s = createInitialState()
@@ -234,17 +218,3 @@ describe('isSceneComplete / isMissionComplete', () => {
   })
 })
 
-describe('tickState — cinematic auto-advance', () => {
-  test('cinematic advances to interaction after 3000ms', () => {
-    let s: MissionState = { ...createInitialState(), scenePhase: 'cinematic' as const }
-    s = tickState(s, 3000)
-    strictEqual(s.scenePhase, 'interaction')
-    strictEqual(s.elapsedMs, 0)
-  })
-
-  test('cinematic does not advance before 3000ms', () => {
-    let s: MissionState = { ...createInitialState(), scenePhase: 'cinematic' as const }
-    s = tickState(s, 2999)
-    strictEqual(s.scenePhase, 'cinematic')
-  })
-})

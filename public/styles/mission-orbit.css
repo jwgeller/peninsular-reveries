@@ -319,6 +319,13 @@
   }
 }
 
+/* Landscape phone: give narrative slightly more room */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mission-content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* Cinematic pane ============================================== */
 
 #cinematic-pane {
@@ -393,12 +400,44 @@
   font-weight: 700;
   color: #7ec8f0;
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .briefing-text {
   font-size: clamp(0.875rem, 1.8vw, 1rem);
   line-height: 1.6;
   margin: 0;
+  overflow-wrap: break-word;
+}
+
+/* Continue prompt ============================================= */
+
+.continue-prompt {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--mission-muted);
+  letter-spacing: 0.04em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease 800ms;
+}
+
+.continue-prompt.continue-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .continue-prompt {
+    transition: none;
+  }
+}
+
+[data-reduce-motion='reduce'] .continue-prompt {
+  transition: none !important;
 }
 
 .interaction-prompt {
@@ -428,6 +467,8 @@
   cursor: pointer;
   touch-action: manipulation;
   transition: transform 0.1s, background 0.1s;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .tap-btn:active {
@@ -441,16 +482,18 @@
 
 .tap-count-display {
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #7ec8f0;
 }
 
 .hold-progress {
   width: 100%;
   height: 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 0.5rem;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-sizing: border-box;
 }
 
 .hold-progress-bar {
@@ -508,6 +551,17 @@
 @keyframes moFlash {
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(2); }
+}
+
+@keyframes breathe {
+  from { opacity: 1; }
+  to   { opacity: 0.82; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-reduce-motion='reduce']) #cinematic-pane {
+    animation: breathe 9s ease-in-out infinite alternate;
+  }
 }
 
 /* Settings modal ============================================== */

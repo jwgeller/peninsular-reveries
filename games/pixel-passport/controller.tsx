@@ -12,13 +12,13 @@ const pixelPassportModalOverlayStyles = {
   backdropFilter: 'blur(8px)',
 }
 
-function renderMarkerButtons(group: 'globe' | 'mystery') {
+function renderMarkerButtons() {
   return DESTINATIONS.map((destination) => (
     <button
-      id={`${group}-marker-${destination.id}`}
+      id={`globe-marker-${destination.id}`}
       className="destination-marker"
       data-destination-id={destination.id}
-      data-marker-group={group}
+      data-marker-group="globe"
       style={`--marker-color:${destination.markerColor};left:${destination.coords.x}%;top:${destination.coords.y}%;`}
       aria-label={destination.name}
       type="button"
@@ -36,7 +36,7 @@ export async function pixelPassportAction() {
   const html = await renderToString(
     <Document
       title="Pixel Passport"
-      description="Ride a magic bus around the world, learn simple facts, and solve kid-friendly destination mysteries."
+      description="Ride a magic bus around the world, learn simple facts about each place, and collect memories from every destination."
       path="/pixel-passport/"
       includeNav={false}
       includeFooter={false}
@@ -53,11 +53,10 @@ export async function pixelPassportAction() {
             <div className="start-copy">
               <p className="screen-kicker">Magic bus world trip</p>
               <h1 id="passport-title" className="passport-title">Pixel Passport</h1>
-              <p className="passport-subtitle">Spin the world. Find a place. Solve a clue. Save a memory.</p>
+              <p className="passport-subtitle">Spin the world. Find a place. Learn a fact. Save a memory.</p>
 
               <div className="title-stats" aria-label="Game progress">
                 <span id="title-memory-count" className="passport-pill">0 memories</span>
-                <span id="title-mystery-count" className="passport-pill">0 mysteries</span>
               </div>
 
               <div className="guide-card guide-card-title" aria-live="polite">
@@ -67,14 +66,13 @@ export async function pixelPassportAction() {
 
               <div className="start-actions">
                 <button id="start-explore-btn" className="passport-btn passport-btn-primary" type="button">Explore! <span aria-hidden="true">🌍</span></button>
-                <button id="start-mystery-btn" className="passport-btn passport-btn-secondary" type="button">Mystery! <span aria-hidden="true">🔍</span></button>
                 <button data-settings-open="true" className="passport-btn passport-btn-ghost" type="button" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>
               </div>
 
               <ul className="start-notes" aria-label="Quick tips">
-                <li>Pick a place and ride there.</li>
-                <li>Listen to Pip's short facts.</li>
-                <li>Solve clues in Mystery Mode.</li>
+                <li>Pick a place on the globe and ride there.</li>
+                <li>Listen to Pip's short facts at each stop.</li>
+                <li>Collect a memory from every place you visit.</li>
               </ul>
             </div>
 
@@ -94,13 +92,12 @@ export async function pixelPassportAction() {
               className="passport-topbar"
               headingId="globe-heading"
               leftContent={<>
-                <p className="screen-kicker">Explore Mode</p>
+                <p className="screen-kicker">Explore</p>
                 <h2 id="globe-heading" className="screen-title">Choose a place</h2>
                 <p id="globe-location-copy" className="screen-copy">Home base</p>
               </>}
               rightContent={<>
                 <GameHeaderPill value={<span id="globe-memory-pill">0 memories</span>} />
-                <GameHeaderPill value={<span id="globe-mystery-pill">0 mysteries</span>} />
               </>}
             />
 
@@ -109,7 +106,7 @@ export async function pixelPassportAction() {
                 <div className="globe-map-shell" aria-hidden="true">
                   <div id="globe-map-track" className="globe-map-track"></div>
                 </div>
-                <div id="globe-markers" className="destination-markers">{renderMarkerButtons('globe')}</div>
+                <div id="globe-markers" className="destination-markers">{renderMarkerButtons()}</div>
               </div>
 
               <div className="globe-side-panel">
@@ -119,8 +116,7 @@ export async function pixelPassportAction() {
                 </div>
 
                 <div className="globe-actions">
-                  <button id="globe-room-btn" className="passport-btn passport-btn-secondary" type="button">Room <span aria-hidden="true">🏠</span></button>
-                  <button id="globe-mystery-btn" className="passport-btn passport-btn-secondary" type="button">Mystery <span aria-hidden="true">🔍</span></button>
+                  <button id="globe-room-btn" className="passport-btn passport-btn-secondary" type="button">My Memories <span aria-hidden="true">🏠</span></button>
                   <button data-settings-open="true" className="passport-btn passport-btn-ghost" type="button" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>
                 </div>
               </div>
@@ -242,53 +238,6 @@ export async function pixelPassportAction() {
             </div>
           </div>
         </GameScreen>
-
-        <GameScreen id="mystery-screen" labelledBy="mystery-heading" padded>
-          <div className="mystery-shell passport-panel">
-            <GameHeader
-              className="passport-topbar"
-              headingId="mystery-heading"
-              leftContent={<>
-                <p className="screen-kicker">Mystery Mode</p>
-                <h2 id="mystery-heading" className="screen-title">Where on Earth?</h2>
-                <p id="mystery-attempt-pill" className="screen-copy">Clue 1 of 3</p>
-              </>}
-              rightContent={<button data-settings-open="true" className="passport-btn passport-btn-ghost passport-btn-small" type="button" aria-haspopup="dialog" aria-controls="settings-modal" aria-expanded="false">Menu</button>}
-            />
-
-            <div className="mystery-stage">
-              <div className="mystery-card">
-                <div id="mystery-pip" className="guide-sprite" aria-hidden="true"></div>
-                <p id="mystery-clue-text" className="guide-text">Pip has a clue for you.</p>
-              </div>
-
-              <div className="world-globe mystery-globe" role="group" aria-label="Mystery globe">
-                <div className="globe-map-shell" aria-hidden="true">
-                  <div id="mystery-map-track" className="globe-map-track"></div>
-                </div>
-                <div id="mystery-markers" className="destination-markers">{renderMarkerButtons('mystery')}</div>
-              </div>
-
-              <p id="mystery-selected-copy" className="screen-copy mystery-selected-copy">Tap the place you think fits the clue.</p>
-            </div>
-          </div>
-        </GameScreen>
-
-        <GameScreen id="mystery-result-screen" labelledBy="mystery-result-heading" padded>
-          <div className="result-shell passport-panel">
-            <p className="screen-kicker">Mystery result</p>
-            <h2 id="mystery-result-heading" className="screen-title">Let's see!</h2>
-
-            <div className="guide-card">
-              <div id="mystery-result-pip" className="guide-sprite" aria-hidden="true"></div>
-              <p id="mystery-result-copy" className="guide-text">Pip is checking the clue.</p>
-            </div>
-
-            <div className="screen-actions">
-              <button id="mystery-result-btn" className="passport-btn passport-btn-primary" type="button">Next clue <span aria-hidden="true">→</span></button>
-            </div>
-          </div>
-        </GameScreen>
       </div>
 
       <GameTabbedModal
@@ -307,10 +256,6 @@ export async function pixelPassportAction() {
               <li>Arrow keys or D-pad move between places.</li>
               <li>Enter, Space, or A picks the highlighted place.</li>
             </ul>
-          </SettingsSection>
-
-          <SettingsSection title="🌍 Modes">
-            <p>Explore Mode lets you roam the world. Mystery Mode gives you three clues and asks you to guess the place.</p>
           </SettingsSection>
 
           <SettingsSection title="Accessibility">
@@ -337,7 +282,7 @@ export async function pixelPassportAction() {
 
       <noscript>
         <div className="noscript-message">
-          <p>Pixel Passport needs JavaScript to spin the globe, ride the magic bus, and solve mysteries. Turn JavaScript on and reload to play.</p>
+          <p>Pixel Passport needs JavaScript to spin the globe and ride the magic bus. Turn JavaScript on and reload to play.</p>
         </div>
       </noscript>
     </Document>,

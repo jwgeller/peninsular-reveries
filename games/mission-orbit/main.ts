@@ -137,6 +137,13 @@ function onPlayAgain(): void {
   stopLoop()
 }
 
+function onAdvancePhase(): void {
+  if (state.scenePhase === 'briefing' || state.scenePhase === 'cinematic') {
+    state = advanceScenePhase(state)
+    announcePhase(state.sceneIndex, state.scenePhase)
+  }
+}
+
 const callbacks: InputCallbacks = {
   onStart,
   onTap,
@@ -146,6 +153,26 @@ const callbacks: InputCallbacks = {
   onPlayAgain,
 }
 setupInput(callbacks)
+
+// Narrative pane click advances briefing/cinematic phases
+const narrativePaneEl = document.getElementById('narrative-pane')
+if (narrativePaneEl) {
+  narrativePaneEl.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement
+    if (target.closest('#interaction-area')) return
+    onAdvancePhase()
+  })
+}
+
+// Space/Enter advances briefing/cinematic (global, skips form elements)
+document.addEventListener('keydown', (e) => {
+  const target = e.target as HTMLElement
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName ?? '')) return
+  if ((e.key === ' ' || e.key === 'Enter') && (state.scenePhase === 'briefing' || state.scenePhase === 'cinematic')) {
+    e.preventDefault()
+    onAdvancePhase()
+  }
+})
 
 // Settings close wiring (in addition to what input.ts does)
 document.addEventListener('visibilitychange', () => {

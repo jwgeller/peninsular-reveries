@@ -232,14 +232,14 @@
 
 - Slug: pixel-passport
 - Code license: GPL-3.0
-- Summary: Solve clues to discover world destinations and stamp your passport! Pixel Passport uses original DOM-rendered pixel scenes, original clue writing, and browser-synthesized travel tones. No third-party art, photo, or audio assets are bundled.
+- Summary: Explore world destinations and stamp your passport! Pixel Passport uses original DOM-rendered pixel scenes and browser-synthesized travel tones. No third-party art, photo, or audio assets are bundled.
 
 #### Entries
 
 ##### Pixel Passport globe, destination scenes, Pip sprite, and vehicle sprites
 
 - Type: illustration
-- Used in: Pixel Passport title screen, globe hub, travel scenes, destination scenes, room shelf, and mystery screens
+- Used in: Pixel Passport title screen, globe hub, travel scenes, destination scenes, and room shelf
 - Creator: Peninsular Reveries
 - Source: Original DOM-rendered pixel art defined in the repository
 - License: GPL-3.0

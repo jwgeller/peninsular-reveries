@@ -71,16 +71,6 @@ export function handleHoldEnd(state: MissionState): MissionState {
 export function tickState(state: MissionState, deltaMs: number): MissionState {
   let next = { ...state, elapsedMs: state.elapsedMs + deltaMs }
 
-  // Briefing auto-advances after 2500ms
-  if (next.scenePhase === 'briefing' && next.elapsedMs >= 2500) {
-    return advanceScenePhase(next)
-  }
-
-  // Cinematic auto-advances after 3000ms
-  if (next.scenePhase === 'cinematic' && next.elapsedMs >= 3000) {
-    return advanceScenePhase(next)
-  }
-
   // Hold interaction: advance holdProgress while holdActive
   const scene = SCENES[next.sceneIndex]
   if (next.scenePhase === 'interaction' && scene.interactionType === 'hold' && next.holdActive) {

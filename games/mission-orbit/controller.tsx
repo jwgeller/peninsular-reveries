@@ -119,6 +119,7 @@ export async function missionOrbitAction() {
                 <h2 id="scene-title" className="scene-title" aria-hidden="true"></h2>
                 <p id="briefing-text" className="briefing-text"></p>
                 <p id="interaction-prompt" className="interaction-prompt" hidden></p>
+                <p className="continue-prompt" aria-live="off">Tap to continue →</p>
                 <div id="interaction-area" className="interaction-area">
                   <button id="tap-btn" type="button" className="tap-btn" aria-label="Take action" hidden>
                     Take action

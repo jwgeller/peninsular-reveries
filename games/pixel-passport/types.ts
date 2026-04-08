@@ -11,8 +11,7 @@ export const DESTINATION_IDS = [
 ] as const
 
 export type DestinationId = (typeof DESTINATION_IDS)[number]
-export type GamePhase = 'title' | 'globe' | 'travel' | 'explore' | 'memory-collect' | 'room' | 'mystery-clue' | 'mystery-result'
-export type GameMode = 'explore' | 'mystery'
+export type GamePhase = 'title' | 'globe' | 'travel' | 'explore' | 'memory-collect' | 'room'
 export type TransportType = 'bus' | 'train' | 'boat' | 'plane'
 export type NavigationDirection = 'next' | 'previous'
 export type PipPose = 'wave' | 'guide' | 'cheer' | 'think'
@@ -48,19 +47,16 @@ export interface Destination {
   readonly scene: PixelArt
   readonly visualTheme: DestinationVisualTheme
   readonly facts: readonly string[]
-  readonly clues: readonly [string, string, string]
   readonly memoryEmoji: string
   readonly memoryLabel: string
 }
 
 export interface GameProgress {
   readonly collectedMemories: readonly DestinationId[]
-  readonly mysteryCompleted: readonly DestinationId[]
 }
 
 export interface GameState {
   readonly phase: GamePhase
-  readonly mode: GameMode
   readonly currentLocation: DestinationId | null
   readonly targetDestination: DestinationId | null
   readonly transportType: TransportType | null
@@ -69,18 +65,9 @@ export interface GameState {
   readonly collectedMemories: readonly DestinationId[]
   readonly globeSelectedIndex: number
   readonly globeRotationOffset: number
-  readonly mysteryTarget: DestinationId | null
-  readonly mysteryClueIndex: number
-  readonly mysteryGuessesWrong: number
-  readonly mysteryCompleted: readonly DestinationId[]
   readonly lastGuessCorrect: boolean | null
   readonly revealedDestination: boolean
   readonly memoryWasNew: boolean
-}
-
-export interface MysteryOutcome {
-  readonly state: GameState
-  readonly outcome: 'correct' | 'wrong' | 'revealed'
 }
 
 export interface SpriteSheet {
