@@ -434,6 +434,7 @@
 .destination-markers {
   position: absolute;
   inset: 0;
+  z-index: 2;
 }
 
 .destination-marker {
@@ -1053,6 +1054,10 @@ html[data-reduce-motion='reduce'] .travel-vehicle-shadow {
   .start-shell,
   .globe-stage {
     grid-template-columns: 1fr;
+  }
+
+  .world-globe-start {
+    width: min(100%, 13rem);
   }
 
   .travel-guide-card {

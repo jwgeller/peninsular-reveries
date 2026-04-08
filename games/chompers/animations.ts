@@ -42,7 +42,8 @@ export function animateHippoChomp(
       const headEl = hippoEl.querySelector<HTMLElement>('.hippo-head')
       const bodyH = bodyEl?.offsetHeight ?? 40
       const headH = headEl?.offsetHeight ?? 48
-      neckH = Math.max(20, arenaRect.bottom - targetCenterY - bodyH - headH / 2)
+      const maxNeck = Math.max(20, arenaRect.height * 0.55 - bodyH - headH)
+      neckH = Math.min(Math.max(20, arenaRect.bottom - targetCenterY - bodyH - headH / 2), maxNeck)
     }
 
     // Phase 1: slide to align under target (200ms CSS transition)
@@ -183,7 +184,8 @@ export function animateNpcChomp(npcId: string, targetEl: HTMLElement | null): vo
     const headEl = npcEl.querySelector<HTMLElement>('.hippo-head')
     const bodyH = bodyEl?.offsetHeight ?? 40
     const headH = headEl?.offsetHeight ?? 48
-    neckH = Math.max(20, arenaRect.bottom - targetCenterY - bodyH - headH / 2)
+    const maxNeck = Math.max(20, arenaRect.height * 0.55 - bodyH - headH)
+    neckH = Math.min(Math.max(20, arenaRect.bottom - targetCenterY - bodyH - headH / 2), maxNeck)
   }
 
   // Slide to target

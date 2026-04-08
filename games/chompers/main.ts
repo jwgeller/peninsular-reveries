@@ -1,7 +1,7 @@
 import { announceCorrect, announceGameOver, announceProblem, announceRound, announceWrong, moveFocusAfterTransition } from './accessibility.js'
 import { animateCorrectFeedback, animateHippoChomp, animateNextRound, animateNpcChomp, animateWrongFeedback, spawnPointsPopup } from './animations.js'
 import { moveFocusToFirstItem, setupInput, teardownInput } from './input.js'
-import { renderAll, renderEndScreen, renderFrenzyEndScreen, renderFrenzyScoreboard, renderHUD, renderHippo, renderNpcHippos, renderProblem, renderRoundTimer, renderScene } from './renderer.js'
+import { renderAll, renderEndScreen, renderFrenzyEndScreen, renderFrenzyScoreboard, renderHUD, renderNpcHippos, renderProblem, renderRoundTimer, renderScene } from './renderer.js'
 import { setupTabbedModal } from '../../client/modal.js'
 import { bindMusicToggle, bindSfxToggle, bindReduceMotionToggle } from '../../client/preferences.js'
 import { ensureAudioUnlocked, playFrenzyLose, playFrenzyMusic, playFrenzyWin, playNpcChomp, playNpcScore, playTimerWarning, sfxChomp, sfxCorrect, sfxGameOver, sfxProblemAppear, sfxWrong, stopFrenzyMusic } from './sounds.js'
@@ -217,7 +217,6 @@ async function onSelectAnswer(itemId: string): Promise<void> {
   }
 
   state = selectAnswer(state, itemId)
-  renderHippo(state)
 
   // Disable all scene items to prevent double-selection
   for (const btn of document.querySelectorAll<HTMLButtonElement>('.scene-item')) {

@@ -164,6 +164,14 @@ if (narrativePaneEl) {
   })
 }
 
+// Cinematic pane click also advances briefing/cinematic phases
+const cinematicPaneEl = document.getElementById('cinematic-pane')
+if (cinematicPaneEl) {
+  cinematicPaneEl.addEventListener('click', () => {
+    onAdvancePhase()
+  })
+}
+
 // Space/Enter advances briefing/cinematic (global, skips form elements)
 document.addEventListener('keydown', (e) => {
   const target = e.target as HTMLElement
