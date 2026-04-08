@@ -87,8 +87,17 @@ Run tests after each fix. If tests break, diagnose and resolve before moving on.
 
 1. **Run full validation.** `npm run test:local` + `npm run build`.
 2. **Commit and push** with a descriptive message summarizing the field review fixes.
-3. **Confirm deployment.** Wait for the Actions run to succeed (`gh run list --limit 1`). Then fetch the production `sw.js` and confirm the deployed SHA matches the commit just pushed.
-4. **Instruct user to hard-refresh.** Service workers cache aggressively. Tell the user: "Force-close your browser, reopen, and reload the page. If issues persist, go to Settings → Safari → Clear Website Data (or equivalent)." Do not declare the field review complete until the user confirms they see the new version.
+3. **Confirm deployment.** Do this yourself — do not ask the user to check.
+   1. Get the expected SHA: `git rev-parse --short HEAD`
+   2. Poll the Actions run: `gh run list --limit 1`. If status is not `completed`, wait ~30 seconds and retry (up to 5 retries).
+   3. Once the run succeeds, fetch `sw.js` and extract the cache name:
+      ```
+      $r = Invoke-WebRequest -Uri "https://ironloon.github.io/peninsular-reveries/sw.js" -UseBasicParsing
+      ($r.Content -split "`n")[0]
+      ```
+   4. Verify the SHA in the `CACHE_NAME` matches the pushed commit. If it doesn't match, the CDN may be stale — wait ~30 seconds and re-fetch (up to 3 retries).
+   5. Only proceed to step 4 after confirmed match. If it never matches after retries, tell the user and investigate.
+4. **Instruct user to hard-refresh.** Service workers cache aggressively. Tell the user: "The deploy is live (confirmed SHA `<short>` in production). Force-close your browser, reopen, and reload the page. If issues persist, go to Settings → Safari → Clear Website Data (or equivalent)." Do not declare the field review complete until the user confirms they see the new version.
 5. **User re-verifies on device.** The user tests the same observations from Phase 2 on the same device. Any findings that persist or new findings that appear trigger a new round of Phase 4 fixes. This loop continues until the user confirms the issues are resolved.
 6. **Only then: archive.** Create `/memories/repo/plans/archive/<YYYY-MM-DD>-field-review-<slug>.md` with the findings + what was implemented + what was re-verified. Same archive directory as plan critiques.
 7. **Update process files** if findings reveal a process gap.
