@@ -53,6 +53,11 @@
 ## Bug Fix Escalation
 
 - When a reported bug survives a fix attempt, escalate investigation before guessing again: dump computed styles and stacking context for visual bugs, bisect CSS rules, toggle pseudo-elements, or add diagnostic logging. Do not repeat surface-level guesses across multiple rounds.
+- **Diagnose before coding.** When the user reports “X is broken,” reproduce the exact failure path mentally (or with tests) before writing a fix. Especially: determine which element types, event types, and browser quirks are involved.
+- **One fix, one deploy.** Do not ship a speculative fix and wait for the user to re-test. If you’re not confident the fix addresses the root cause, investigate further first.
+- **Read the game loop end-to-end** before fixing game progression bugs. Stuck-state bugs are usually missing auto-advance logic, not event handler issues.
+- **iOS Safari deserves its own mental model.** Events, layout, font rendering, and animation timing all behave differently. Check the iOS Safari Rules in architecture.md before fixing any mobile bug.
+- **Ask what the user actually sees.** "Stuck" can mean: event not firing, state not advancing, render not updating, or auto-advance missing. Narrow down which layer before choosing a fix strategy.
 
 ## Educational Content
 
@@ -106,3 +111,24 @@ When making design decisions, ask:
 3. Does the visual hierarchy guide the child's eyes to the learning task?
 4. Can a child with low vision, motor difficulty, or hearing impairment complete this game?
 5. Is every word or concept concrete and imageable for a child at this grade level?
+
+## Field Review Checklist
+
+Before declaring a game human-ready for field testing, walk through this checklist:
+
+### Completeness
+- [ ] Every game phase is reachable: start → gameplay → completion → end screen / replay
+- [ ] Every phase has auto-advance or user-driven advance logic — no dead ends
+- [ ] Every visual pane has actual rendered content, not just background colors/gradients
+- [ ] Interaction feedback is visible: tapping/holding produces a visual response in the scene
+
+### iOS Safari
+- [ ] All tappable progression points use native `<button>` or `<a>`, not `<div>` click handlers
+- [ ] Tested with Reduce Motion ON: game is fully playable with correct visual positioning
+- [ ] Touch targets are ≥44px
+- [ ] No reliance on `click` or `pointerup` on non-interactive elements
+
+### User Reports
+- [ ] When a user says "stuck," determine which layer: event → state → render → auto-advance
+- [ ] When a user says "nothing there," check if the visual content was ever implemented, not just the container/background
+- [ ] When a user says "no improvement," the previous fix did not reach the actual root cause — escalate investigation rather than trying a variant of the same approach

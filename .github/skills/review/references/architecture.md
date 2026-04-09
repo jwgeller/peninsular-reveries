@@ -110,12 +110,38 @@ Every game in `games/` follows this pattern:
 - `sounds.ts` — Web Audio API synth logic
 - `sample-manifest.ts` — optional bundled audio metadata and sourcing info when a game ships curated samples
 - `*.test.ts` — colocated pure-logic or data-shape tests when that makes ownership clearer
+- `cinematic.ts` — optional per-frame visual renderer for games with animated scene panes (see Cinematic Contract below)
 
 ## DOM-Based Game Architecture
 
 Games use vanilla TypeScript with direct DOM manipulation. This is intentional for accessibility, tiny bundles, CSS-first motion, and responsive layout without canvas barriers.
 
 Site pages and shared server-rendered UI may use Remix `css()` mixins for co-located styles without changing the DOM-first game runtime model.
+
+### iOS Safari Rules
+
+iOS Safari has event-handling quirks that silently break touch interaction:
+
+- **Native interactive elements only.** `click` events do NOT reliably fire on `<div>`, `<p>`, or `<span>` elements — even with `cursor: pointer`. `pointerup` is also unreliable on non-interactive elements. Always use `<button>` or `<a>` for anything the user must tap.
+- **Never use `<div>` click handlers for game progression.** If a tap needs to advance state, attach it to a `<button>` (with button reset CSS) or use `touchend` with a debounce as a secondary fallback.
+- **`touch-action: manipulation`** on all interactive areas to prevent double-tap zoom.
+- **44px minimum touch targets** per Apple HIG.
+- **Test with Reduce Motion ON.** The user's real device has Reduce Motion enabled. Every animation branch must have a non-animated code path that still produces the correct visual/positional result — not just skipping the animation entirely.
+
+### Canvas Policy
+
+Canvas is used sparingly (Super Word emoji tiles). For all other games, prefer DOM elements manipulated via JS and CSS. When diagnosing a rendering bug, identify WHETHER the game uses canvas before proposing canvas-related fixes.
+
+## Cinematic Contract
+
+Games with visual scene panes (e.g., Mission Orbit's cinematic pane) must render animated content driven by the game loop — not just CSS backgrounds. Static backgrounds with no foreground elements look broken to users.
+
+- **Use JS, not just CSS.** The game loop already runs at ~60fps. Use it to position, move, and animate emoji or DOM elements inside the scene pane.
+- **Pool DOM elements** to avoid GC pressure. Create spans once, reuse them each frame, hide extras.
+- **Every scene phase should be visually distinct.** Briefing, cinematic, interaction, and transition should each look different.
+- **Interaction feedback is mandatory.** During tap/hold interactions, the scene must react (shake, move, glow, etc.) so the player sees their input having an effect.
+- **Reduced motion:** show a static composition (correct positions, no animation), not a blank pane.
+- **Auto-advance transitions.** If a game has a transition phase between scenes, the game loop must auto-advance after a brief pause (e.g., 800ms). Never leave the player stuck in a phase with no way to proceed.
 
 ## Styling Architecture
 

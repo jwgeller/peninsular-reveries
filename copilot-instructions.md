@@ -4,17 +4,10 @@
 
 For project architecture, game quality standards, and testing conventions, load the `review` skill in `.github/skills/review/` before doing substantial repo work.
 
-## Styling Guidance
-
-- This repo uses a hybrid CSS model. Prefer Remix `css()` mixins in `app/` for shared server-rendered UI, page layouts, shared game shell helpers, modal shells, and accessibility utilities.
-- Keep `public/styles/*.css` for global foundation CSS and large game-specific visual systems, especially where client DOM code depends on stable class hooks or art-heavy selector/animation sections.
-- Do not reintroduce duplicated per-game shell rules such as hiding site chrome, full-screen `main` layout, base screen transitions, base settings-modal overlay behavior, or `.sr-only` when `app/ui/game-shell.tsx` or other shared UI modules already own them.
-- When updating a server-rendered component in `app/`, prefer co-located style objects or shared modules in `app/ui/` over adding new page-specific rules to `public/styles/main.css`.
-- Treat `public/styles/main.css` as the global foundation stylesheet for tokens, theme overrides, theme toggle styling, and view-transition/reduced-motion glue.
-
 ## Knowledge Persistence
 
-- Do not use Copilot memory files (`/memories/repo/`) to store project learnings. Memory files are invisible to humans, other tools, and collaborators.
+- **Never write project knowledge to any Copilot memory path** — not `/memories/`, `/memories/repo/`, or `/memories/session/`. Memory files are invisible to humans, other tools, and collaborators, and don't travel with the repo.
+- This includes lessons learned, process improvements, iOS quirks, architecture decisions, and anything else that would be useful on a different machine.
 - **Exception:** Orchestrated workflow plans live in `/memories/repo/plans/` because they are ephemeral dispatch state, not project knowledge.
 - When you learn something reusable about this project, record it in the appropriate in-repo file instead:
 	- Architecture, conventions, build and deploy patterns → `.github/skills/review/references/architecture.md`
@@ -22,6 +15,14 @@ For project architecture, game quality standards, and testing conventions, load 
 	- Testing conventions, validation gates, CI behavior → `.github/skills/review/references/testing.md`
 	- Workflow, session expectations, environment → `copilot-instructions.md`
 - Keep additions concise. If the insight is game-specific rather than project-wide, note the game slug inline.
+
+## Styling Guidance
+
+- This repo uses a hybrid CSS model. Prefer Remix `css()` mixins in `app/` for shared server-rendered UI, page layouts, shared game shell helpers, modal shells, and accessibility utilities.
+- Keep `public/styles/*.css` for global foundation CSS and large game-specific visual systems, especially where client DOM code depends on stable class hooks or art-heavy selector/animation sections.
+- Do not reintroduce duplicated per-game shell rules such as hiding site chrome, full-screen `main` layout, base screen transitions, base settings-modal overlay behavior, or `.sr-only` when `app/ui/game-shell.tsx` or other shared UI modules already own them.
+- When updating a server-rendered component in `app/`, prefer co-located style objects or shared modules in `app/ui/` over adding new page-specific rules to `public/styles/main.css`.
+- Treat `public/styles/main.css` as the global foundation stylesheet for tokens, theme overrides, theme toggle styling, and view-transition/reduced-motion glue.
 
 ## Session Expectations
 
@@ -33,10 +34,6 @@ For project architecture, game quality standards, and testing conventions, load 
 - If the user says some version of **"continue until done"**, interpret "done" as **human-ready unless genuinely blocked**.
 - If the user says **"wrap it up"** or otherwise makes it clear that **pushing finished work is welcome**, treat that as permission to finish the current task end-to-end. When the work is validated and human-ready, and the commit scope is clear with no ambiguous unrelated changes, the agent may stage the intended files, create a concise commit, and push without asking for one more round of confirmation. If the working tree is mixed or risky, stop short of commit/push and explain the blocker briefly.
 - After completing work, report what changed and what was verified.
-
-## Process Improvements
-
-- Do not store process improvements in Copilot memory preference files. Encode them in skills, copilot-instructions.md, or agent definitions instead.
 
 ## Composing Plans
 
