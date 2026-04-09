@@ -1,12 +1,85 @@
 export interface InputCallbacks {
   onSelectAnswer: (itemId: string) => void
-  onOpenSettings: () => void
+  onToggleSettings: () => void
 }
 
 let pointerHandler: ((event: PointerEvent) => void) | null = null
 let keydownHandler: ((event: KeyboardEvent) => void) | null = null
 let gamepadHandle: number | null = null
 let lastGamepadAction = 0
+
+function isModalOpen(): boolean {
+  const modal = document.getElementById('settings-modal')
+  return modal !== null && !modal.hasAttribute('hidden')
+}
+
+function isVisible(element: HTMLElement): boolean {
+  return !element.closest('[hidden]') && element.getClientRects().length > 0
+}
+
+function getActiveScreen(): 'start-screen' | 'game-screen' | 'end-screen' | null {
+  const active = document.querySelector<HTMLElement>('.game-screen:not([hidden])')
+  if (!active) return null
+  if (active.id === 'start-screen' || active.id === 'game-screen' || active.id === 'end-screen') {
+    return active.id
+  }
+  return null
+}
+
+function isManagedFocusTarget(element: HTMLElement): boolean {
+  return element.matches('.area-card, .level-selector label, .mode-radio-group label')
+}
+
+function getStartScreenTargets(): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>(
+    '#start-screen .area-card, #start-screen .level-selector label, #start-screen .mode-toggle-btn, #start-screen .mode-radio-group label, #start-screen .color-swatch, #start-screen .start-actions .chomp-btn',
+  )).filter(isVisible)
+}
+
+function getEndScreenTargets(): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>('#end-screen .chomp-btn')).filter(isVisible)
+}
+
+function getModalTargets(): HTMLElement[] {
+  const modal = document.getElementById('settings-modal')
+  if (!modal || modal.hasAttribute('hidden')) return []
+
+  return Array.from(modal.querySelectorAll<HTMLElement>(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )).filter(isVisible)
+}
+
+function focusGamepadTarget(target: HTMLElement): void {
+  const previous = document.querySelector<HTMLElement>('.gamepad-focus')
+  if (previous && previous !== target) {
+    previous.classList.remove('gamepad-focus')
+    if (isManagedFocusTarget(previous)) previous.tabIndex = -1
+  }
+
+  if (isManagedFocusTarget(target)) target.tabIndex = 0
+  target.classList.add('gamepad-focus')
+  target.focus({ preventScroll: true })
+  target.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+}
+
+function focusNearestControl(candidates: HTMLElement[], direction: string): void {
+  if (candidates.length === 0) return
+
+  const focused = document.activeElement as HTMLElement | null
+  const current = focused && candidates.includes(focused) ? focused : null
+
+  if (!current) {
+    focusGamepadTarget(candidates[0])
+    return
+  }
+
+  const nearest = findNearestInDirection(current, candidates, direction)
+  if (nearest) focusGamepadTarget(nearest)
+}
+
+function activateElement(target: HTMLElement): void {
+  target.click()
+}
 
 function getActiveSceneItems(): HTMLElement[] {
   return Array.from(
@@ -55,7 +128,7 @@ function findNearestInDirection(
 
 function getFocusedItem(): HTMLElement | null {
   const focused = document.activeElement as HTMLElement | null
-  if (focused?.classList.contains('scene-item')) return focused
+  if (focused?.classList.contains('scene-item') && isVisible(focused) && !focused.hasAttribute('disabled')) return focused
   return null
 }
 
@@ -65,6 +138,8 @@ export function moveFocusToFirstItem(): void {
 }
 
 export function setupInput(callbacks: InputCallbacks): void {
+  if (pointerHandler || keydownHandler || gamepadHandle !== null) return
+
   pointerHandler = (event: PointerEvent) => {
     const target = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-item-id]')
     if (target && !target.disabled) {
@@ -75,11 +150,20 @@ export function setupInput(callbacks: InputCallbacks): void {
   document.addEventListener('pointerup', pointerHandler)
 
   keydownHandler = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && !isModalOpen()) {
       event.preventDefault()
-      callbacks.onOpenSettings()
+      callbacks.onToggleSettings()
       return
     }
+
+    if (isModalOpen()) return
+
+    const target = event.target as HTMLElement | null
+    if (target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName) && !target.classList.contains('scene-item')) {
+      return
+    }
+
+    if (getActiveScreen() !== 'game-screen') return
 
     const arrows = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
     if (arrows.includes(event.key)) {
@@ -113,6 +197,99 @@ export function setupInput(callbacks: InputCallbacks): void {
   }
   document.addEventListener('keydown', keydownHandler)
 
+  function focusGameplayItem(direction: string): void {
+    const items = getActiveSceneItems()
+    const focused = getFocusedItem()
+
+    if (!focused) {
+      if (items[0]) focusGamepadTarget(items[0])
+      return
+    }
+
+    if (items.length <= 1) return
+
+    const nearest = findNearestInDirection(focused, items, direction)
+    if (nearest) {
+      focused.tabIndex = -1
+      nearest.tabIndex = 0
+      focusGamepadTarget(nearest)
+    }
+  }
+
+  function focusCurrentContext(direction: string): void {
+    if (isModalOpen()) {
+      focusNearestControl(getModalTargets(), direction)
+      return
+    }
+
+    const screen = getActiveScreen()
+    if (screen === 'game-screen') {
+      focusGameplayItem(direction)
+      return
+    }
+
+    if (screen === 'start-screen') {
+      focusNearestControl(getStartScreenTargets(), direction)
+      return
+    }
+
+    if (screen === 'end-screen') {
+      focusNearestControl(getEndScreenTargets(), direction)
+    }
+  }
+
+  function activateCurrentContext(): void {
+    if (isModalOpen()) {
+      const modalTargets = getModalTargets()
+      const focused = document.activeElement as HTMLElement | null
+      const current = focused && modalTargets.includes(focused) ? focused : null
+      if (!current) {
+        if (modalTargets[0]) focusGamepadTarget(modalTargets[0])
+        return
+      }
+      activateElement(current)
+      return
+    }
+
+    const screen = getActiveScreen()
+    if (screen === 'game-screen') {
+      const focused = getFocusedItem()
+      if (!focused) {
+        moveFocusToFirstItem()
+        return
+      }
+
+      const itemId = focused.dataset.itemId
+      if (itemId) callbacks.onSelectAnswer(itemId)
+      return
+    }
+
+    if (screen === 'start-screen') {
+      const startTargets = getStartScreenTargets()
+      const focused = document.activeElement as HTMLElement | null
+      const current = focused && startTargets.includes(focused) ? focused : null
+      if (current) {
+        activateElement(current)
+        return
+      }
+
+      document.getElementById('start-btn')?.click()
+      return
+    }
+
+    if (screen === 'end-screen') {
+      const endTargets = getEndScreenTargets()
+      const focused = document.activeElement as HTMLElement | null
+      const current = focused && endTargets.includes(focused) ? focused : null
+      if (current) {
+        activateElement(current)
+        return
+      }
+
+      document.getElementById('replay-btn')?.click()
+    }
+  }
+
   let prevDpadUp = false
   let prevDpadDown = false
   let prevDpadLeft = false
@@ -121,6 +298,11 @@ export function setupInput(callbacks: InputCallbacks): void {
   let prevBtnStart = false
 
   function pollGamepad(): void {
+    if (document.visibilityState !== 'visible') {
+      gamepadHandle = requestAnimationFrame(pollGamepad)
+      return
+    }
+
     const pads = navigator.getGamepads?.()
     const pad = pads ? pads[0] : null
 
@@ -151,30 +333,17 @@ export function setupInput(callbacks: InputCallbacks): void {
 
         if (direction) {
           lastGamepadAction = now
-          const items = getActiveSceneItems()
-          const focused = getFocusedItem() ?? items[0]
-          if (focused && items.length > 1) {
-            const nearest = findNearestInDirection(focused, items, direction)
-            if (nearest) {
-              focused.tabIndex = -1
-              nearest.tabIndex = 0
-              nearest.focus()
-            }
-          }
+          focusCurrentContext(direction)
         }
 
         if (btnA && !prevBtnA) {
           lastGamepadAction = now
-          const focused = getFocusedItem()
-          if (focused) {
-            const itemId = focused.dataset.itemId
-            if (itemId) callbacks.onSelectAnswer(itemId)
-          }
+          activateCurrentContext()
         }
 
         if (btnStart && !prevBtnStart) {
           lastGamepadAction = now
-          callbacks.onOpenSettings()
+          callbacks.onToggleSettings()
         }
       }
 

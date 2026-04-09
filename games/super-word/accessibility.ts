@@ -52,8 +52,17 @@ export function moveFocusAfterTransition(elementId: string, delayMs: number = 30
 
 export function moveFocusToFirstSceneItem(delayMs: number = 300): void {
   setTimeout(() => {
-    const selector = '#scene-a11y .sr-overlay-btn[data-item-type="letter"][tabindex="0"], #scene-a11y .sr-overlay-btn[data-item-type="letter"], #scene-a11y .sr-overlay-btn[tabindex="0"], #scene-a11y .sr-overlay-btn'
-    const el = document.querySelector(selector) as HTMLElement | null
+    const selectors = [
+      '#scene-a11y .sr-overlay-btn[data-item-type="letter"][tabindex="0"]',
+      '#scene-a11y .sr-overlay-btn[data-item-type="letter"]',
+      '#scene-a11y .sr-overlay-btn[tabindex="0"]',
+      '#scene-a11y .sr-overlay-btn',
+    ]
+
+    const el = selectors
+      .map((selector) => document.querySelector(selector) as HTMLElement | null)
+      .find((candidate) => candidate !== null)
+
     if (!el) return
     if (el.tabIndex < 0) {
       el.tabIndex = 0

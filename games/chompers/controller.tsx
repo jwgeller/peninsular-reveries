@@ -352,7 +352,7 @@ export async function chompersAction() {
           </SettingsSection>
 
           <SettingsSection title="Controls">
-            <p className="settings-copy">Tap or click a fruit to choose your answer. Use arrow keys or D-pad to navigate, Enter/Space to select.</p>
+            <p className="settings-copy">Tap or click a fruit to choose your answer. Use arrow keys or D-pad to navigate, Enter/Space or A to select, and Start to open the menu.</p>
           </SettingsSection>
 
           <SettingsSection title="Accessibility">

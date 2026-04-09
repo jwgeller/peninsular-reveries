@@ -273,6 +273,26 @@ export function setupInput(
   let prevStickDir = ''
   let stickCooldown = 0
 
+  function isModalOpen(): boolean {
+    const modal = document.getElementById('settings-modal')
+    return modal !== null && !modal.hidden
+  }
+
+  function getModalFocusableElements(): HTMLElement[] {
+    const modal = document.getElementById('settings-modal')
+    if (!modal || modal.hidden) return []
+
+    return Array.from(modal.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )).filter((element) => !element.closest('[hidden]'))
+  }
+
+  function getScreenControls(screen: string | null): HTMLElement[] {
+    if (screen === 'start-screen') return [startBtn]
+    if (screen === 'win-screen') return [replayBtn]
+    return []
+  }
+
   // Remove gamepad-active on mouse/keyboard
   function clearGamepadMode(): void {
     document.body.classList.remove('gamepad-active')
@@ -351,6 +371,21 @@ export function setupInput(
     }
   }
 
+  function focusNearestControl(direction: string, candidates: HTMLElement[]): void {
+    if (candidates.length === 0) return
+
+    const focused = document.activeElement as HTMLElement | null
+    const current = focused && candidates.includes(focused) ? focused : null
+
+    if (!current) {
+      gamepadFocus(candidates[0])
+      return
+    }
+
+    const nearest = findNearestInDirection(current, candidates, direction)
+    if (nearest) gamepadFocus(nearest)
+  }
+
   function activateFocusedItem(): void {
     const focused = document.activeElement as HTMLElement
     if (!focused) return
@@ -375,7 +410,7 @@ export function setupInput(
     }
 
     // Scene item
-    if (!focused.classList.contains('scene-item') || focused.classList.contains('collected')) return
+    if (!focused.hasAttribute('data-item-id') || focused.classList.contains('collected')) return
     const itemId = focused.dataset.itemId
     const puzzle = getPuzzle()
     const item = puzzle.items.find(it => it.id === itemId)
@@ -399,8 +434,69 @@ export function setupInput(
     return true
   }
 
+  function focusInCurrentContext(direction: string): void {
+    if (isCelebrationVisible()) {
+      const continueBtn = document.getElementById('celebration-continue-btn') as HTMLElement | null
+      if (continueBtn) gamepadFocus(continueBtn)
+      return
+    }
+
+    if (isModalOpen()) {
+      focusNearestControl(direction, getModalFocusableElements())
+      return
+    }
+
+    const screen = getActiveScreen()
+    if (screen === 'game-screen') {
+      focusNearestItem(direction)
+      return
+    }
+
+    focusNearestControl(direction, getScreenControls(screen))
+  }
+
+  function activateFocusedControl(): void {
+    if (dismissCelebration()) return
+
+    if (isModalOpen()) {
+      const controls = getModalFocusableElements()
+      const focused = document.activeElement as HTMLElement | null
+      const current = focused && controls.includes(focused) ? focused : null
+
+      if (!current) {
+        if (controls[0]) gamepadFocus(controls[0])
+        return
+      }
+
+      current.click()
+      return
+    }
+
+    const screen = getActiveScreen()
+    if (screen === 'start-screen') {
+      startBtn.click()
+      return
+    }
+
+    if (screen === 'win-screen') {
+      replayBtn.click()
+      return
+    }
+
+    if (screen === 'game-screen') {
+      activateFocusedItem()
+    }
+  }
+
   function handleContextStart(): void {
     if (dismissCelebration()) return
+
+    if (isModalOpen()) {
+      const toggle = window.__settingsToggle
+      if (typeof toggle === 'function') toggle()
+      return
+    }
+
     const screen = getActiveScreen()
     if (screen === 'start-screen') startBtn.click()
     else if (screen === 'win-screen') replayBtn.click()
@@ -447,24 +543,30 @@ export function setupInput(
 
         switch (i) {
           case 0: // A — activate/select
-            if (dismissCelebration()) break
-            if (screen === 'start-screen') { startBtn.click(); break }
-            if (screen === 'game-screen') activateFocusedItem()
+            activateFocusedControl()
             break
           case 9: // Start — context-sensitive
             handleContextStart()
             break
           case 12: // D-pad up
-            if (screen === 'game-screen') focusNearestItem('ArrowUp')
+            if (screen === 'game-screen' || screen === 'start-screen' || screen === 'win-screen' || isModalOpen() || isCelebrationVisible()) {
+              focusInCurrentContext('ArrowUp')
+            }
             break
           case 13: // D-pad down
-            if (screen === 'game-screen') focusNearestItem('ArrowDown')
+            if (screen === 'game-screen' || screen === 'start-screen' || screen === 'win-screen' || isModalOpen() || isCelebrationVisible()) {
+              focusInCurrentContext('ArrowDown')
+            }
             break
           case 14: // D-pad left
-            if (screen === 'game-screen') focusNearestItem('ArrowLeft')
+            if (screen === 'game-screen' || screen === 'start-screen' || screen === 'win-screen' || isModalOpen() || isCelebrationVisible()) {
+              focusInCurrentContext('ArrowLeft')
+            }
             break
           case 15: // D-pad right
-            if (screen === 'game-screen') focusNearestItem('ArrowRight')
+            if (screen === 'game-screen' || screen === 'start-screen' || screen === 'win-screen' || isModalOpen() || isCelebrationVisible()) {
+              focusInCurrentContext('ArrowRight')
+            }
             break
         }
       }
@@ -489,7 +591,7 @@ export function setupInput(
       }
 
       if (dir && dir !== prevStickDir) {
-        if (getActiveScreen() === 'game-screen') focusNearestItem(dir)
+        focusInCurrentContext(dir)
         stickCooldown = 12 // ~200ms at 60fps
       }
 

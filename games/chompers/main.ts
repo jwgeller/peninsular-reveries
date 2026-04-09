@@ -1,6 +1,6 @@
 import { announceCorrect, announceGameOver, announceProblem, announceRound, announceWrong, moveFocusAfterTransition } from './accessibility.js'
 import { animateCorrectFeedback, animateHippoChomp, animateNextRound, animateNpcChomp, animateWrongFeedback, spawnPointsPopup } from './animations.js'
-import { moveFocusToFirstItem, setupInput, teardownInput } from './input.js'
+import { moveFocusToFirstItem, setupInput } from './input.js'
 import { renderAll, renderEndScreen, renderFrenzyEndScreen, renderFrenzyScoreboard, renderHUD, renderNpcHippos, renderProblem, renderRoundTimer, renderScene } from './renderer.js'
 import { setupTabbedModal } from '../../client/modal.js'
 import { bindMusicToggle, bindSfxToggle, bindReduceMotionToggle } from '../../client/preferences.js'
@@ -288,10 +288,6 @@ async function onSelectAnswer(itemId: string): Promise<void> {
   moveFocusToFirstItem()
 }
 
-function onOpenSettings(): void {
-  settingsModal.open()
-}
-
 function onStartGame(): void {
   ensureAudioUnlocked()
   const areaInput = document.querySelector<HTMLInputElement>('input[name="area"]:checked')
@@ -344,7 +340,6 @@ function onStartGame(): void {
   showScreen('game-screen')
   renderAll(state)
   sfxProblemAppear()
-  setupInput({ onSelectAnswer, onOpenSettings })
   announceProblem(state.currentProblem)
   moveFocusAfterTransition('scene-items', 100)
   window.setTimeout(() => moveFocusToFirstItem(), 200)
@@ -374,7 +369,6 @@ function showEndScreen(endState: GameState): void {
     sfxGameOver()
   }
 
-  teardownInput()
   announceGameOver(endState)
   moveFocusAfterTransition('replay-btn', 300)
 }
@@ -382,7 +376,6 @@ function showEndScreen(endState: GameState): void {
 function onReplay(): void {
   stopFrenzyTick()
   stopFrenzyMusic()
-  teardownInput()
   const replayArea = state?.area ?? 'matching'
   const replayLevel = state?.level ?? 1
   const areaInput = document.querySelector<HTMLInputElement>('input[name="area"]:checked')
@@ -391,7 +384,6 @@ function onReplay(): void {
   showScreen('game-screen')
   renderAll(state)
   sfxProblemAppear()
-  setupInput({ onSelectAnswer, onOpenSettings })
   announceProblem(state.currentProblem)
   moveFocusAfterTransition('scene-items', 100)
   window.setTimeout(() => moveFocusToFirstItem(), 200)
@@ -400,7 +392,6 @@ function onReplay(): void {
 function onReturnToMenu(): void {
   stopFrenzyTick()
   stopFrenzyMusic()
-  teardownInput()
   showScreen('start-screen')
   moveFocusAfterTransition('start-btn', 320)
 }
@@ -408,6 +399,8 @@ function onReturnToMenu(): void {
 document.addEventListener('restart', () => { onReturnToMenu() })
 
 document.addEventListener('DOMContentLoaded', () => {
+  setupInput({ onSelectAnswer, onToggleSettings: settingsModal.toggle })
+
   document.getElementById('start-btn')?.addEventListener('click', () => {
     onStartGame()
   })

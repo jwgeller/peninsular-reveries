@@ -159,6 +159,13 @@
   background: rgba(255, 209, 102, 0.08);
 }
 
+.area-card.gamepad-focus,
+.area-card:has(.area-radio:focus-visible) {
+  border-color: rgba(255, 209, 102, 0.85);
+  background: rgba(255, 209, 102, 0.12);
+  box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.24);
+}
+
 .area-radio {
   position: absolute;
   width: 1px;
@@ -234,6 +241,12 @@
   border-color: rgba(255, 209, 102, 0.4);
 }
 
+.level-selector label.gamepad-focus span,
+.level-selector label:has(input:focus-visible) span {
+  border-color: rgba(255, 209, 102, 0.85);
+  box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.24);
+}
+
 .area-card:not(:has(.area-radio:checked)) .level-selector {
   display: none;
 }
@@ -270,6 +283,12 @@
 .chomp-btn:hover {
   transform: translateY(-1px);
   opacity: 0.92;
+}
+
+.chomp-btn:focus-visible,
+.chomp-btn.gamepad-focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .chomp-btn:active {
@@ -919,6 +938,12 @@
   font-weight: 700;
 }
 
+.mode-toggle-btn:focus-visible,
+.mode-toggle-btn.gamepad-focus {
+  outline: 3px solid rgba(255, 209, 102, 0.9);
+  outline-offset: 3px;
+}
+
 /* Frenzy config panel */
 #frenzy-config {
   margin-top: 0.75rem;
@@ -962,6 +987,11 @@
   cursor: pointer;
 }
 
+.mode-radio-group label.gamepad-focus,
+.mode-radio-group label:has(input:focus-visible) {
+  color: var(--accent);
+}
+
 .frenzy-field {
   display: flex;
   flex-direction: column;
@@ -997,6 +1027,12 @@
 .color-swatch:focus {
   border-color: #fff;
   transform: scale(1.15);
+}
+
+.color-swatch.gamepad-focus {
+  border-color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.28);
 }
 
 /* NPC hippo positioning */

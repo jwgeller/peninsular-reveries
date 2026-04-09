@@ -27,6 +27,7 @@
   ```
 - `toBeInViewport()` retries until the element is fully visible within viewport bounds, handling CSS transition timing automatically.
 - This catches elements that are technically visible but clipped by `overflow: hidden`, positioned off-screen, or pushed out of the viewport by layout bugs.
+- If a game advertises controller/gamepad support, add at least one smoke path driven by mocked gamepad input (`A`, `Start`, or D-pad) so non-pointer regressions are exercised before release.
 
 ## Attribution Sync
 
