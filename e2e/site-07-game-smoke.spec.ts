@@ -183,7 +183,9 @@ test.describe('SITE-07: Game smoke tests', () => {
     await expect(page.locator('#game-screen')).toBeVisible()
 
     for (let collected = 1; collected <= 3; collected++) {
-      await page.locator('#scene-a11y .sr-overlay-btn[data-item-type="letter"]').first().click({ force: true })
+        const availableLetters = page.locator('#scene-a11y .sr-overlay-btn[data-item-type="letter"]')
+        await expect(availableLetters.first()).toBeVisible()
+        await availableLetters.first().click()
       await expect(page.locator('#letters-count')).toHaveText(new RegExp(`^${collected}\\s*\\/\\s*\\d+$`))
     }
 
@@ -266,7 +268,9 @@ test.describe('SITE-07: Game smoke tests', () => {
     await expect(page.locator('#game-screen')).toBeVisible()
 
     for (let collected = 1; collected <= 3; collected++) {
-      await page.locator('#scene-a11y .sr-overlay-btn[data-item-type="letter"]').first().click({ force: true })
+      const availableLetters = page.locator('#scene-a11y .sr-overlay-btn[data-item-type="letter"]')
+      await expect(availableLetters.first()).toBeVisible()
+      await availableLetters.first().click()
       await expect(page.locator('#letters-count')).toHaveText(new RegExp(`^${collected}\\s*\\/\\s*\\d+$`))
     }
 
@@ -314,7 +318,9 @@ test.describe('SITE-07: Game smoke tests', () => {
     await expect(page.locator('#game-screen')).toBeVisible()
 
     for (let collected = 1; collected <= 3; collected++) {
-      await page.locator('#scene-a11y .sr-overlay-btn[data-item-type="letter"]').first().click({ force: true })
+      const availableLetters = page.locator('#scene-a11y .sr-overlay-btn[data-item-type="letter"]')
+      await expect(availableLetters.first()).toBeVisible()
+      await availableLetters.first().click()
       await expect(page.locator('#letters-count')).toHaveText(new RegExp(`^${collected}\\s*\\/\\s*\\d+$`))
     }
 

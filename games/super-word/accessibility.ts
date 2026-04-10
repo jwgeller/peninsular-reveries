@@ -12,7 +12,7 @@ export function announceDistractorClicked(label: string): void {
 }
 
 export function announceLetterSelected(char: string, position: number): void {
-  announce(`Selected letter ${char} at position ${position}. Tap another letter to swap.`, 'polite')
+  announce(`Selected letter ${char} at position ${position}. Pick another letter to swap.`, 'polite')
 }
 
 export function announceLettersSwapped(char1: string, char2: string, allLetters: string[]): void {

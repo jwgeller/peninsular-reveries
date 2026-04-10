@@ -214,6 +214,14 @@ function onTileSelected(index: number): void {
   }
 
   const nextState = selectTile(prevState, index)
+  const didSwap = prevState.selectedTileIndex !== null
+    && prevState.selectedTileIndex !== index
+    && nextState.selectedTileIndex === null
+
+  if (didSwap) {
+    sfxSwap()
+  }
+
   setState(nextState)
   renderCollectedLetters()
 
@@ -228,12 +236,11 @@ function onTileSelected(index: number): void {
       nextState.collectedLetters[index].char,
       index + 1,
     )
-  } else if (prevState.selectedTileIndex !== null && prevState.selectedTileIndex !== index) {
-    // A swap happened through selectTile
+  } else if (didSwap && prevState.selectedTileIndex !== null) {
     const letters = nextState.collectedLetters.map(l => l.char)
     announceLettersSwapped(
-      letters[prevState.selectedTileIndex],
-      letters[index],
+      prevState.collectedLetters[prevState.selectedTileIndex].char,
+      prevState.collectedLetters[index].char,
       letters,
     )
   }
@@ -241,11 +248,12 @@ function onTileSelected(index: number): void {
 
 function onLettersSwapped(indexA: number, indexB: number): void {
   sfxSwap()
+  const prevLetters = getState().collectedLetters
   setState(swapLetters(getState(), indexA, indexB))
   renderCollectedLetters()
 
   const letters = getState().collectedLetters.map(l => l.char)
-  announceLettersSwapped(letters[indexA], letters[indexB], letters)
+  announceLettersSwapped(prevLetters[indexA].char, prevLetters[indexB].char, letters)
 
   // Refocus the tile at the swapped position
   requestAnimationFrame(() => {

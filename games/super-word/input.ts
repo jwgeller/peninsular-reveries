@@ -197,12 +197,7 @@ export function setupInput(
       }
     } else {
       // Click (no drag) — select tile
-      const state = getState()
-      if (state.selectedTileIndex !== null && state.selectedTileIndex !== dragSourceIndex) {
-        callbacks.onLettersSwapped(state.selectedTileIndex, dragSourceIndex)
-      } else {
-        callbacks.onTileSelected(dragSourceIndex)
-      }
+      callbacks.onTileSelected(dragSourceIndex)
     }
 
     cleanupDrag()
@@ -225,6 +220,15 @@ export function setupInput(
     dragActive = false
   }
 
+  function focusAdjacentTile(currentTile: HTMLElement, offset: number): void {
+    const tiles = Array.from(slotsEl.querySelectorAll('.letter-tile:not(.pending-flight)')) as HTMLElement[]
+    const currentTileIndex = tiles.indexOf(currentTile)
+    if (currentTileIndex === -1) return
+
+    const nextTile = tiles[currentTileIndex + offset]
+    if (nextTile) nextTile.focus()
+  }
+
   // ── Letter tile keyboard navigation ─────────────────────
   slotsEl.addEventListener('keydown', (e: KeyboardEvent) => {
     const target = e.target as HTMLElement
@@ -233,15 +237,12 @@ export function setupInput(
     const index = parseInt(target.dataset.index ?? '-1', 10)
     if (index < 0) return
 
-    if (e.key === 'ArrowLeft' && index > 0) {
+    if (e.key === 'ArrowLeft') {
       e.preventDefault()
-      callbacks.onLettersSwapped(index, index - 1)
+      focusAdjacentTile(target, -1)
     } else if (e.key === 'ArrowRight') {
-      const state = getState()
-      if (index < state.collectedLetters.length - 1) {
-        e.preventDefault()
-        callbacks.onLettersSwapped(index, index + 1)
-      }
+      e.preventDefault()
+      focusAdjacentTile(target, 1)
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       callbacks.onTileSelected(index)
@@ -472,12 +473,7 @@ export function setupInput(
     if (focused.classList.contains('letter-tile')) {
       const index = parseInt(focused.dataset.index ?? '-1', 10)
       if (index < 0) return
-      const state = getState()
-      if (state.selectedTileIndex !== null && state.selectedTileIndex !== index) {
-        callbacks.onLettersSwapped(state.selectedTileIndex, index)
-      } else {
-        callbacks.onTileSelected(index)
-      }
+      callbacks.onTileSelected(index)
       return
     }
 
