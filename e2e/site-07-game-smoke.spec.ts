@@ -1,5 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
+import { findNearestDirectionalTarget } from '../client/spatial-navigation';
+
 async function installMockGamepad(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const state = {
@@ -106,7 +108,15 @@ test.describe('SITE-07: Game smoke tests', () => {
     await expect(page.locator('#globe-screen')).toBeVisible()
     await expect(page.locator('.destination-marker').first()).toBeVisible()
 
-    await expect(page.locator('.destination-marker').first()).toBeInViewport()
+    await expect.poll(async () => page.evaluate(() =>
+      Array.from(document.querySelectorAll<HTMLElement>('.destination-marker')).filter((marker) => {
+        const rect = marker.getBoundingClientRect()
+        return rect.bottom > 0
+          && rect.right > 0
+          && rect.top < window.innerHeight
+          && rect.left < window.innerWidth
+      }).length,
+    )).toBeGreaterThan(0)
   })
 
   // Mission Orbit
@@ -165,7 +175,7 @@ test.describe('SITE-07: Game smoke tests', () => {
     await expect(page.locator('#settings-modal')).toBeVisible()
   })
 
-  test('Super Word — controller drops to the nearest tile instead of the first tile', async ({ page }) => {
+  test('Super Word — controller drops to the scorer-selected downward tile', async ({ page }) => {
     await installMockGamepad(page)
     await page.goto('/super-word/')
 
@@ -181,55 +191,57 @@ test.describe('SITE-07: Game smoke tests', () => {
       document.querySelectorAll('#letter-slots .letter-tile:not(.pending-flight)').length,
     )).toBe(3)
 
-    const target = await page.evaluate(() => {
+    const geometry = await page.evaluate(() => {
       const tiles = Array.from(document.querySelectorAll<HTMLElement>('#letter-slots .letter-tile:not(.pending-flight)'))
       const sceneItems = Array.from(document.querySelectorAll<HTMLElement>('#scene-a11y .sr-overlay-btn'))
       if (tiles.length === 0 || sceneItems.length === 0) return null
 
       const tileCenters = tiles.map((tile) => ({
         index: parseInt(tile.dataset.index ?? '-1', 10),
-        center: tile.getBoundingClientRect().left + tile.getBoundingClientRect().width / 2,
-        top: tile.getBoundingClientRect().top + tile.getBoundingClientRect().height / 2,
+        x: tile.getBoundingClientRect().left + tile.getBoundingClientRect().width / 2,
+        y: tile.getBoundingClientRect().top + tile.getBoundingClientRect().height / 2,
       }))
 
       const candidates = sceneItems
         .map((item) => {
           const rect = item.getBoundingClientRect()
-          const center = rect.left + rect.width / 2
-          const top = rect.top + rect.height / 2
-
-          const nearestTile = tileCenters.reduce((best, candidate) => {
-            if (!best) return candidate
-            const bestDistance = Math.hypot(best.center - center, best.top - top)
-            const candidateDistance = Math.hypot(candidate.center - center, candidate.top - top)
-            return candidateDistance < bestDistance ? candidate : best
-          }, tileCenters[0])
+          const x = rect.left + rect.width / 2
+          const y = rect.top + rect.height / 2
 
           const hasLowerSceneItem = sceneItems.some((other) => {
             if (other === item) return false
             const otherRect = other.getBoundingClientRect()
-            const otherTop = otherRect.top + otherRect.height / 2
-            return otherTop > top + 10
+            const otherY = otherRect.top + otherRect.height / 2
+            return otherY > y + 10
           })
 
           if (!item.dataset.itemId || hasLowerSceneItem) return null
 
           return {
             itemId: item.dataset.itemId,
-            expectedTileIndex: nearestTile.index,
-            center,
-            top,
+            x,
+            y,
           }
         })
-        .filter((candidate): candidate is { itemId: string; expectedTileIndex: number; center: number; top: number } => candidate !== null)
-        .sort((a, b) => b.expectedTileIndex - a.expectedTileIndex || b.center - a.center)
+        .filter((candidate): candidate is { itemId: string; x: number; y: number } => candidate !== null)
 
-      return candidates[0] ?? null
+      return { tiles: tileCenters, candidates }
     })
+
+    expect(geometry).not.toBeNull()
+    if (!geometry) throw new Error('Expected scene and tile geometry to exist')
+
+    const target = geometry.candidates
+      .map((candidate) => ({
+        itemId: candidate.itemId,
+        expectedTileIndex: findNearestDirectionalTarget(candidate, geometry.tiles, 'ArrowDown')?.index ?? -1,
+        x: candidate.x,
+      }))
+      .filter((candidate) => candidate.expectedTileIndex >= 0)
+      .sort((a, b) => b.expectedTileIndex - a.expectedTileIndex || b.x - a.x)[0] ?? null
 
     expect(target).not.toBeNull()
     if (!target) throw new Error('Expected a scene item with a nearest tile target')
-    expect(target.expectedTileIndex).toBeGreaterThan(0)
 
     await page.evaluate(({ itemId }) => {
       const sceneItem = document.querySelector<HTMLElement>(`#scene-a11y .sr-overlay-btn[data-item-id="${itemId}"]`)

@@ -1,3 +1,5 @@
+import { findNearestDirectionalTarget, type NavigationDirection } from '../../client/spatial-navigation.js'
+
 export interface InputCallbacks {
   onSelectAnswer: (itemId: string) => void
   onToggleSettings: () => void
@@ -65,7 +67,7 @@ function focusGamepadTarget(target: HTMLElement): void {
   target.scrollIntoView({ block: 'nearest', inline: 'nearest' })
 }
 
-function focusNearestControl(candidates: HTMLElement[], direction: string): void {
+function focusNearestControl(candidates: HTMLElement[], direction: NavigationDirection): void {
   if (candidates.length === 0) return
 
   const focused = document.activeElement as HTMLElement | null
@@ -90,88 +92,33 @@ function getActiveSceneItems(): HTMLElement[] {
   )
 }
 
-function getDirectionalMetrics(
-  dx: number,
-  dy: number,
-  direction: string,
-): { crossAxisDistance: number; primaryDistance: number; totalDistance: number } | null {
-  switch (direction) {
-    case 'ArrowUp':
-      if (dy >= -10) return null
-      return {
-        crossAxisDistance: Math.abs(dx),
-        primaryDistance: -dy,
-        totalDistance: Math.hypot(dx, dy),
-      }
-    case 'ArrowDown':
-      if (dy <= 10) return null
-      return {
-        crossAxisDistance: Math.abs(dx),
-        primaryDistance: dy,
-        totalDistance: Math.hypot(dx, dy),
-      }
-    case 'ArrowLeft':
-      if (dx >= -10) return null
-      return {
-        crossAxisDistance: Math.abs(dy),
-        primaryDistance: -dx,
-        totalDistance: Math.hypot(dx, dy),
-      }
-    case 'ArrowRight':
-      if (dx <= 10) return null
-      return {
-        crossAxisDistance: Math.abs(dy),
-        primaryDistance: dx,
-        totalDistance: Math.hypot(dx, dy),
-      }
-    default:
-      return null
-  }
-}
-
 function findNearestInDirection(
   current: HTMLElement,
   candidates: HTMLElement[],
-  direction: string,
+  direction: NavigationDirection,
 ): HTMLElement | null {
   const currentRect = current.getBoundingClientRect()
-  const cx = currentRect.left + currentRect.width / 2
-  const cy = currentRect.top + currentRect.height / 2
-
-  let best: HTMLElement | null = null
-  let bestMetrics: { crossAxisDistance: number; primaryDistance: number; totalDistance: number } | null = null
-
-  for (const candidate of candidates) {
-    if (candidate === current) continue
-    const rect = candidate.getBoundingClientRect()
-    const px = rect.left + rect.width / 2
-    const py = rect.top + rect.height / 2
-    const dx = px - cx
-    const dy = py - cy
-    const metrics = getDirectionalMetrics(dx, dy, direction)
-
-    if (!metrics) continue
-
-    if (
-      !bestMetrics
-      || metrics.crossAxisDistance < bestMetrics.crossAxisDistance
-      || (
-        metrics.crossAxisDistance === bestMetrics.crossAxisDistance
-        && (
-          metrics.primaryDistance < bestMetrics.primaryDistance
-          || (
-            metrics.primaryDistance === bestMetrics.primaryDistance
-            && metrics.totalDistance < bestMetrics.totalDistance
-          )
-        )
-      )
-    ) {
-      best = candidate
-      bestMetrics = metrics
-    }
+  const currentPoint = {
+    x: currentRect.left + currentRect.width / 2,
+    y: currentRect.top + currentRect.height / 2,
   }
 
-  return best
+  const nearest = findNearestDirectionalTarget(
+    currentPoint,
+    candidates
+      .filter((candidate) => candidate !== current)
+      .map((candidate) => {
+        const rect = candidate.getBoundingClientRect()
+        return {
+          element: candidate,
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        }
+      }),
+    direction,
+  )
+
+  return nearest?.element ?? null
 }
 
 function getFocusedItem(): HTMLElement | null {
@@ -235,7 +182,7 @@ export function setupInput(callbacks: InputCallbacks): void {
         return
       }
 
-      const nearest = findNearestInDirection(focused, items, event.key)
+      const nearest = findNearestInDirection(focused, items, event.key as NavigationDirection)
       if (nearest) {
         focused.tabIndex = -1
         nearest.tabIndex = 0
@@ -255,7 +202,7 @@ export function setupInput(callbacks: InputCallbacks): void {
   }
   document.addEventListener('keydown', keydownHandler)
 
-  function focusGameplayItem(direction: string): void {
+  function focusGameplayItem(direction: NavigationDirection): void {
     const items = getActiveSceneItems()
     const focused = getFocusedItem()
 
@@ -274,7 +221,7 @@ export function setupInput(callbacks: InputCallbacks): void {
     }
   }
 
-  function focusCurrentContext(direction: string): void {
+  function focusCurrentContext(direction: NavigationDirection): void {
     if (isModalOpen()) {
       focusNearestControl(getModalTargets(), direction)
       return
@@ -380,7 +327,7 @@ export function setupInput(callbacks: InputCallbacks): void {
       const axis1 = pad.axes[1] ?? 0
 
       if (now - lastGamepadAction >= debounce) {
-        let direction: string | null = null
+        let direction: NavigationDirection | null = null
 
         if (dpadUp && !prevDpadUp) direction = 'ArrowUp'
         else if (dpadDown && !prevDpadDown) direction = 'ArrowDown'

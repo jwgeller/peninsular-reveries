@@ -1,3 +1,5 @@
+import { findNearestDirectionalTarget, type NavigationDirection } from '../../client/spatial-navigation.js'
+
 import type { GameState, Puzzle, SceneItem } from './types.js'
 
 declare global {
@@ -93,7 +95,7 @@ export function setupInput(
       const currentIdx = uncollected.indexOf(target)
       if (currentIdx === -1) return
 
-      const nearest = findNearestInDirection(target, uncollected, e.key)
+      const nearest = findNearestInDirection(target, uncollected, e.key as NavigationDirection)
       if (nearest) {
         target.tabIndex = -1
         nearest.tabIndex = 0
@@ -102,89 +104,34 @@ export function setupInput(
     }
   })
 
-  function getDirectionalMetrics(
-    dx: number,
-    dy: number,
-    direction: string,
-  ): { crossAxisDistance: number; primaryDistance: number; totalDistance: number } | null {
-    switch (direction) {
-      case 'ArrowUp':
-        if (dy >= -10) return null
-        return {
-          crossAxisDistance: Math.abs(dx),
-          primaryDistance: -dy,
-          totalDistance: Math.hypot(dx, dy),
-        }
-      case 'ArrowDown':
-        if (dy <= 10) return null
-        return {
-          crossAxisDistance: Math.abs(dx),
-          primaryDistance: dy,
-          totalDistance: Math.hypot(dx, dy),
-        }
-      case 'ArrowLeft':
-        if (dx >= -10) return null
-        return {
-          crossAxisDistance: Math.abs(dy),
-          primaryDistance: -dx,
-          totalDistance: Math.hypot(dx, dy),
-        }
-      case 'ArrowRight':
-        if (dx <= 10) return null
-        return {
-          crossAxisDistance: Math.abs(dy),
-          primaryDistance: dx,
-          totalDistance: Math.hypot(dx, dy),
-        }
-      default:
-        return null
-    }
-  }
-
   function findNearestInDirection(
     current: HTMLElement,
     candidates: HTMLElement[],
-    direction: string,
+    direction: NavigationDirection,
   ): HTMLElement | null {
     const currentRect = current.getBoundingClientRect()
-    const cx = currentRect.left + currentRect.width / 2
-    const cy = currentRect.top + currentRect.height / 2
-
-    let best: HTMLElement | null = null
-    let bestMetrics: { crossAxisDistance: number; primaryDistance: number; totalDistance: number } | null = null
-
-    for (const candidate of candidates) {
-      if (candidate === current) continue
-      const rect = candidate.getBoundingClientRect()
-      const px = rect.left + rect.width / 2
-      const py = rect.top + rect.height / 2
-      const dx = px - cx
-      const dy = py - cy
-      const metrics = getDirectionalMetrics(dx, dy, direction)
-
-      if (!metrics) continue
-
-      if (
-        !bestMetrics
-        || metrics.crossAxisDistance < bestMetrics.crossAxisDistance
-        || (
-          metrics.crossAxisDistance === bestMetrics.crossAxisDistance
-          && (
-            metrics.primaryDistance < bestMetrics.primaryDistance
-            || (
-              metrics.primaryDistance === bestMetrics.primaryDistance
-              && metrics.totalDistance < bestMetrics.totalDistance
-            )
-          )
-        )
-      ) {
-        best = candidate
-        bestMetrics = metrics
-      }
+    const currentPoint = {
+      x: currentRect.left + currentRect.width / 2,
+      y: currentRect.top + currentRect.height / 2,
     }
 
+    const nearest = findNearestDirectionalTarget(
+      currentPoint,
+      candidates
+        .filter((candidate) => candidate !== current)
+        .map((candidate) => {
+          const rect = candidate.getBoundingClientRect()
+          return {
+            element: candidate,
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+          }
+        }),
+      direction,
+    )
+
     // No wrap-around — if nothing in that direction, stay put
-    return best
+    return nearest?.element ?? null
   }
 
   // ── Letter tile interaction (Pointer Events) ────────────
@@ -314,7 +261,7 @@ export function setupInput(
   // ── Gamepad support (Xbox Bluetooth controller) ─────────
   const STICK_THRESHOLD = 0.5
   const prevButtons: boolean[] = []
-  let prevStickDir = ''
+  let prevStickDir: NavigationDirection | null = null
   let stickCooldown = 0
   let lastSceneItemId: string | null = null
   let lastTileIndex: number | null = null
@@ -412,7 +359,7 @@ export function setupInput(
     el.focus()
   }
 
-  function focusNearestItem(direction: string): void {
+  function focusNearestItem(direction: NavigationDirection): void {
     const focused = document.activeElement as HTMLElement
     const sceneItems = getSceneItems()
     const tiles = getTiles()
@@ -496,7 +443,7 @@ export function setupInput(
     }
   }
 
-  function focusNearestControl(direction: string, candidates: HTMLElement[]): void {
+  function focusNearestControl(direction: NavigationDirection, candidates: HTMLElement[]): void {
     if (candidates.length === 0) return
 
     const focused = document.activeElement as HTMLElement | null
@@ -559,7 +506,7 @@ export function setupInput(
     return true
   }
 
-  function focusInCurrentContext(direction: string): void {
+  function focusInCurrentContext(direction: NavigationDirection): void {
     if (isCelebrationVisible()) {
       const continueBtn = document.getElementById('celebration-continue-btn') as HTMLElement | null
       if (continueBtn) gamepadFocus(continueBtn)
@@ -705,7 +652,7 @@ export function setupInput(
     } else if (gp.axes.length >= 2) {
       const lx = gp.axes[0]
       const ly = gp.axes[1]
-      let dir = ''
+      let dir: NavigationDirection | null = null
 
       if (Math.abs(lx) > STICK_THRESHOLD || Math.abs(ly) > STICK_THRESHOLD) {
         if (Math.abs(lx) > Math.abs(ly)) {
