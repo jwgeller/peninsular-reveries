@@ -49,7 +49,7 @@ For project architecture, game quality standards, and testing conventions, load 
 
 ## Orchestrated Workflow
 
-- When the user says `cue` alone, tell them to start a new chat session with the `@Orchestrator` agent. Do not begin execution directly, do not invoke the Orchestrator mid-session, and do not attempt to execute movements yourself. The Orchestrator must start with a fresh context.
+- When the user asks to dispatch the active score from a fresh chat, or says a bootstrap trigger like `cue`, `start`, `run`, `dispatch`, or `go` by itself, tell them to start a new chat session with the `@Orchestrator` agent. Do not begin execution directly, do not invoke the Orchestrator mid-session, and do not attempt to execute movements yourself. The Orchestrator must start with a fresh chat, but a short bootstrap message is allowed and should be treated as ignorable startup text rather than task context.
 - Scores live in `/memories/repo/plans/active-score.md` and there is exactly one active score.
 
 ## Environment Context
