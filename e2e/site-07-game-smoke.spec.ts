@@ -245,4 +245,52 @@ test.describe('SITE-07: Game smoke tests', () => {
       return parseInt(active.dataset.index ?? '-1', 10)
     })).toBe(target.expectedTileIndex)
   })
+
+  test('Super Word — controller keeps left and right within the collected letter row', async ({ page }) => {
+    await installMockGamepad(page)
+    await page.goto('/super-word/')
+
+    await tapGamepadButton(page, 0)
+    await expect(page.locator('#game-screen')).toBeVisible()
+
+    for (let collected = 1; collected <= 3; collected++) {
+      await page.locator('#scene-a11y .sr-overlay-btn[data-item-type="letter"]').first().click({ force: true })
+      await expect(page.locator('#letters-count')).toHaveText(new RegExp(`^${collected}\\s*\\/\\s*\\d+$`))
+    }
+
+    await expect.poll(async () => page.evaluate(() =>
+      document.querySelectorAll('#letter-slots .letter-tile:not(.pending-flight)').length,
+    )).toBe(3)
+
+    await page.evaluate(() => {
+      document.body.classList.add('gamepad-active')
+      const tile = document.querySelector<HTMLElement>('#letter-slots .letter-tile[data-index="1"]')
+      if (!tile) throw new Error('Expected middle tile to exist')
+      tile.focus()
+    })
+
+    await tapGamepadButton(page, 0)
+
+    await expect.poll(async () => page.evaluate(() => {
+      const active = document.activeElement as HTMLElement | null
+      if (!active?.classList.contains('letter-tile')) return -1
+      return parseInt(active.dataset.index ?? '-1', 10)
+    })).toBe(1)
+
+    await tapGamepadButton(page, 15)
+
+    await expect.poll(async () => page.evaluate(() => {
+      const active = document.activeElement as HTMLElement | null
+      if (!active?.classList.contains('letter-tile')) return -1
+      return parseInt(active.dataset.index ?? '-1', 10)
+    })).toBe(2)
+
+    await tapGamepadButton(page, 14)
+
+    await expect.poll(async () => page.evaluate(() => {
+      const active = document.activeElement as HTMLElement | null
+      if (!active?.classList.contains('letter-tile')) return -1
+      return parseInt(active.dataset.index ?? '-1', 10)
+    })).toBe(1)
+  })
 })

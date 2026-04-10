@@ -208,6 +208,12 @@ function onTileSelected(index: number): void {
   setState(selectTile(prevState, index))
   renderCollectedLetters()
 
+  requestAnimationFrame(() => {
+    const focusIndex = getState().selectedTileIndex ?? index
+    const tile = slotsEl.querySelector(`[data-index="${focusIndex}"]`) as HTMLElement | null
+    if (tile) tile.focus()
+  })
+
   if (getState().selectedTileIndex !== null) {
     announceLetterSelected(
       getState().collectedLetters[index].char,

@@ -90,6 +90,45 @@ function getActiveSceneItems(): HTMLElement[] {
   )
 }
 
+function getDirectionalMetrics(
+  dx: number,
+  dy: number,
+  direction: string,
+): { crossAxisDistance: number; primaryDistance: number; totalDistance: number } | null {
+  switch (direction) {
+    case 'ArrowUp':
+      if (dy >= -10) return null
+      return {
+        crossAxisDistance: Math.abs(dx),
+        primaryDistance: -dy,
+        totalDistance: Math.hypot(dx, dy),
+      }
+    case 'ArrowDown':
+      if (dy <= 10) return null
+      return {
+        crossAxisDistance: Math.abs(dx),
+        primaryDistance: dy,
+        totalDistance: Math.hypot(dx, dy),
+      }
+    case 'ArrowLeft':
+      if (dx >= -10) return null
+      return {
+        crossAxisDistance: Math.abs(dy),
+        primaryDistance: -dx,
+        totalDistance: Math.hypot(dx, dy),
+      }
+    case 'ArrowRight':
+      if (dx <= 10) return null
+      return {
+        crossAxisDistance: Math.abs(dy),
+        primaryDistance: dx,
+        totalDistance: Math.hypot(dx, dy),
+      }
+    default:
+      return null
+  }
+}
+
 function findNearestInDirection(
   current: HTMLElement,
   candidates: HTMLElement[],
@@ -100,7 +139,7 @@ function findNearestInDirection(
   const cy = currentRect.top + currentRect.height / 2
 
   let best: HTMLElement | null = null
-  let bestDist = Infinity
+  let bestMetrics: { crossAxisDistance: number; primaryDistance: number; totalDistance: number } | null = null
 
   for (const candidate of candidates) {
     if (candidate === current) continue
@@ -109,20 +148,26 @@ function findNearestInDirection(
     const py = rect.top + rect.height / 2
     const dx = px - cx
     const dy = py - cy
+    const metrics = getDirectionalMetrics(dx, dy, direction)
 
-    let inDirection = false
-    switch (direction) {
-      case 'ArrowUp': inDirection = dy < -10; break
-      case 'ArrowDown': inDirection = dy > 10; break
-      case 'ArrowLeft': inDirection = dx < -10; break
-      case 'ArrowRight': inDirection = dx > 10; break
-    }
+    if (!metrics) continue
 
-    if (!inDirection) continue
-    const dist = Math.sqrt(dx * dx + dy * dy)
-    if (dist < bestDist) {
-      bestDist = dist
+    if (
+      !bestMetrics
+      || metrics.crossAxisDistance < bestMetrics.crossAxisDistance
+      || (
+        metrics.crossAxisDistance === bestMetrics.crossAxisDistance
+        && (
+          metrics.primaryDistance < bestMetrics.primaryDistance
+          || (
+            metrics.primaryDistance === bestMetrics.primaryDistance
+            && metrics.totalDistance < bestMetrics.totalDistance
+          )
+        )
+      )
+    ) {
       best = candidate
+      bestMetrics = metrics
     }
   }
 
