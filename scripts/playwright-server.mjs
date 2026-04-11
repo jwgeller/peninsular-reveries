@@ -32,12 +32,12 @@ function run(command, args, onExit) {
   return child
 }
 
-run('npm', ['run', 'build'], (code) => {
+run('pnpm', ['build'], (code) => {
   if (code !== 0) {
     process.exit(code)
   }
 
-  const serve = run('npx', ['serve', 'dist', '-l', PORT], (serveCode) => {
+  const serve = run('pnpm', ['exec', 'serve', 'dist', '-l', PORT], (serveCode) => {
     process.exit(serveCode)
   })
 

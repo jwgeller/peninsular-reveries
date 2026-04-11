@@ -10,8 +10,8 @@
 
 1. Run `git status --short` and make sure only intended files changed.
 2. Inspect the staged or final diff for `.env`, `token`, `apikey`, `api_key`, `secret`, `Authorization`, and private-key material.
-3. Run the repo validation gate that matches the scope: at minimum `npm run check`, and for release-ready work prefer `npm run test:local`.
-4. If attributions changed, run `npm run sync:attributions` before the final validation pass.
+3. Run the repo validation gate that matches the scope: at minimum `pnpm check`, and for release-ready work prefer `pnpm test:local`.
+4. If attributions changed, run `pnpm sync:attributions` before the final validation pass.
 5. If media or PWA assets changed, confirm the scoped service worker cache list and version were updated.
 
 ## Remediation Expectations

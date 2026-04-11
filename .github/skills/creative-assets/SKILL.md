@@ -42,7 +42,7 @@ When a step is marked ❌ agent, pause and write a handoff note instead of silen
 
 - **CC0 or public domain only.** Verify the license explicitly before download. Do not assume; open the license page and confirm.
 - **File-size budget.** Raster images ≤ 60 KB per asset. SVGs ≤ 8 KB. Audio one-shots ≤ 64 kbps mono OGG with tight trims.
-- **Attribution required.** Every third-party asset must have an entry in `ATTRIBUTIONS.md` via the per-game data file in `games/<game>/attributions.ts`. Run `npm run sync:attributions` after updating.
+- **Attribution required.** Every third-party asset must have an entry in `ATTRIBUTIONS.md` via the per-game data file in `games/<game>/attributions.ts`. Run `pnpm sync:attributions` after updating.
 - **Match the visual or sonic language** of the game. External assets that feel generic or out-of-register hurt cohesion more than they help.
 - **Minimize processing passes.** Evaluate the rendered file after the real filter or optimization chain, not just a raw preview.
 
@@ -87,13 +87,13 @@ The fetch script stages raw previews and renders final OGG variants per game.
 
 ```
 # List approved samples for a game
-npx tsx .github/skills/creative-assets/scripts/fetch-game-audio.ts --game <slug> --list
+pnpm exec tsx .github/skills/creative-assets/scripts/fetch-game-audio.ts --game <slug> --list
 
 # Regenerate one approved sample
-npx tsx .github/skills/creative-assets/scripts/fetch-game-audio.ts --game <slug> --only <sample-id> --yes
+pnpm exec tsx .github/skills/creative-assets/scripts/fetch-game-audio.ts --game <slug> --only <sample-id> --yes
 
 # Regenerate all approved samples for a game
-npx tsx .github/skills/creative-assets/scripts/fetch-game-audio.ts --game <slug> --yes
+pnpm exec tsx .github/skills/creative-assets/scripts/fetch-game-audio.ts --game <slug> --yes
 ```
 
 Requires `FREESOUND_API_KEY` in `.env` and `ffmpeg` on `PATH`.
@@ -111,8 +111,8 @@ Extend the `gameAudioConfigs` map in the script as other games add sample manife
 ## Pixel Art Generator
 
 ```
-npm run generate:pixel-art -- --emoji "🗼" --name parisTower --width 20 --height 14 --max-colors 6
-npm run generate:pixel-art -- --codepoints 1F5FC --name parisTower --width 20 --height 14 --max-colors 6
+pnpm generate:pixel-art -- --emoji "🗼" --name parisTower --width 20 --height 14 --max-colors 6
+pnpm generate:pixel-art -- --codepoints 1F5FC --name parisTower --width 20 --height 14 --max-colors 6
 ```
 
 See [references/pixel-art-workflow.md](./references/pixel-art-workflow.md) for size targets, tuning levers, and the integration pattern.
@@ -123,6 +123,6 @@ See [references/pixel-art-workflow.md](./references/pixel-art-workflow.md) for s
 
 1. Asset saved under the correct game or public folder.
 2. File size within budget (raster ≤ 60 KB, SVG ≤ 8 KB, audio ≤ 64 kbps mono).
-3. Attribution data file updated; `npm run sync:attributions` run.
+3. Attribution data file updated; `pnpm sync:attributions` run.
 4. For audio: per-game sample manifest and service-worker cache list updated; cache name bumped if bundled bytes changed.
 5. Build passes and page budget checks green.

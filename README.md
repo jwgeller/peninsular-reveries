@@ -35,3 +35,14 @@ Peninsular Reveries holds itself to the same standards as [PBS Kids](https://pbs
 5. Add the build and dev-server entry points in `build.ts` and `server.ts`.
 6. Add scoped PWA assets in `public/[game-slug]/`.
 7. Add tests for state logic and page behavior.
+
+## Development
+
+- Runtime: Node `24.14.1` and pnpm `10.33.0`.
+- Install dependencies with `pnpm install`.
+- Start local development with `pnpm dev`.
+- Run lint and typecheck with `pnpm check`.
+- Run the full local validation gate with `pnpm test:local`.
+- Build the static site with `pnpm build`.
+- Prefer `pnpm exec <tool>` over `npx <tool>` for repo-local CLIs.
+- If install scripts are blocked, review the package first, then use `pnpm approve-builds` or update `onlyBuiltDependencies` in `pnpm-workspace.yaml` when the allowlist should be committed.

@@ -50,7 +50,7 @@ export function renderAttributionsMarkdown(): string {
   const lines: string[] = [
     '# Attributions',
     '',
-    '> This file is generated from per-game files in `games/*/attributions.ts`. Run `npm run sync:attributions` after changes.',
+    '> This file is generated from per-game files in `games/*/attributions.ts`. Run `pnpm sync:attributions` after changes.',
     '',
     '## Repository',
     '',

@@ -3,30 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "npm@11.12.0",
+  "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=25.0.0"
+    "node": ">=24.14.1 <25"
   },
   "scripts": {
     "build": "tsx --tsconfig config/tsconfig.json build.ts",
-    "check": "npm run lint && npm run typecheck",
+    "check": "pnpm lint && pnpm typecheck",
     "lint": "eslint --config config/eslint.config.mjs .",
     "generate:pixel-art": "tsx --tsconfig config/tsconfig.json scripts/generate-pixel-art.ts",
     "sync:attributions": "tsx --tsconfig config/tsconfig.json scripts/sync-attributions.ts",
     "typecheck": "tsc --noEmit -p config/tsconfig.json",
     "dev": "tsx --tsconfig config/tsconfig.json server.ts",
-    "test": "npm run test:unit && npm run test:e2e",
-    "test:local": "npm run check && npm run test",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "test:local": "pnpm check && pnpm test",
     "test:unit": "node --import tsx --test app/**/*.test.ts client/**/*.test.ts config/**/*.test.ts",
-    "test:e2e": "npx playwright test --config config/playwright.config.ts --reporter=list",
-    "test:report": "npm run test:unit && npx playwright test --config config/playwright.config.ts",
+    "test:e2e": "pnpm exec playwright test --config config/playwright.config.ts --reporter=list",
+    "test:report": "pnpm test:unit && pnpm exec playwright test --config config/playwright.config.ts",
     "prepare": "node scripts/install-git-hooks.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.1",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.59.1",
-    "@types/node": "25.5.2",
+    "@types/node": "24.12.2",
     "esbuild": "0.28.0",
     "eslint": "10.1.0",
     "eslint-plugin-jsx-a11y": "6.10.2",

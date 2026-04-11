@@ -10,13 +10,13 @@
 
 ```sh
 # 20×14 (Pixel Passport destination)
-npm run generate:pixel-art -- --emoji 🗼 --name eiffel-tower --width 20 --height 14
+pnpm generate:pixel-art -- --emoji 🗼 --name eiffel-tower --width 20 --height 14
 
 # 10×6 (compact icon)
-npm run generate:pixel-art -- --emoji 🚀 --name rocket --width 10 --height 6
+pnpm generate:pixel-art -- --emoji 🚀 --name rocket --width 10 --height 6
 
 # 12×12 (square sprite)
-npm run generate:pixel-art -- --emoji 🌍 --name earth --width 12 --height 12 --max-colors 4
+pnpm generate:pixel-art -- --emoji 🌍 --name earth --width 12 --height 12 --max-colors 4
 ```
 
 ## Problematic Emoji Categories

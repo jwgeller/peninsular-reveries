@@ -35,7 +35,7 @@ For project architecture, game quality standards, and testing conventions, load 
 ## Session Expectations
 
 - Default to human-ready completion for non-trivial feature work. Do not stop at code edits alone when the clear user intent is ready for me to try it. Continue through generated-file sync, repository validation, and low-risk regression fixes unless the user explicitly scopes the work smaller.
-- Treat `npm run test:local` as the preferred end-state check before handoff when the change is large enough to affect app behavior beyond a single isolated file.
+- Treat `pnpm test:local` as the preferred end-state check before handoff when the change is large enough to affect app behavior beyond a single isolated file.
 - Treat secret hygiene as blocking release work. Do not leave real credentials, tokens, private keys, or committed `.env` secrets in the working tree or reachable history when the task is about review, release readiness, pushing, or security cleanup.
 - If a validation run finds an objective blocker to human testing that was introduced or exposed by the current work, fix it before stopping when the fix is clear and low-risk.
 - Ask the user a clarifying question only when the answer would materially change the implementation, or when proceeding would require a destructive, irreversible, or product-direction choice. If a reasonable default exists, use it and keep going.
@@ -48,18 +48,20 @@ For project architecture, game quality standards, and testing conventions, load 
 - Dev OS: Windows
 - CI OS: Ubuntu (`ubuntu-latest`)
 - Shell: PowerShell. Set `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` at session start to avoid mojibake with Unicode characters.
-- Node: `25.9.0`
-- npm: `11.12.1`
+- Node: `24.14.1`
+- pnpm: `10.33.0`
+- npm: `11.12.1` (bootstrap only)
 - Editor: VS Code with GitHub Copilot
 - GitHub CLI: `gh` is available and should be assumed authenticated. If auth fails, help the user recover and use `gh --help` for command discovery.
 - No Docker or container workflow is expected. Use direct Node execution.
 
 ## Key Commands
 
-- `npm run dev` -> local dev server
-- `npm run check` -> lint and typecheck
-- `npm run test:local` -> full local validation gate
-- `npm run build` -> static build
-- `npm run sync:attributions` -> regenerate `ATTRIBUTIONS.md`
+- `pnpm dev` -> local dev server
+- `pnpm check` -> lint and typecheck
+- `pnpm test:local` -> full local validation gate
+- `pnpm build` -> static build
+- `pnpm sync:attributions` -> regenerate `ATTRIBUTIONS.md`
 
-`npm install` configures the repo-owned pre-commit hook, and the hook runs `npm run test:local` automatically.
+`pnpm install` configures the repo-owned pre-commit hook, and the hook runs `pnpm test:local` automatically.
+Prefer `pnpm exec <tool>` over `npx <tool>` for repo-local CLIs. If install scripts are blocked, review the dependency and then use `pnpm approve-builds` or update `onlyBuiltDependencies` in `pnpm-workspace.yaml`.

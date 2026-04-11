@@ -9,4 +9,11 @@ if [ -z "$CODE_FILES" ]; then
   exit 0
 fi
 
-npm run test:local
+if command -v corepack >/dev/null 2>&1; then
+  corepack pnpm test:local
+elif command -v pnpm >/dev/null 2>&1; then
+  pnpm test:local
+else
+  echo "pre-commit: pnpm not found and corepack is unavailable" >&2
+  exit 1
+fi

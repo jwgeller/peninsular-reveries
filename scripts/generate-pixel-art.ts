@@ -62,8 +62,8 @@ function printHelp(): void {
   console.log(`Generate repo-ready pixel-art rows from an emoji.
 
 Usage:
-  npm run generate:pixel-art -- --emoji "🗼" --name parisTower --width 20 --height 14 --max-colors 6
-  npm run generate:pixel-art -- --codepoints 1F5FC --name parisTower --width 20 --height 14 --max-colors 6
+  pnpm generate:pixel-art -- --emoji "🗼" --name parisTower --width 20 --height 14 --max-colors 6
+  pnpm generate:pixel-art -- --codepoints 1F5FC --name parisTower --width 20 --height 14 --max-colors 6
 
 Options:
   --emoji <value>              Emoji to render.

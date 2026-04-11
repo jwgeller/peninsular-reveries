@@ -29,7 +29,7 @@
 - TypeScript `^5.9`
 - esbuild `^0.28`
 - tsx `^4.21`
-- Node `>=25.0` with the repo pinned to `25.9.0`
+- Node `>=24.14.1 <25` with the repo pinned to `24.14.1` via pnpm workspace settings
 
 ## Architecture Layout
 
@@ -90,7 +90,7 @@ server.ts                dev server with live reload
 10. Add scoped PWA assets in `public/[game-slug]/manifest.json` and `public/[game-slug]/sw.js`.
 11. Pass `includeNav={false}` and `includeFooter={false}` from the game controller.
 12. Add a `Menu` overlay with Home, controls help, settings, reduce-motion, and credits when needed.
-13. Run `npm run sync:attributions` to regenerate ATTRIBUTIONS.md.
+13. Run `pnpm sync:attributions` to regenerate ATTRIBUTIONS.md.
 14. Add both unit and e2e tests for new logic and UI behavior.
 
 ## Game Module Contract

@@ -1,0 +1,15 @@
+packages:
+  - .
+
+useNodeVersion: 24.14.1
+nodeVersion: 24.14.1
+engineStrict: true
+savePrefix: ''
+verifyDepsBeforeRun: error
+resolutionMode: time-based
+minimumReleaseAge: 1440
+blockExoticSubdeps: true
+strictDepBuilds: true
+onlyBuiltDependencies:
+  - esbuild
+  - playwright
