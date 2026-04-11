@@ -84,7 +84,7 @@
 
 ## In-Game Menu Standard
 
-Every game's settings modal uses a two-tab layout (Settings / Info) rendered by `GameTabbedModal`. An X close button (`aria-label="Close menu"`, `id="settings-close-btn"`, `className="modal-close"`) appears in the top-right corner of the dialog. The footer inside the dialog contains exactly two actions: **Restart** (a `<button>` with `id="restart-btn"` wired in the game's `main.ts`, returns player to the game's own start screen — no navigation away from the page) and **Quit** (an `<a>` element pointed at the site root via `withBasePath('/', siteBasePath)`, `className="...-quit-link"`). Use the exact labels "Restart" and "Quit". The former "Home" link in existing games must be relabeled "Quit". Games still using the legacy `GameSettingsModal` will be migrated to `GameTabbedModal` in MVT-8/9. Restart does not apply on the start screen itself (hide or omit in that context if needed, but consistency across games is more important — keeping it visible and simply re-showing the same screen is acceptable).
+Every game's settings modal uses a two-tab layout (Settings / Info) rendered by `GameTabbedModal`. An X close button (`aria-label="Close menu"`, `id="settings-close-btn"`, `className="modal-close"`) appears in the top-right corner of the dialog. The footer inside the dialog contains exactly two actions: **Restart** (a `<button>` with `id="restart-btn"` wired in the game's `main.ts`, returns player to the game's own start screen — no navigation away from the page) and **Quit** (an `<a>` element pointed at the site root via `withBasePath('/', siteBasePath)`, `className="...-quit-link"`). Use the exact labels "Restart" and "Quit". The former "Home" link in existing games must be relabeled "Quit". Games still using the legacy `GameSettingsModal` will be migrated to `GameTabbedModal` in a future migration pass. Restart does not apply on the start screen itself (hide or omit in that context if needed, but consistency across games is more important — keeping it visible and simply re-showing the same screen is acceptable).
 
 ## Quality Benchmarks
 
@@ -112,7 +112,7 @@ When making design decisions, ask:
 4. Can a child with low vision, motor difficulty, or hearing impairment complete this game?
 5. Is every word or concept concrete and imageable for a child at this grade level?
 
-## Field Review Checklist
+## Field Testing Checklist
 
 Before declaring a game human-ready for field testing, walk through this checklist:
 

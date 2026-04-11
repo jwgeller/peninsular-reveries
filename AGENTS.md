@@ -6,9 +6,17 @@
 
 For project architecture, game quality standards, and testing conventions, load the `review` skill in `.github/skills/review/` before doing substantial repo work.
 
+## Planning Overlays
+
+- When a plan touches visual assets, route art work through the `creative-assets` workflow or `scripts/generate-pixel-art.ts` with explicit iteration steps. Do not treat code agents as freeform art generators.
+- Plans involving CSS visual design should include visual checkpoints for key states such as idle, animating, and complete.
+- If NPCs share the player character's structure, specify whether NPCs animate identically to the player or remain static.
+- If a plan uses `GameScreen` with a non-`.active` activation mechanism, explicitly state how the active screen overrides base `transform`, `visibility`, and hit-testing behavior.
+- If a game includes a menu or settings modal, plan for a baseline home or quit path, controls help when gameplay exists, audio settings, reduce-motion control, and an info or credits path.
+
 ## Knowledge Persistence
 
-- Never write project knowledge to any Copilot memory path except orchestrated workflow plans in `/memories/repo/plans/`, which are ephemeral dispatch state.
+- Do not write reusable project knowledge to Copilot memory paths. Record it in the appropriate in-repo file instead.
 - When you learn something reusable about this project, record it in the appropriate in-repo file instead:
   - Architecture, conventions, build and deploy patterns -> `.github/skills/review/references/architecture.md`
   - Game quality, layout, pacing, visual rules -> `.github/skills/review/references/game-quality.md`
@@ -34,23 +42,6 @@ For project architecture, game quality standards, and testing conventions, load 
 - If the user says some version of continue until done, interpret done as human-ready unless genuinely blocked.
 - If the user says wrap it up or otherwise makes it clear that pushing finished work is welcome, treat that as permission to finish the current task end-to-end. When the work is validated and human-ready, and the commit scope is clear with no ambiguous unrelated changes, stage the intended files, create a concise commit, and push without another confirmation round. If the working tree is mixed or risky, stop short of commit or push and explain the blocker briefly.
 - After completing work, report what changed and what was verified.
-
-## Composing Plans
-
-- When composing plans for orchestrated execution, load the compose skill in `.github/skills/compose/`. It owns the full workflow, score structure, and movement format.
-- Embed relevant project constraints from the review skill references directly into each movement's intent so that performers do not need to load skills independently.
-
-## Executing Agent Guidance
-
-- Complete every step in the approved plan. When you finish one step, immediately start the next. Do not stop partway to ask whether you should continue.
-- If you hit an error, diagnose it and fix it. If you are genuinely stuck, explain the specific blocker. Do not abandon the remaining steps.
-- Before any push-ready handoff, inspect the changed files for accidental secrets or credential-like strings, and if a real secret was already committed, treat rotation plus history cleanup as required work rather than a documentation note.
-- After completing all planned work, run the relevant verification. If it passes, report what changed and what was verified.
-
-## Orchestrated Workflow
-
-- When the user asks to dispatch the active score from a fresh chat, or says a bootstrap trigger like `cue`, `start`, `run`, `dispatch`, or `go` by itself, tell them to start a new chat session with the `@Orchestrator` agent. Do not begin execution directly, do not invoke the Orchestrator mid-session, and do not attempt to execute movements yourself. The Orchestrator must start with a fresh chat, but a short bootstrap message is allowed and should be treated as ignorable startup text rather than task context.
-- Scores live in `/memories/repo/plans/active-score.md` and there is exactly one active score.
 
 ## Environment Context
 
