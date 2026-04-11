@@ -146,6 +146,7 @@ const pages: Record<string, string[]> = {
   'super-word': ['super-word/index.html', 'styles/game.css', 'client/shell.js', 'client/super-word/main.js'],
   chompers: ['chompers/index.html', 'styles/chompers.css', 'client/shell.js', 'client/chompers/main.js'],
   'pixel-passport': ['pixel-passport/index.html', 'styles/pixel-passport.css', 'client/shell.js', 'client/pixel-passport/main.js'],
+  'story-trail': ['story-trail/index.html', 'styles/story-trail.css', 'client/shell.js', 'client/story-trail/main.js'],
   '404': ['404.html', 'styles/main.css', 'client/shell.js', 'client/404.js'],
 }
 

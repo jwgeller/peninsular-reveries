@@ -47,6 +47,22 @@ export function setupInput(
     return !!overlay && !overlay.hidden
   }
 
+  function isSettingsOpen(): boolean {
+    const modal = document.getElementById('settings-modal')
+    return modal instanceof HTMLElement && !modal.hidden
+  }
+
+  function getModalFocusables(): HTMLElement[] {
+    const modal = document.getElementById('settings-modal')
+    if (!(modal instanceof HTMLElement) || modal.hidden) {
+      return []
+    }
+
+    return Array.from(modal.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )).filter((element) => !element.closest('[hidden]') && element.getClientRects().length > 0)
+  }
+
   // ── Navigation helpers ────────────────────────────────────
   function getUnlockedStops(): HTMLElement[] {
     return Array.from(document.querySelectorAll('.trail-stop-unlocked')) as HTMLElement[]
@@ -83,6 +99,10 @@ export function setupInput(
 
   // ── Keyboard ──────────────────────────────────────────────
   document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (isSettingsOpen()) {
+      return
+    }
+
     if (isInventoryOpen()) {
       if (e.key === 'Escape' || e.key === 'i' || e.key === 'I') {
         e.preventDefault()
@@ -164,6 +184,18 @@ export function setupInput(
 
   // ── Gamepad ───────────────────────────────────────────────
   function activateFocused(): void {
+    if (isSettingsOpen()) {
+      const modalFocusables = getModalFocusables()
+      const activeModalElement = document.activeElement as HTMLElement | null
+
+      if (activeModalElement && modalFocusables.includes(activeModalElement)) {
+        activeModalElement.click()
+      } else {
+        modalFocusables[0]?.focus()
+      }
+      return
+    }
+
     const focused = document.activeElement as HTMLElement | null
     if (!focused) return
 
@@ -178,6 +210,11 @@ export function setupInput(
   }
 
   function navigateDirection(dir: 'ArrowUp' | 'ArrowDown'): void {
+    if (isSettingsOpen()) {
+      navigateList(getModalFocusables(), dir)
+      return
+    }
+
     const context = getContext()
     if (isInventoryOpen()) {
       navigateList(getOverlayButtons(), dir)
@@ -221,7 +258,9 @@ export function setupInput(
             activateFocused()
             break
           case 1: // B — back
-            if (isInventoryOpen()) {
+            if (isSettingsOpen()) {
+              window.__settingsToggle?.()
+            } else if (isInventoryOpen()) {
               callbacks.onInventoryClose()
             } else if (getContext() === 'completion-view') {
               callbacks.onBackToTrail()

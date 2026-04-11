@@ -11,6 +11,7 @@ const ASSETS = [
   new URL('./client/404.js', self.registration.scope).toString(),
   new URL('./favicon.svg', self.registration.scope).toString(),
   new URL('./favicon-game-super-word.svg', self.registration.scope).toString(),
+  new URL('./favicon-game-story-trail.svg', self.registration.scope).toString(),
   new URL('./apple-touch-icon.png', self.registration.scope).toString(),
   new URL('./manifest.json', self.registration.scope).toString(),
   new URL('./chompers/', self.registration.scope).toString(),
@@ -52,6 +53,11 @@ const ASSETS = [
   new URL('./styles/game.css', self.registration.scope).toString(),
   new URL('./client/super-word/main.js', self.registration.scope).toString(),
   new URL('./super-word/manifest.json', self.registration.scope).toString(),
+  new URL('./story-trail/', self.registration.scope).toString(),
+  new URL('./story-trail/info/', self.registration.scope).toString(),
+  new URL('./styles/story-trail.css', self.registration.scope).toString(),
+  new URL('./client/story-trail/main.js', self.registration.scope).toString(),
+  new URL('./story-trail/manifest.json', self.registration.scope).toString(),
 ]
 
 self.addEventListener('install', (event) => {

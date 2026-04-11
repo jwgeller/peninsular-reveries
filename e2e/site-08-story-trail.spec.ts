@@ -1,5 +1,60 @@
 import { test, expect, type Page } from '@playwright/test';
 
+async function installMockGamepad(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const state = {
+      connected: true,
+      id: 'Mock Gamepad',
+      index: 0,
+      mapping: 'standard',
+      axes: [0, 0, 0, 0],
+      buttons: Array.from({ length: 16 }, () => ({ pressed: false, touched: false, value: 0 })),
+      timestamp: Date.now(),
+    };
+
+    Object.defineProperty(window, '__mockGamepadState', {
+      value: state,
+      configurable: true,
+    });
+
+    Object.defineProperty(navigator, 'getGamepads', {
+      configurable: true,
+      value: () => [state, null, null, null],
+    });
+  });
+}
+
+async function setGamepadButton(page: Page, index: number, pressed: boolean): Promise<void> {
+  await page.evaluate(({ index, pressed }) => {
+    const gamepadWindow = window as unknown as Window & {
+      __mockGamepadState: {
+        buttons: Array<{ pressed: boolean; touched: boolean; value: number }>
+        timestamp: number
+      }
+    };
+
+    const state = gamepadWindow.__mockGamepadState;
+    state.buttons[index] = {
+      ...state.buttons[index],
+      pressed,
+      touched: pressed,
+      value: pressed ? 1 : 0,
+    };
+    state.timestamp = Date.now();
+  }, { index, pressed });
+}
+
+async function tapGamepadButton(page: Page, index: number): Promise<void> {
+  await setGamepadButton(page, index, true);
+  await page.waitForTimeout(60);
+  await setGamepadButton(page, index, false);
+  await page.waitForTimeout(260);
+}
+
+async function isModalFocusContained(page: Page): Promise<boolean> {
+  return page.evaluate(() => document.getElementById('settings-modal')?.contains(document.activeElement) ?? false);
+}
+
 async function startWeatherStory(page: Page): Promise<void> {
   const weatherStop = page.getByRole('button', { name: 'Play Weather Watcher' })
 
@@ -130,6 +185,32 @@ test.describe('SITE-08: Story Trail', () => {
     await expect(page.locator('#settings-modal')).toContainText('Hold the right item, then tap the matching choice.')
     await page.locator('#settings-close-btn').click()
     await expect(page.locator('#settings-modal')).toHaveAttribute('hidden')
+  })
+
+  test('settings modal blocks Story Trail completion shortcuts while open', async ({ page }) => {
+    await page.goto('/story-trail/')
+    await completeWeatherStory(page)
+    await expect(page.locator('#game-area')).toHaveAttribute('data-active-screen', 'completion-view', { timeout: 15000 })
+
+    await page.locator('#menu-btn').click()
+    await expect(page.locator('#settings-modal')).not.toHaveAttribute('hidden')
+    await page.locator('#settings-modal').focus()
+    await page.keyboard.press('Enter')
+
+    await expect(page.locator('#settings-modal')).not.toHaveAttribute('hidden')
+    await expect(page.locator('#game-area')).toHaveAttribute('data-active-screen', 'completion-view')
+  })
+
+  test('gamepad navigation stays inside the settings modal', async ({ page }) => {
+    await installMockGamepad(page)
+    await page.goto('/story-trail/')
+
+    await tapGamepadButton(page, 9)
+    await expect(page.locator('#settings-modal')).not.toHaveAttribute('hidden')
+    await expect.poll(async () => isModalFocusContained(page)).toBe(true)
+
+    await tapGamepadButton(page, 13)
+    await expect.poll(async () => isModalFocusContained(page)).toBe(true)
   })
 
   test('keyboard navigation through choices', async ({ page }) => {
