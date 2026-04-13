@@ -40,6 +40,7 @@
   - `844x390`
   - `1024x768`
   - `1280x800`
+- For legs introducing or changing gameplay mechanics, verify the mechanic is clear and comfortable at each checkpoint — not just layout correctness. Cramped choice lists, inventory bars, or interactive overlays that work visually but feel awkward to use are a UX concern, not just a layout concern.
 
 ## Input Coverage
 

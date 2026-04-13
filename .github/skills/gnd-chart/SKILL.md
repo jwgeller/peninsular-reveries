@@ -69,6 +69,11 @@ After the draft, automatically workshop each leg:
 
 Do not advance until all legs are confirmed or removed.
 
+**Additional checks during Workshop:**
+- **Art and placeholder audit:** For any leg with visual assets, sprite files, or `art.ts` as a read-only reference, scan for emoji or other placeholder art. List each placeholder explicitly in the leg intent as "placeholder — sourcing deferred" or open a companion `creative-assets` leg. Reference the `creative-assets` skill in the intent if sourcing work is in scope.
+- **Gameplay at viewport (new-mechanic legs):** When a leg introduces or changes a gameplay mechanic, ask: *"Does this mechanic remain clear and comfortable at 390×844 portrait and 844×390 landscape?"* Add responsive gameplay confirmation to the intent alongside layout checkpoints — not just layout correctness.
+- **Game design lenses (optional, new-mechanic legs):** For legs introducing a new loop or mechanic, run a quick lens check before finalising the intent: Does it satisfy basic Feedback and Loop lenses (Schell)? Is it simple enough for the youngest intended player? Is there enough "toy" quality that experimenting is rewarding without instruction?
+
 ### Phase 5 — Refinement
 
 **User Intent confirmation.** Present a 2–4 sentence summary of the user's goal distilled from the conversation. Ask: "Does this capture your goal?" Options: **Looks right** (recommended), **Needs revision**. Update and re-confirm if revised.
@@ -154,7 +159,7 @@ After all complete: deferred edits → full validation → delivery verification
 | **Owned files** | Exhaustive list the sub-agent may modify. No globs. One leg per file — never split. Grep during Draft/Workshop to confirm targets exist. |
 | **Read-only** | Reference files the sub-agent reads but must not modify. Include a reason. |
 | **Deferred shared edits** | Changes to shared files (`package.json`, routers, etc.) the navigator applies after all legs complete. Be precise. |
-| **Verification** | Single shell command covering only this leg's files. Not the project's full gate. For test legs: list explicit per-file expected assertions. |
+| **Verification** | Single shell command covering only this leg's files. Not the project's full gate. For test legs: list explicit per-file expected assertions. For visual legs (CSS layout, art, animation): lint alone is insufficient — add a Playwright screenshot assertion, a `page.screenshot` step, or a clearly labeled "manual visual check required" note so the navigator has acceptance criteria beyond lint. |
 | **Intent** | The critical field. Must be **specific** (name functions, interfaces, selectors), **self-contained** (embed needed constraints), **outcome-oriented** (what code does when done), and **bounded** (number sub-tasks). |
 
 ---
