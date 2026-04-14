@@ -112,5 +112,38 @@ Sequential via runSubagent (navigator reviews between each):
 After all complete: apply deferred edits -> `pnpm sync:attributions` -> `pnpm test:local` -> commit -> push.
 
 ## Implementation
-Commit: none (local-only)
-Pushed: not applicable (local-only)
+Commit: abc7e105b216c4a34a641f361a0a2d7d463cd4f7
+Pushed: yes (origin/main)
+
+## Critique
+Date: 2026-04-14
+
+### What Worked
+- Rules engine solid: plus/X patterns, edge clipping, reverse-scrambled easy boards, per-bucket high scores, restart all correct.
+- All deferred shared edits landed: registry, routes, build, all e2e suites, attributions.
+- Settings correct: preset, ruleset, theme high-score bucket update together and persist.
+- Input breadth: keyboard, right-click, long-hold touch, gamepad all wired with roving tabindex.
+- Accessibility live regions wired; move/pattern-change/restart/win all announced.
+
+### What Didn't
+1. **Board invisible on small portrait screens (blocker).** Dual-toolbar stacking — SSR GameHeader pills (~150px) + renderer toolbar (~122px) — consumed nearly all viewport at 445px height; board measured 3px visible. Root cause: renderer toolbar included a full title/moves/score block duplicating the SSR HUD pills. Fix: collapsed renderer toolbar to controls-only (Pattern + Restart); removed redundant `hud-high-score-context` row from game panel; updated grid-template-rows to 2 rows.
+2. **iOS long-press triggers native copy callout (high).** Board cells lacked `-webkit-touch-callout: none; user-select: none`. Fix: added to `.squares-board-cell` in injected runtime styles.
+3. **Chill music too prominent (medium).** Shared music bus gain 0.20 × per-event gains 0.06–0.10 reads as foreground. Fix: reduced chill profile event gains ~35% (max 0.065 → previously 0.1).
+4. **Settings discoverability on mobile (medium).** Preset/ruleset selectors hidden inside modal, not discoverable without exploring. Flagged as design question — no code fix this cycle; tracked in Field Review Holding List.
+
+### Chart Gaps
+1. **No minimum board-area floor.** Workshop listed viewport sizes but not a concrete "playfield ≥ N% of remaining height" checkpoint. Corrected in `gnd-chart/LOCAL.md` and `game-quality.md`.
+2. **iOS long-hold mechanics omitted from spec.** Leg specified long-hold threshold and pointercancel but not the required UA callout suppression. Corrected in `gnd-chart/LOCAL.md` and `game-quality.md`.
+3. **Music bus gain not specified.** "Chill default" intent wasn't translated into an ambient-volume target. Corrected in `gnd-chart/LOCAL.md`.
+
+### User Effectiveness
+- "Classic Hybrid vs easy modes" distinction well-described in User Intent but not mapped to start-screen UX discoverability — only to a settings field. Worth specifying discoverability expectations at chart time for primary mechanism selectors.
+- Visual checkpoints should name a pass/fail metric (e.g., "board fills ≥50% of remaining viewport height"), not just a breakpoint list.
+
+### Corrections for Next Cycle
+- gnd-chart/LOCAL.md: viewport floor + iOS touch spec + ambient-volume spec + visual verification note (created)
+- gnd-navigator.local.md: visual-legs review rule (created)
+- game-quality.md: viewport floor rule + iOS touch-callout rule (updated)
+
+### Field Review Holding List
+- Settings discoverability: preset/ruleset selectors inside modal only — consider inline quick-change on start screen

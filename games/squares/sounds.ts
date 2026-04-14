@@ -41,12 +41,12 @@ export const SQUARES_MUSIC_PROFILES = [
     stepsPerBeat: 2,
     loopBeats: 8,
     events: [
-      { startStep: 0, durationSteps: 6, frequency: 220, gain: 0.1, type: 'triangle' },
-      { startStep: 2, durationSteps: 4, frequency: 277.18, gain: 0.06, type: 'sine' },
-      { startStep: 6, durationSteps: 6, frequency: 329.63, gain: 0.08, type: 'triangle' },
-      { startStep: 8, durationSteps: 4, frequency: 246.94, gain: 0.06, type: 'sine' },
-      { startStep: 10, durationSteps: 4, frequency: 293.66, gain: 0.06, type: 'triangle' },
-      { startStep: 12, durationSteps: 4, frequency: 220, gain: 0.08, type: 'sine' },
+      { startStep: 0, durationSteps: 6, frequency: 220, gain: 0.065, type: 'triangle' },
+      { startStep: 2, durationSteps: 4, frequency: 277.18, gain: 0.04, type: 'sine' },
+      { startStep: 6, durationSteps: 6, frequency: 329.63, gain: 0.05, type: 'triangle' },
+      { startStep: 8, durationSteps: 4, frequency: 246.94, gain: 0.04, type: 'sine' },
+      { startStep: 10, durationSteps: 4, frequency: 293.66, gain: 0.04, type: 'triangle' },
+      { startStep: 12, durationSteps: 4, frequency: 220, gain: 0.05, type: 'sine' },
     ],
   },
   {

@@ -6,6 +6,7 @@
 - Prefer `height: 100dvh`, `min-height: 100svh`, grid layouts with `minmax(0, 1fr)`, and safe-area padding using `env(safe-area-inset-*)`.
 - On short mobile and landscape viewports, compress chrome such as headers, toolbars, and status bars instead of clipping content.
 - Content should not be cut off. If a layout cannot fit, tighten the layout before accepting scroll as a fallback.
+- On active game screens, the playfield must remain the dominant element. At 390×844 portrait, the playfield should fill ≥50% of the remaining height after all chrome (headers, toolbars, control bars). Audit the combined height of all fixed chrome elements against the viewport before declaring a layout leg done.
 - Keep consistent edge buffers around the screen.
 
 ## Pacing
@@ -45,6 +46,7 @@
 ## Input Coverage
 
 - Every game must support keyboard, touch/pointer, and gamepad input (README principle 1).
+- For game interactions that rely on long-press or sustained-touch mechanics (hold threshold ~300–500ms), apply `-webkit-touch-callout: none; user-select: none` on the interactive elements. iOS Safari's native copy callout fires at a similar threshold and will overlay the game UI otherwise. `touch-action: manipulation` does not suppress the callout.
 - Gamepad support requires: D-pad navigation between interactive elements, A/Button-0 for select, Start/Button-9 for menu/settings.
 - Analog stick navigation should use ±0.5 dead zone thresholds and 200ms debounce between actions.
 - Tab order and arrow-key navigation must work independently of gamepad polling.

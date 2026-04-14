@@ -52,26 +52,6 @@ const RUNTIME_STYLES = `
   gap: 0.75rem;
 }
 
-.squares-runtime-headline {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.9rem;
-  align-items: start;
-  flex-wrap: wrap;
-}
-
-.squares-runtime-copy {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.squares-runtime-copy h2,
-.squares-runtime-copy p,
-.squares-runtime-status,
-.squares-runtime-score {
-  margin: 0;
-}
-
 .squares-runtime-controls {
   display: flex;
   gap: 0.6rem;
@@ -136,6 +116,8 @@ const RUNTIME_STYLES = `
     inset 0 1px 0 var(--squares-light-edge),
     0 0.35rem 0.85rem rgba(23, 49, 58, 0.1);
   touch-action: manipulation;
+  -webkit-touch-callout: none;
+  user-select: none;
   overflow: hidden;
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
 }
@@ -288,20 +270,6 @@ export function createRenderer(root: HTMLElement): SquaresRenderer {
   const toolbar = documentRef.createElement('header')
   toolbar.className = 'squares-runtime-toolbar'
 
-  const headline = documentRef.createElement('div')
-  headline.className = 'squares-runtime-headline'
-
-  const copy = documentRef.createElement('div')
-  copy.className = 'squares-runtime-copy'
-
-  const title = documentRef.createElement('h2')
-  title.textContent = 'Squares'
-  const status = documentRef.createElement('p')
-  status.className = 'squares-runtime-status'
-  const score = documentRef.createElement('p')
-  score.className = 'squares-runtime-score'
-  copy.append(title, status, score)
-
   const controls = documentRef.createElement('div')
   controls.className = 'squares-runtime-controls'
 
@@ -323,8 +291,7 @@ export function createRenderer(root: HTMLElement): SquaresRenderer {
   restartButton.textContent = 'Restart'
 
   controls.append(patternToggleButton, menuButton, restartButton)
-  headline.append(copy, controls)
-  toolbar.append(headline)
+  toolbar.append(controls)
 
   const boardWrap = documentRef.createElement('section')
   boardWrap.className = 'squares-runtime-board-wrap'
@@ -346,8 +313,6 @@ export function createRenderer(root: HTMLElement): SquaresRenderer {
     root.dataset['phase'] = model.state.phase
     root.dataset['reducedMotion'] = String(Boolean(model.reducedMotion))
     boardElement.dataset['activePattern'] = previewPatternId
-    status.textContent = `Moves: ${model.state.moveCount}`
-    score.textContent = model.highScoreSummary ?? ''
     patternToggleButton.textContent = `Pattern: ${previewPatternId === 'plus' ? 'Plus' : 'X'}`
     patternToggleButton.disabled = model.state.lockedPatternId !== null
     patternToggleButton.setAttribute('aria-pressed', model.state.lockedPatternId === null ? 'false' : 'true')

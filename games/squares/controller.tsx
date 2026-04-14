@@ -132,7 +132,6 @@ export async function squaresAction() {
               </button>}
             />
 
-            <p id="hud-high-score-context" className="squares-hud-context">High score bucket: Pocket 3x3 · Classic Hybrid</p>
             <div id="squares-runtime-root" className="squares-runtime-host"></div>
           </div>
         </GameScreen>
