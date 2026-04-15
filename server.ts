@@ -43,6 +43,7 @@ const gameCtx = await esbuild.context({
     'games/pixel-passport/main.ts',
     'games/story-trail/main.ts',
     'games/squares/main.ts',
+    'games/waterwall/main.ts',
   ],
   bundle: true,
   outbase: 'games',

@@ -49,4 +49,11 @@ export const games: GameEntry[] = [
     icon: '🔳',
     status: 'live',
   },
+  {
+    slug: 'waterwall',
+    name: 'Waterwall',
+    description: 'A zen waterfall sandbox. Place barriers, redirect water, listen.',
+    icon: '🌊',
+    status: 'live',
+  },
 ]

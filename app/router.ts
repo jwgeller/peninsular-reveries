@@ -10,6 +10,7 @@ import { pixelPassportAction } from '../games/pixel-passport/controller.js'
 import { squaresAction } from '../games/squares/controller.js'
 import { superWordAction } from '../games/super-word/controller.js'
 import { storyTrailAction } from '../games/story-trail/controller.js'
+import { waterwallAction } from '../games/waterwall/controller.js'
 
 export function createAppRouter() {
   const router = createRouter()
@@ -22,12 +23,14 @@ export function createAppRouter() {
   router.get(routes.pixelPassportInfo, () => gameInfoAction('pixel-passport'))
   router.get(routes.storyTrailInfo, () => gameInfoAction('story-trail'))
   router.get(routes.squaresInfo, () => gameInfoAction('squares'))
+  router.get(routes.waterwallInfo, () => gameInfoAction('waterwall'))
   router.get(routes.missionOrbit, () => missionOrbitAction())
   router.get(routes.superWord, () => superWordAction())
   router.get(routes.chompers, () => chompersAction())
   router.get(routes.pixelPassport, () => pixelPassportAction())
   router.get(routes.storyTrail, () => storyTrailAction())
   router.get(routes.squares, () => squaresAction())
+  router.get(routes.waterwall, () => waterwallAction())
   router.get(routes.notFound, () => notFoundAction())
 
   return router

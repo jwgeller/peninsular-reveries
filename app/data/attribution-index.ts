@@ -10,6 +10,8 @@ import { superWordAttribution } from '../../games/super-word/attributions.js'
 import { superWordInfo } from '../../games/super-word/info.js'
 import { storyTrailAttribution } from '../../games/story-trail/attributions.js'
 import { storyTrailInfo } from '../../games/story-trail/info.js'
+import { waterwallAttribution } from '../../games/waterwall/attributions.js'
+import { waterwallInfo } from '../../games/waterwall/info.js'
 import type { GameAttribution, GameInfo } from './attribution-types.js'
 import { attributionsPagePath, repositoryCodeLicense } from './attribution-types.js'
 
@@ -27,6 +29,7 @@ const gameEntries: readonly { attribution: GameAttribution; info: GameInfo }[] =
   { attribution: pixelPassportAttribution, info: pixelPassportInfo },
   { attribution: storyTrailAttribution, info: storyTrailInfo },
   { attribution: squaresAttribution, info: squaresInfo },
+  { attribution: waterwallAttribution, info: waterwallInfo },
 ]
 
 export const gameAttributions: readonly GameAttributionWithInfo[] = gameEntries.map(

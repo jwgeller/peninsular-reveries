@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "Waterwall",
+  "short_name": "Waterwall",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1976D2",
+  "theme_color": "#1976D2",
+  "icons": [
+    {
+      "src": "../favicon-game-waterwall.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "../apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

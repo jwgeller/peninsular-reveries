@@ -10,11 +10,13 @@ export const routes = route({
   pixelPassportInfo: '/pixel-passport/info/',
   storyTrailInfo: '/story-trail/info/',
   squaresInfo: '/squares/info/',
+  waterwallInfo: '/waterwall/info/',
   missionOrbit: '/mission-orbit/',
   superWord: '/super-word/',
   chompers: '/chompers/',
   pixelPassport: '/pixel-passport/',
   storyTrail: '/story-trail/',
   squares: '/squares/',
+  waterwall: '/waterwall/',
   notFound: '/404.html',
 })

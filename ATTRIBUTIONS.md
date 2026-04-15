@@ -311,3 +311,41 @@
 - License: GPL-3.0
 - Modifications: Not applicable
 - Notes: All sound effects are synthesized at runtime unless a future implementation proves external media necessary.
+
+### Waterwall
+
+- Slug: waterwall
+- Code license: GPL-3.0
+- Summary: A zen waterfall sandbox. Place barriers to redirect falling water and listen as the sound follows the flow.
+
+#### Entries
+
+##### Waterwall water texture
+
+- Type: sound effect
+- Used in: Waterwall ambient water noise that follows the flow
+- Creator: Peninsular Reveries
+- Source: Generated in-browser with the Web Audio API
+- License: GPL-3.0
+- Modifications: Not applicable
+- Notes: Filtered white noise synthesized at runtime. No bundled audio files ship with the game.
+
+##### Waterwall ambient music
+
+- Type: music
+- Used in: Waterwall background ambient loop
+- Creator: Peninsular Reveries
+- Source: Generated in-browser with the Web Audio API
+- License: GPL-3.0
+- Modifications: Not applicable
+- Notes: Ambient music is synthesized at runtime with deterministic note schedules. No bundled music files ship with the game.
+
+##### Waterwall barrier and cursor sound effects
+
+- Type: sound effect
+- Used in: Waterwall barrier placement, removal, and cursor edge cues
+- Creator: Peninsular Reveries
+- Source: Generated in-browser with the Web Audio API
+- License: GPL-3.0
+- Modifications: Not applicable
+- Notes: All sound effects are synthesized at runtime. No bundled audio files ship with the game.
