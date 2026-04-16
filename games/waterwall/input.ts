@@ -117,18 +117,19 @@ export function setupPointerInput(
   config: WaterwallConfig,
   onAction: (action: WaterwallAction) => void,
   toGrid: (canvas: HTMLCanvasElement, clientX: number, clientY: number, config: WaterwallConfig) => WaterwallCoordinate | null,
+  getCellType: (coord: WaterwallCoordinate) => WaterwallCellType,
 ): () => void {
   let pointerDown = false
-  let pointerButton = 0
+  let dragMode: 'place' | 'remove' = 'place'
 
   const handlePointerDown = (event: PointerEvent): void => {
     const coord = toGrid(canvas, event.clientX, event.clientY, config)
     if (!coord) return
 
     pointerDown = true
-    pointerButton = event.button
-
-    const mode: 'place' | 'remove' = event.button === 2 ? 'remove' : 'place'
+    // Right-click always removes; otherwise toggle based on current cell type
+    const mode: 'place' | 'remove' = (event.button === 2 || getCellType(coord) === 'barrier') ? 'remove' : 'place'
+    dragMode = mode
     onAction({ type: 'pointer', coordinate: coord, mode })
   }
 
@@ -137,8 +138,7 @@ export function setupPointerInput(
     if (!coord) return
 
     if (pointerDown) {
-      const mode: 'place' | 'remove' = pointerButton === 2 ? 'remove' : 'place'
-      onAction({ type: 'pointer', coordinate: coord, mode })
+      onAction({ type: 'pointer', coordinate: coord, mode: dragMode })
     } else {
       onAction({ type: 'pointer-move', coordinate: coord })
     }

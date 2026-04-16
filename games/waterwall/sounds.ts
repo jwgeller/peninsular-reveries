@@ -312,10 +312,10 @@ export function playBarrierPlaceSound(): void {
 
     const filter = context.createBiquadFilter()
     filter.type = 'highpass'
-    filter.frequency.value = 2000
+    filter.frequency.value = 800
 
     const gain = context.createGain()
-    gain.gain.setValueAtTime(0.08, now)
+    gain.gain.setValueAtTime(0.04, now)
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04)
 
     source.connect(filter)

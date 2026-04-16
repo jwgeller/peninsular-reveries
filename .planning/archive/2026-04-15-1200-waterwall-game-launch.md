@@ -291,3 +291,54 @@ Sequential via runSubagent (navigator reviews between each):
 3. LEG-3 (Canvas renderer, input, accessibility) - depends on LEG-1, LEG-2
 4. LEG-4 (Shell, controller, game loop, wiring) - depends on LEG-1, LEG-2, LEG-3
 After all complete: deferred edits → `pnpm sync:attributions` → `pnpm test:local` → delivery verification (local-only) → commit → push.
+
+## Implementation
+Commit: ede8161
+Pushed: 2026-04-14
+
+## Critique
+Date: 2026-04-15
+Critique commit: (post-fix, see archive)
+
+### What Worked
+- Simulation engine: pure immutable helpers, bottom-to-top/diagonal/lateral scan. Emergent flow behavior landed well as a physical toy.
+- 349 simulation tests + 200 input tests + 125 audio tests — solid coverage baseline.
+- Full game wiring landed cleanly (registry, routes, build, e2e, attribution).
+- Shell structure mirrors reference games; settings modal, PWA, favicon present correctly.
+- Water sound texture and zen feel came through.
+
+### What Didn't
+
+**1. Barrier budget allows full water blockage (Bug — high)**
+- Evidence: `computeMaxBarriers` used `Math.floor(columns * 1.5)` ≈ 147 on iPhone 17 (~98 columns). Full dam requires 98 barriers — well below budget. Plan constraint said "not enough to dam the full source row."
+- Fix applied: multiplier changed from `1.5` → `0.7`.
+
+**2. Barrier placement/removal doesn't work in water (Bug — high)**
+- Two defects: (a) `placeBarrier` rejected water cells (`!== 'empty'`) blocking all placement once water flowed; (b) pointer mode used `event.button === 2` for remove, making removal impossible on touch devices.
+- Fix applied: `placeBarrier` now rejects only `=== 'barrier'`; `setupPointerInput` determines mode by cell type at tap, not mouse button.
+
+**3. Barrier SFX too harsh (UX issue — medium)**
+- Highpass at 2000 Hz, gain 0.08 was sharp. Lowered to 800 Hz, gain 0.04.
+
+### Chart Gaps
+- Barrier behavior in water: user expected tap-to-toggle regardless of cell contents. Workshop missed "what happens when placing where water is?"
+- Water translucency: expected background to show through water. Not captured.
+- Pointer remove on mobile: plan said "if barrier cell, remove" but Workshop didn't address how right-click applies on touch devices.
+
+### User Effectiveness
+- For sandbox games, add "can a player exhaust the experience / block the primary channel using the budget alone?" as a Workshop scope question.
+- Pointer toggle pattern (tap to place/remove by cell type) is idiomatic for mobile-first and should be stated explicitly, not implied.
+
+### Community Candidates
+- **Community Candidate:** Sandbox budget saturation check (gnd-chart Workshop Checks section).
+- **Community Candidate:** Pointer toggle-by-cell-type specification note (gnd-chart Workshop Checks section).
+- **Community Candidate:** Plan file commit timing rule (gnd-navigator, wrap-up protocol).
+
+### Field Review Holding List
+- Ambient music / drone removal (currently off by default; low priority)
+- Barrier count HUD removal (design preference)
+- Barrier eviction model (remove first-placed when budget exceeded — new mechanic)
+- Water translucency with device-capability budget
+- Water running visual texture (animation enhancement)
+- Architecture/build simplification (user backlog)
+

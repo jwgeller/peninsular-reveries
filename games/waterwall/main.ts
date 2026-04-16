@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPointerInput(canvas, config, (action) => {
     unlockAudioOnce()
     processAction(action)
-  }, canvasToGrid)
+  }, canvasToGrid, (coord) => grid.cells[coord.row]?.[coord.column] ?? 'empty')
 
   setupKeyboardInput(
     (action) => {

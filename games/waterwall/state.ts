@@ -142,7 +142,7 @@ export function placeBarrier(grid: WaterwallGrid, coordinate: WaterwallCoordinat
     return grid
   }
 
-  if (grid.cells[row][column] !== 'empty') {
+  if (grid.cells[row][column] === 'barrier') {
     return grid
   }
 

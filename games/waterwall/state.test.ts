@@ -20,7 +20,7 @@ describe('createGrid', () => {
     assert.equal(grid.rows, 5)
     assert.equal(grid.columns, 8)
     assert.equal(grid.barrierCount, 0)
-    assert.equal(grid.maxBarriers, Math.floor(8 * 1.5))
+    assert.equal(grid.maxBarriers, Math.floor(8 * 0.7))
     for (let r = 0; r < 5; r++) {
       for (let c = 0; c < 8; c++) {
         assert.equal(grid.cells[r][c], 'empty')
@@ -113,7 +113,7 @@ describe('simulateTick', () => {
 describe('placeBarrier', () => {
   it('succeeds when budget allows', () => {
     const grid = createGrid(5, 4)
-    // maxBarriers = floor(4 * 1.5) = 6
+    // maxBarriers = floor(4 * 0.7) = 2; placing first barrier is fine
     const after = placeBarrier(grid, { row: 2, column: 1 })
     assert.notEqual(after, grid)
     assert.equal(after.cells[2][1], 'barrier')
@@ -121,35 +121,44 @@ describe('placeBarrier', () => {
   })
 
   it('fails (returns same grid) when at max', () => {
-    let grid = createGrid(5, 2) // maxBarriers = floor(2 * 1.5) = 3
+    let grid = createGrid(5, 5) // maxBarriers = floor(5 * 0.7) = 3
     grid = placeBarrier(grid, { row: 0, column: 0 })
     grid = placeBarrier(grid, { row: 0, column: 1 })
-    grid = placeBarrier(grid, { row: 1, column: 0 })
+    grid = placeBarrier(grid, { row: 0, column: 2 })
     assert.equal(grid.barrierCount, 3)
     assert.equal(grid.maxBarriers, 3)
 
-    const after = placeBarrier(grid, { row: 1, column: 1 })
+    const after = placeBarrier(grid, { row: 0, column: 3 })
     assert.equal(after, grid, 'should return same grid when at max barriers')
   })
 
-  it('no-ops when cell is not empty', () => {
-    let grid = createGrid(3, 3)
+  it('no-ops when cell is a barrier', () => {
+    let grid = createGrid(3, 10)
     grid = placeBarrier(grid, { row: 1, column: 1 })
     const again = placeBarrier(grid, { row: 1, column: 1 })
     assert.equal(again, grid, 'placing on existing barrier returns same grid')
   })
+
+  it('succeeds when cell contains water', () => {
+    const grid = spawnWater(createGrid(3, 10))
+    // Top row is full of water after spawnWater
+    const after = placeBarrier(grid, { row: 0, column: 5 })
+    assert.notEqual(after, grid, 'should place barrier in water cell')
+    assert.equal(after.cells[0][5], 'barrier')
+    assert.equal(after.barrierCount, 1)
+  })
 })
 
 describe('barrier budget', () => {
-  it('computes Math.floor(columns * 1.5) for various column counts', () => {
+  it('computes Math.floor(columns * 0.7) for various column counts', () => {
     const cases: [number, number][] = [
-      [1, 1],
-      [2, 3],
-      [3, 4],
-      [4, 6],
-      [5, 7],
-      [10, 15],
-      [7, 10],
+      [1, 0],
+      [2, 1],
+      [3, 2],
+      [4, 2],
+      [5, 3],
+      [10, 7],
+      [7, 4],
     ]
     for (const [columns, expected] of cases) {
       assert.equal(computeMaxBarriers(columns), expected, `columns=${columns}`)
@@ -219,7 +228,7 @@ describe('bresenhamLine', () => {
 
 describe('placeBarrierLine', () => {
   it('stops placing when budget exhausted and returns partial line', () => {
-    const grid = createGrid(10, 2) // maxBarriers = 3
+    const grid = createGrid(10, 5) // maxBarriers = floor(5 * 0.7) = 3
     const result = placeBarrierLine(grid, { row: 0, column: 0 }, { row: 9, column: 0 })
 
     assert.equal(result.grid.barrierCount, 3, 'should place exactly maxBarriers')
@@ -231,7 +240,7 @@ describe('placeBarrierLine', () => {
   })
 
   it('places all coordinates when budget sufficient', () => {
-    const grid = createGrid(5, 10) // maxBarriers = 15
+    const grid = createGrid(5, 10) // maxBarriers = floor(10 * 0.7) = 7; placing 5 is fine
     const result = placeBarrierLine(grid, { row: 2, column: 0 }, { row: 2, column: 4 })
 
     assert.equal(result.placed.length, 5)
