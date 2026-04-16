@@ -87,30 +87,18 @@ function emptyColor(theme: WaterwallThemeId, row: number, column: number): strin
 }
 
 function waterColor(row: number, column: number, timestamp: number, reducedMotion: boolean): string {
-  const seed = seededRandom(row, column)
-
   if (reducedMotion) {
-    const r = 30 + Math.floor(seed * 15)
-    const g = 130 + Math.floor(seed * 20)
-    const b = 220 + Math.floor(seed * 20)
-    return `rgb(${r},${g},${b})`
+    const seed = seededRandom(row, column)
+    return `rgb(${30 + Math.floor(seed * 20)},${130 + Math.floor(seed * 30)},${210 + Math.floor(seed * 20)})`
   }
 
-  // Animated flowing caustic: a bright wave band scrolls downward across the grid.
-  // Each cell oscillates between a dark-water base and a bright highlighted peak.
-  // Using rgb (fully opaque) so the contrast is cell-color vs cell-color, not
-  // alpha-blend vs background — making the wave bands clearly visible even when
-  // the grid is full of water.
-  const flow = (Math.sin(timestamp * 0.006 - row * 0.55 + column * 0.18) + 1) * 0.5 // 0..1
-  const dark = 80 + Math.floor(seed * 20)    // dark-water trough channel base
-  const bright = 220 + Math.floor(seed * 30) // bright-water peak channel top
-  const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t)
-
-  const r = lerp(dark - 50, bright - 160, flow)
-  const g = lerp(dark + 20,  bright - 30,  flow)
-  const b = lerp(dark + 80,  bright,       flow)
-
-  return `rgb(${Math.max(0, r)},${Math.min(255, g)},${Math.min(255, b)})`
+  // Caustic wave: bright bands scroll downward.
+  // Large amplitude so trough (dark navy) and peak (bright cyan) are unmistakable.
+  const wave = (Math.sin(timestamp * 0.008 - row * 0.6 + column * 0.15) + 1) * 0.5 // 0..1
+  const r = Math.round(10  + wave * 60)
+  const g = Math.round(80  + wave * 160)
+  const b = Math.round(160 + wave * 90)
+  return `rgb(${r},${Math.min(255, g)},${Math.min(255, b)})`
 }
 
 function barrierColor(row: number, column: number): string {

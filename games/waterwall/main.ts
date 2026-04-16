@@ -11,7 +11,6 @@ import {
   removeBarrier,
   placeBarrierLine,
   computeWaterDistribution,
-  resizeGrid,
 } from './state.js'
 import {
   ensureAudioUnlocked,
@@ -340,10 +339,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }) as EventListener)
 
-  // Resize handling
+  // Resize handling — clear barriers on resize (orientation change acts as a reset)
   const resizeObserver = new ResizeObserver(() => {
     const newDims = handleResize(canvas, ctx, container, config)
-    grid = resizeGrid(grid, newDims.rows, newDims.columns)
+    grid = createGrid(newDims.rows, newDims.columns)
     grid = spawnWater(grid)
     updateCanvasLabel(canvas, grid.barrierCount, grid.maxBarriers, currentTheme)
   })

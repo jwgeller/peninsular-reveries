@@ -117,7 +117,7 @@ export function setupPointerInput(
   config: WaterwallConfig,
   onAction: (action: WaterwallAction) => void,
   toGrid: (canvas: HTMLCanvasElement, clientX: number, clientY: number, config: WaterwallConfig) => WaterwallCoordinate | null,
-  getCellType: (coord: WaterwallCoordinate) => WaterwallCellType,
+  _getCellType: (coord: WaterwallCoordinate) => WaterwallCellType,
 ): () => void {
   let pointerDown = false
   let dragMode: 'place' | 'remove' = 'place'
@@ -127,8 +127,8 @@ export function setupPointerInput(
     if (!coord) return
 
     pointerDown = true
-    // Right-click always removes; otherwise toggle based on current cell type
-    const mode: 'place' | 'remove' = (event.button === 2 || getCellType(coord) === 'barrier') ? 'remove' : 'place'
+    // Always place — removing is done via Restart in the menu
+    const mode: 'place' | 'remove' = 'place'
     dragMode = mode
     onAction({ type: 'pointer', coordinate: coord, mode })
   }
