@@ -1,11 +1,10 @@
 # Backlog
 
-Items collected from field reviews, critiques, and conversations. The `gnd-critique` skill transfers Field Review Holding List items here at the end of PC Phase 5. Items are grouped by area; remove an item once it's absorbed into a plan.
+Items collected from field reviews, critiques, and conversations. The `gnd-critique` skill transfers Field Review Holding List items here at the end of PC Phase 5. Items are grouped by area. **Remove an item once it's absorbed into a plan or implemented directly — the git commit message is the implementation record, no separate note needed.**
 
 ## Waterwall
 
 - **Pointer barrier placement UX follow-up:** After the barrier-in-water fix, confirm the tap-to-toggle feel is right on device. If water fills too fast, per-cell visual feedback (brief flash on placement) may be needed.
-- **Water running visual texture:** ~~Add per-cell animation/texture variation to water so it looks like running water rather than a solid blue mass.~~ Implemented: time-based sine wave scrolling downward across cells.
 
 ## App / Architecture
 
