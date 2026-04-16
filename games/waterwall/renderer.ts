@@ -88,17 +88,24 @@ function emptyColor(theme: WaterwallThemeId, row: number, column: number): strin
 
 function waterColor(row: number, column: number, timestamp: number, reducedMotion: boolean): string {
   const seed = seededRandom(row, column)
-  const r = 25 + Math.floor(seed * 15)
-  const g = 140 + Math.floor(seed * 20)
-  const b = 230 + Math.floor(seed * 20)
+  const baseR = 25 + Math.floor(seed * 15)
+  const baseG = 140 + Math.floor(seed * 20)
+  const baseB = 230 + Math.floor(seed * 20)
+
+  if (reducedMotion) {
+    return `rgba(${baseR},${baseG},${baseB},0.52)`
+  }
 
   // Animated flowing texture: sine wave scrolls downward across cells.
   // Negative row term makes the pattern drift downward over time.
-  const alpha = reducedMotion
-    ? 0.55
-    : 0.45 + Math.sin(timestamp * 0.003 - row * 0.45 + column * 0.25) * 0.10
+  // Both alpha and color brighten on peaks so bright bands are clearly visible.
+  const flow = Math.sin(timestamp * 0.004 - row * 0.45 + column * 0.25)
+  const alpha = 0.36 + flow * 0.22  // range 0.14–0.58
+  const hl = Math.max(0, flow) * 35  // peaks get brighter, troughs stay base
+  const g = Math.min(255, baseG + Math.floor(hl))
+  const b = Math.min(255, baseB + Math.floor(hl * 0.6))
 
-  return `rgba(${r},${g},${b},${alpha})`
+  return `rgba(${baseR},${g},${b},${alpha.toFixed(3)})`
 }
 
 function barrierColor(row: number, column: number): string {
