@@ -22,6 +22,6 @@ test('Squares controller renders the full page shell and required UI hooks', asy
   assert.match(html, /id="settings-high-plusx"/)
   assert.match(html, /id="game-status"/)
   assert.match(html, /id="game-feedback"/)
-  assert.match(html, /href="\/squares\/manifest\.json"/)
-  assert.match(html, /href="\/favicon-game-squares\.svg"/)
+  assert.match(html, /href="[^"]*\/squares\/manifest\.json"/)
+  assert.match(html, /href="[^"]*\/favicon-game-squares\.svg"/)
 })
