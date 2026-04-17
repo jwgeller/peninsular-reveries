@@ -552,3 +552,12 @@ Sequential via runSubagent (navigator reviews between each):
 14. LEG-14 (Cross-Game Regression) - depends on all implementation legs
 
 After all complete: deferred edits (none expected) → `pnpm test:local` → delivery verification (local-only) → commit → push.
+
+## Boundary Notes
+- `games/super-word/input.ts` and `games/super-word/main.ts` were fixed by navigator during integration gate — `#start-btn` references replaced with `.btn-difficulty` selectors after LEG-10 removed the start button but LEG-7 input migration preserved the old reference.
+- `games/story-trail/controller.tsx` was fixed by navigator — missing `leftContent` prop on `GameHeader` after LEG-3 restructured the controller.
+- LEG-10 deferred edits (start button wiring in story-trail/main.ts, super-word/main.ts; gamepad-active class in squares/input.ts, story-trail/input.ts, pixel-passport/input.ts) applied by navigator before integration gate.
+
+## Implementation
+Commit: 73f658b
+Pushed: 2025-07-13
