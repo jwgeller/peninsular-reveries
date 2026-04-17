@@ -6,6 +6,14 @@ Items collected from field reviews, critiques, and conversations. The `gnd-criti
 
 - **Pointer barrier placement UX follow-up:** After the barrier-in-water fix, confirm the tap-to-toggle feel is right on device. If water fills too fast, per-cell visual feedback (brief flash on placement) may be needed.
 
+## Story Trail
+
+- **Inventory feel refinement (iPhone portrait):** The equip loop is mechanically correct but the feel isn't settled — visual weight/density of selection state and interaction pacing on phone portrait may need tuning. (From plan critique 2026-04-17.)
+
+## Cross-Game
+
+- **Manual gamepad hardware testing:** Pixel Passport, Mission Orbit, and Story Trail all received controller support but have not been tested on a real gamepad yet. (From plan critique 2026-04-17.)
+
 ## App / Architecture
 
 - **Shared assets between games:** Common audio buses, font identity tokens, sprite sheets, and UI patterns are duplicated per game. Explore a shared module layer — needs architecture planning.

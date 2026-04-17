@@ -136,3 +136,33 @@ After all complete: apply deferred edits (none expected) -> `pnpm test:local` ->
 ## Implementation
 Commit: 60b9ef8
 Pushed: 2026-04-10
+
+## Critique
+Date: 2026-04-17
+
+### What Worked
+- All 5 legs executed cleanly — no boundary violations, scope creep, or failures.
+- Story Trail equip model is architecturally sound: pure state, toggleEquippedItem separate from makeChoice, auto-equip on grant, reset on story boundaries.
+- Inventory bar and overlay rebuilt as native buttons with aria-pressed and focus management between bar↔overlay.
+- Pixel Passport fresh restart and same-place revisit landed exactly as intended.
+- Mission Orbit controller support is comprehensive with phase-aware gamepad polling.
+- Responsive CSS uses clamp() and grid layouts with viewport-appropriate breakpoints.
+
+### What Didn't
+- LEG-1 feel (design question): User reports the inventory equip loop is mechanically correct but wants further refinement — likely visual weight/density or interaction pacing on iPhone portrait.
+
+### Chart Gaps
+- None.
+
+### User Effectiveness
+- Good scoping: "removing interaction awkwardness rather than broad rewrites" gave clear boundaries.
+- Primary test surface (iPhone 17 portrait) aligns with the plan's 390×844 viewport checkpoint.
+
+### Blockers
+- None.
+
+### Corrections for Next Cycle
+- Visual leg verification enforcement: LEG-1's intent included a visual checkpoint but verification was eslint-only. The navigator should have flagged this per gnd-navigator.local.md § Visual Legs Review. Existing docs cover this — the gap was execution, not documentation.
+
+### Field Review Holding List
+- Transferred to `.planning/gnd-backlog.md`.
