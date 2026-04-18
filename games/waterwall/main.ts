@@ -55,9 +55,10 @@ let dragAnchor: { row: number; column: number } | null = null
 
 type GamePhase = 'title' | 'dissolving' | 'playing'
 
-const DISSOLVE_MAX_MS = 4000
+const DISSOLVE_MAX_MS = 8000
 const DISSOLVE_EROSION_BASE = 0.18
 const DISSOLVE_EROSION_VARIANCE = 0.12
+const DISSOLVE_SPAWN_CHANCE = 0.35
 const REDUCED_MOTION_FADE_MS = 1000
 
 let phase: GamePhase = 'title'
@@ -65,7 +66,6 @@ let dissolveStartTime = 0
 let titleCoordSet: Set<string> = new Set()
 let titleErosionResistance: Map<string, number> = new Map()
 let totalTitleBarriers = 0
-let spawnMask: boolean[] = []
 
 let settingsModal = { open() {}, close() {}, toggle() {} }
 
@@ -212,7 +212,6 @@ function initTitleGrid(rows: number, columns: number): void {
     coords.map((c) => [`${c.row},${c.column}`, DISSOLVE_EROSION_BASE + (Math.random() - 0.5) * 2 * DISSOLVE_EROSION_VARIANCE]),
   )
   totalTitleBarriers = coords.length
-  spawnMask = Array.from({ length: columns }, () => false)
 }
 
 function startDissolve(): void {
@@ -220,14 +219,6 @@ function startDissolve(): void {
   phase = 'dissolving'
   dissolveStartTime = performance.now()
   unlockAudioOnce()
-
-  // Staggered water spawn: each column activates after a random delay (0–1000ms)
-  // so water doesn't fall perfectly evenly across the top
-  spawnMask = Array.from({ length: grid.columns }, () => false)
-  for (let col = 0; col < grid.columns; col++) {
-    const delay = Math.random() * 1000
-    setTimeout(() => { spawnMask[col] = true }, delay)
-  }
 
   if (getSfxEnabled() && !isReducedMotionEnabled()) {
     startWaterTexture()
@@ -263,7 +254,7 @@ function spawnWaterStaggered(): void {
   if (grid.rows === 0) return
   const nextCells = grid.cells.map((row) => [...row])
   for (let col = 0; col < grid.columns; col++) {
-    if (spawnMask[col] && nextCells[0][col] === 'empty') {
+    if (nextCells[0][col] === 'empty' && Math.random() < DISSOLVE_SPAWN_CHANCE) {
       nextCells[0][col] = 'water'
     }
   }
@@ -406,7 +397,10 @@ function gameLoop(timestamp: number): void {
           grid = simulateTick(grid)
         }
         spawnWaterStaggered()
-        if (elapsed >= DISSOLVE_MAX_MS || titleCoordSet.size === 0) {
+        if (titleCoordSet.size === 0) {
+          transitionToPlaying()
+        } else if (elapsed >= DISSOLVE_MAX_MS) {
+          // Safety cap: after max time, transition even if some barriers remain
           transitionToPlaying()
         } else {
           dissolveWaterAdjacent()
