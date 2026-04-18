@@ -39,3 +39,11 @@ List the candidates briefly with their backlog text. Wait for the user's respons
 ## Visual Verification
 
 For visual legs (CSS layout, art, animation): lint alone is insufficient — add a Playwright screenshot assertion, a `page.screenshot` step, or a clearly labeled "manual visual check required" note in the leg intent so the navigator has acceptance criteria beyond lint. **Community Candidate** (for gnd upstream): lint-insufficiency for visual legs is a general pattern, not project-specific.
+
+## Removal Intent Decomposition
+
+When a leg says "remove X" or "strip X," workshop must decompose X into its constituent parts and ask which parts the user values vs. wants gone. Specifically: separate the *player experience* (what happens on screen) from the *tracking/collecting/persistence* mechanism before writing the intent. Example: "remove souvenir collection" could mean removing the collection tracking while keeping the discovery page, or removing both. Ask. **Community Candidate** (for gnd upstream): removal-intent ambiguity is a general charting risk, not project-specific.
+
+## Branching Depth Criteria
+
+When a leg introduces branching narrative with item gating (or similar gating mechanic), the intent must specify a minimum gating density — e.g., "at least N choices require an equipped item," "no complete path avoids item use," or "≥X% of branch points are gated." Without this, the implementation can ship the branching structure but leave the gating mechanic optional on every path.

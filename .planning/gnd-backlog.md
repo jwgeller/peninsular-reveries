@@ -13,12 +13,13 @@ Items collected from field reviews, critiques, and conversations. The `gnd-criti
 ## Cross-Game
 
 - **Manual gamepad hardware testing:** Pixel Passport, Mission Orbit, and Story Trail all received controller support but have not been tested on a real gamepad yet. (From plan critique 2026-04-17.)
+- **Start screen visual consistency:** Start screens are directionally right but need more visual consistency across games — shared layout rhythm, font sizing, spacing. (From plan critique 2026-04-17.)
 
 ## App / Architecture
 
-- **Shared assets between games:** Common audio buses, font identity tokens, sprite sheets, and UI patterns are duplicated per game. Explore a shared module layer — needs architecture planning.
-- **Build step elimination:** User wants to explore removing the esbuild step entirely (import maps or native ESM). Large scope — needs investigation leg before charting.
-- **Menu / settings redesign:** Revisit the `GameTabbedModal` pattern across all games. User wants to reconsider what belongs in a menu, simplify quit paths, and possibly unify help/controls layout.
+- **Shared assets between games:** Audio buses, font tokens, and UI patterns now use shared modules (LEG-5/LEG-7 of consolidation plan). Remaining: sprite sheets and per-game CSS identity tokens not yet shared.
+- **Build step elimination:** Investigated in LEG-13 of consolidation plan — deferred indefinitely. No bare specifiers, TS transpilation still needed, unbundled request count too high.
+- **Menu UX refinement:** Global menu shell shipped (LEG-8) but user reports menus still need work — layout, interaction feel, and content. (Updated from plan critique 2026-04-17.)
 
 ## Meta / gnd Tooling
 

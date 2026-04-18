@@ -561,3 +561,41 @@ After all complete: deferred edits (none expected) → `pnpm test:local` → del
 ## Implementation
 Commit: 73f658b
 Pushed: 2025-07-13
+
+## Critique
+Date: 2026-04-17
+
+### What Worked
+- 14-leg plan executed cleanly — all legs marked done, integration gate passed, 97 files changed with no boundary violations beyond 3 small navigator fixes.
+- Shared module extraction (LEG-5) is solid architecture — game-audio, game-accessibility, game-animations, game-screens, game-input all have correct APIs and are used by all 7 games.
+- Chompers frenzy strip (LEG-1) and Squares simplification (LEG-2) landed exactly as intended with no user issues.
+- Music catalog preserves all 10 compositions with creative names — no audio lost.
+- Long-hold audit (LEG-12) delivered correct 300ms threshold with press suppression and architecture documentation.
+- Build investigation (LEG-13) was the right call to defer — documented clearly with evidence.
+- Progressive levels in Chompers (LEG-9) and unified start screen pattern (LEG-10) landed directionally right.
+
+### What Didn't
+- **LEG-3 (Story Trail depth):** The Hidden Garden has 27 scenes and 3 endings, but a player can click the bottom button on every page and complete the story without engaging the equip/item-gating mechanic. The story needs more dead ends that require item collection and equipping. The branching structure shipped but the gating depth didn't.
+- **LEG-4 (Pixel Passport discovery page):** The implementation removed the destination discovery/exploration result page along with the collection mechanic. The user wanted to keep the "you found a boomerang" experience — just not collect it as a souvenir. The endpoint experience was the game's payoff and shouldn't have been deleted.
+- **LEG-4 (Pixel Passport vehicle viewport — recurring):** Travel vehicle still cut off on iPhone 17 portrait. This was flagged in the prior plan's LEG-3 and this plan's LEG-4. Two implementation attempts haven't fixed it.
+- **LEGs 6-7 (Music cross-game persistence):** Track selection saves to localStorage but music doesn't actually continue playing when navigating between games. The intent said "once playing, continues across page navigation" but the playback restart on page load isn't wired.
+
+### Chart Gaps
+- **LEG-4 intent conflation (Workshop phase):** "Nothing is collected or taken home" was ambiguous — it conflated removing collection tracking with removing the destination experience page. Workshop should have asked: "When the player arrives, what do they see and do before returning to the globe?" Root cause: Discovery phase — the existing destination flow wasn't decomposed into its two parts (experience + collection) before the intent was written.
+- **LEG-3 missing gating depth criteria (Workshop phase):** The intent said "more decision points" but didn't specify how many choices should require equipped items or what fraction of paths should be gated. Root cause: Workshop phase — the Schell lens and gameplay-at-viewport checks should have asked about item-gating density.
+
+### User Effectiveness
+- Scope direction was clear and well-bounded — "consolidate and simplify" held through all 14 legs.
+- Start screen consistency and menu refinement desires emerged during testing, not charting — reasonable for a plan this size. These are future refinement, not missed intent.
+
+### Blockers
+- None. All legs executed and `pnpm test:local` passed.
+
+### Corrections for Next Cycle
+1. **Workshop: decompose removal intents.** When a leg says "remove X," workshop should ask what parts of X the user values vs. wants gone. Specifically: separate the experience from the tracking/collecting before writing the intent.
+2. **Workshop: quantify gating/branching depth for story legs.** When a leg introduces branching with item gating, the intent should specify a minimum gating density (e.g., "at least N choices require an equipped item" or "no complete path avoids item use").
+3. **Recurring viewport bugs get escalated verification.** When a visual bug persists across two plans, the leg verification must include a screenshot assertion or explicit "manual visual check confirmed" note — lint-only is not acceptable for a recurring visual issue.
+
+### Field Review Holding List
+- Transferred to `.planning/gnd-backlog.md` (start screen consistency, menu UX refinement).
+- Waterwall dissolve mechanic refinement implemented directly (see below).

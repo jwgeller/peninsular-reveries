@@ -55,14 +55,17 @@ let dragAnchor: { row: number; column: number } | null = null
 
 type GamePhase = 'title' | 'dissolving' | 'playing'
 
-const DISSOLVE_MAX_MS = 3000
-const DISSOLVE_CHANCE = 0.04
+const DISSOLVE_MAX_MS = 4000
+const DISSOLVE_EROSION_BASE = 0.18
+const DISSOLVE_EROSION_VARIANCE = 0.12
 const REDUCED_MOTION_FADE_MS = 1000
 
 let phase: GamePhase = 'title'
 let dissolveStartTime = 0
 let titleCoordSet: Set<string> = new Set()
+let titleErosionResistance: Map<string, number> = new Map()
 let totalTitleBarriers = 0
+let spawnMask: boolean[] = []
 
 let settingsModal = { open() {}, close() {}, toggle() {} }
 
@@ -205,7 +208,17 @@ function initTitleGrid(rows: number, columns: number): void {
   const coords = getTitleBarrierCoordinates(rows, columns)
   grid = placeTitleBarriers(grid, coords)
   titleCoordSet = new Set(coords.map((c) => `${c.row},${c.column}`))
+  titleErosionResistance = new Map(
+    coords.map((c) => [`${c.row},${c.column}`, DISSOLVE_EROSION_BASE + (Math.random() - 0.5) * 2 * DISSOLVE_EROSION_VARIANCE]),
+  )
   totalTitleBarriers = coords.length
+
+  // Staggered water spawn: each column gets a random delay (0–600ms)
+  spawnMask = Array.from({ length: columns }, () => false)
+  const delays = Array.from({ length: columns }, () => Math.random() * 600)
+  for (let col = 0; col < columns; col++) {
+    setTimeout(() => { spawnMask[col] = true }, delays[col])
+  }
 }
 
 function startDissolve(): void {
@@ -244,6 +257,17 @@ function transitionToPlaying(): void {
   updateCanvasLabel(canvas, grid.barrierCount, grid.maxBarriers, currentTheme)
 }
 
+function spawnWaterStaggered(): void {
+  if (grid.rows === 0) return
+  const nextCells = grid.cells.map((row) => [...row])
+  for (let col = 0; col < grid.columns; col++) {
+    if (spawnMask[col] && nextCells[0][col] === 'empty') {
+      nextCells[0][col] = 'water'
+    }
+  }
+  grid = { ...grid, cells: nextCells }
+}
+
 function hasAdjacentWater(row: number, col: number): boolean {
   const offsets = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]]
   for (const [dr, dc] of offsets) {
@@ -262,14 +286,18 @@ function dissolveWaterAdjacent(): void {
     const sep = key.indexOf(',')
     const row = Number(key.slice(0, sep))
     const col = Number(key.slice(sep + 1))
-    if (hasAdjacentWater(row, col) && Math.random() < DISSOLVE_CHANCE) {
+    if (!hasAdjacentWater(row, col)) continue
+    const resistance = titleErosionResistance.get(key) ?? DISSOLVE_EROSION_BASE
+    if (Math.random() < resistance) {
       toDissolve.push({ row, column: col })
     }
   }
   if (toDissolve.length > 0) {
     grid = dissolveBarrierCells(grid, toDissolve)
     for (const coord of toDissolve) {
-      titleCoordSet.delete(`${coord.row},${coord.column}`)
+      const k = `${coord.row},${coord.column}`
+      titleCoordSet.delete(k)
+      titleErosionResistance.delete(k)
     }
   }
 }
@@ -375,7 +403,7 @@ function gameLoop(timestamp: number): void {
         for (let i = 0; i < config.ticksPerFrame; i++) {
           grid = simulateTick(grid)
         }
-        grid = spawnWater(grid)
+        spawnWaterStaggered()
         if (elapsed >= DISSOLVE_MAX_MS || titleCoordSet.size === 0) {
           transitionToPlaying()
         } else {
