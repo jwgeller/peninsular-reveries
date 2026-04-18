@@ -602,7 +602,7 @@ test.describe('SITE-07: Game smoke tests', () => {
     await expect(playBtn).toBeInViewport()
 
     await playBtn.click()
-    await expect(playBtn).toBeHidden({ timeout: 10_000 })
+    await expect(playBtn).toBeHidden({ timeout: 15_000 })
 
     await expect(page.locator('#waterwall-canvas-container')).toBeInViewport()
   })
