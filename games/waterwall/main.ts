@@ -1,4 +1,3 @@
-import { isReducedMotionEnabled } from '../../client/preferences.js'
 import { setupGameMenu } from '../../client/game-menu.js'
 
 import { announceBarrierPlaced, announceBarrierRemoved, announceBarriersCleared, announceCursorPosition, updateCanvasLabel } from './accessibility.js'
@@ -95,7 +94,7 @@ function buildRenderModel(): WaterwallRenderModel {
     grid,
     cursor,
     theme: currentTheme,
-    reducedMotion: isReducedMotionEnabled(),
+    reducedMotion: true,
     barrierCount: grid.barrierCount,
     maxBarriers: grid.maxBarriers,
   }
