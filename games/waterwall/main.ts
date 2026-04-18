@@ -52,15 +52,14 @@ let dragAnchor: { row: number; column: number } | null = null
 
 // ── Game phase ────────────────────────────────────────────────────────────────
 
-type GamePhase = 'title' | 'dissolving' | 'playing'
+type GamePhase = 'title' | 'playing'
 
-const DISSOLVE_MAX_MS = 12000
 const DISSOLVE_EROSION_BASE = 0.04
 const DISSOLVE_EROSION_VARIANCE = 0.02
 const DISSOLVE_COLUMN_SPREAD_MS = 150
 
 let phase: GamePhase = 'title'
-let dissolveStartTime = 0
+let playStartTime = 0
 let titleCoordSet: Set<string> = new Set()
 let titleErosionResistance: Map<string, number> = new Map()
 let columnDelays: number[] = []
@@ -210,10 +209,10 @@ function initTitleGrid(rows: number, columns: number): void {
   )
 }
 
-function startDissolve(): void {
+function startPlaying(): void {
   if (phase !== 'title') return
-  phase = 'dissolving'
-  dissolveStartTime = performance.now()
+  phase = 'playing'
+  playStartTime = performance.now()
   unlockAudioOnce()
 
   columnDelays = Array.from({ length: grid.columns }, () => Math.random() * DISSOLVE_COLUMN_SPREAD_MS)
@@ -221,22 +220,6 @@ function startDissolve(): void {
   if (getSfxEnabled()) {
     startWaterTexture()
   }
-
-  const playBtn = byId<HTMLButtonElement>('waterwall-play-btn')
-  if (playBtn) playBtn.classList.add('fading')
-}
-
-function transitionToPlaying(): void {
-  if (titleCoordSet.size > 0) {
-    const remaining = Array.from(titleCoordSet).map((key) => {
-      const sep = key.indexOf(',')
-      return { row: Number(key.slice(0, sep)), column: Number(key.slice(sep + 1)) }
-    })
-    grid = dissolveBarrierCells(grid, remaining)
-    titleCoordSet.clear()
-  }
-
-  phase = 'playing'
 
   const playBtn = byId<HTMLButtonElement>('waterwall-play-btn')
   if (playBtn) playBtn.hidden = true
@@ -289,6 +272,14 @@ function dissolveWaterAdjacent(): void {
   }
 }
 
+function spawnWaterForFrame(elapsed: number): void {
+  if (elapsed < DISSOLVE_COLUMN_SPREAD_MS * 2) {
+    spawnWaterDelayed(elapsed)
+  } else {
+    grid = spawnWater(grid)
+  }
+}
+
 // ── Input processing ──────────────────────────────────────────────────────────
 
 function processAction(action: WaterwallAction): void {
@@ -300,19 +291,16 @@ function processAction(action: WaterwallAction): void {
       settingsModal.toggle()
       syncModalState()
     } else if (action.type === 'place') {
-      startDissolve()
+      startPlaying()
     }
     return
   }
 
-  // Dissolving phase: allow barrier placement + menu
-  if (phase === 'dissolving') {
-    if (action.type === 'menu') {
-      settingsModal.toggle()
-      syncModalState()
-      return
-    }
-    // Fall through to normal input handling so players can place barriers
+  // Playing: barrier placement always works, no phase gate
+  if (phase === 'playing' && action.type === 'menu') {
+    settingsModal.toggle()
+    syncModalState()
+    return
   }
 
   switch (action.type) {
@@ -362,27 +350,13 @@ function gameLoop(timestamp: number): void {
     case 'title':
       break
 
-    case 'dissolving': {
-      const elapsed = timestamp - dissolveStartTime
+    case 'playing': {
+      const elapsed = timestamp - playStartTime
       for (let i = 0; i < config.ticksPerFrame; i++) {
         grid = simulateTick(grid)
       }
-      spawnWaterDelayed(elapsed)
-      if (titleCoordSet.size === 0) {
-        transitionToPlaying()
-      } else if (elapsed >= DISSOLVE_MAX_MS) {
-        transitionToPlaying()
-      } else {
-        dissolveWaterAdjacent()
-      }
-      break
-    }
-
-    case 'playing':
-      for (let i = 0; i < config.ticksPerFrame; i++) {
-        grid = simulateTick(grid)
-      }
-      grid = spawnWater(grid)
+      spawnWaterForFrame(elapsed)
+      if (titleCoordSet.size > 0) dissolveWaterAdjacent()
 
       if (timestamp - lastPanUpdate > 200) {
         lastPanUpdate = timestamp
@@ -390,6 +364,7 @@ function gameLoop(timestamp: number): void {
         updateWaterPanning(dist.centerOfMass)
       }
       break
+    }
   }
 
   renderFrame(ctx, buildRenderModel(), timestamp)
@@ -438,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Play button
   const playBtn = byId<HTMLButtonElement>('waterwall-play-btn')
   if (playBtn) {
-    playBtn.addEventListener('click', () => startDissolve())
+    playBtn.addEventListener('click', () => startPlaying())
   }
 
   // Theme select

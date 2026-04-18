@@ -67,11 +67,6 @@
   opacity: 0.7;
 }
 
-.waterwall-play-btn.fading {
-  opacity: 0;
-  pointer-events: none;
-}
-
 .waterwall-play-btn[hidden] {
   display: none;
 }
