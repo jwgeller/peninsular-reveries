@@ -1,0 +1,436 @@
+# Plan: Music Pad — Drum Pad Instrument Activity
+
+## Project Context
+- Sources:
+  - `README.md` - game principles (offline-first, accessible, synthesized audio, no accounts)
+  - `.github/skills/review/references/architecture.md` - game module contract, adding a game checklist, styling architecture, input timing, iOS Safari rules
+  - `.github/skills/review/references/game-quality.md` - layout, pacing, input coverage, menu standard, visual identity, zoom recovery
+  - `games/squares/` - reference implementation for a simple game's full structure
+  - `games/chompers/sample-manifest.ts` - reference for bundled CC0 audio metadata pattern
+  - `client/audio.ts` - shared Web Audio infrastructure (bus creation, tone synthesis)
+  - `client/game-audio.ts` - per-game audio bus factory
+  - `app/ui/game-shell.tsx` - shared game shell components (GameScreen, GameTabbedModal, etc.)
+- Constraints:
+  - DOM-based game architecture (no canvas)
+  - All tappable elements must be `<button>` (iOS Safari)
+  - Touch targets ≥ 44px
+  - `-webkit-touch-callout: none; user-select: none; touch-action: manipulation` on pads
+  - `prefers-reduced-motion` respected — instant glow changes, no scale pulse, static progress marker
+  - Playfield must fill ≥50% of remaining viewport height at 390×844 portrait after chrome
+  - Per-game font identity via CSS custom properties (`--font`, `--font-title`)
+  - Web fonts for title ≤5KB WOFF2 self-hosted, OFL or CC0
+  - Music off by default, SFX on by default (shared preferences)
+  - Keyboard + touch + gamepad input required
+  - GameTabbedModal (Settings/Info tabs) with Restart + Quit footer
+  - `#game-status` and `#game-feedback` live regions
+  - Scoped PWA manifest + service worker in `public/music-pad/`
+  - Budget enforcement at build time
+- Full validation:
+  - `pnpm test:local`
+- Delivery verification:
+  - `pnpm dev` → navigate to `/music-pad/` → verify pads render, tap produces sound, looper records and plays back
+  - Viewport checkpoints: 390×844, 844×390, 1024×768, 1280×800
+
+## User Intent
+Music Pad is a new activity for Peninsular Reveries — a neon-retro drum pad instrument where kids (and anyone) can tap 8 color-coded pads to trigger synthesized and sampled percussion sounds. Beyond one-shot play, a simple looper lets players record a beat, loop it, and layer up to 3 parts on top, with 3 tempo presets (Slow/Medium/Fast). It's a toy first — satisfying to poke at randomly — and a creative tool second. It follows all project principles: DOM-based, offline-first, fully accessible, every input method supported.
+
+## Legs
+
+### LEG-1: Scaffold — Game shell, routing, and build wiring
+- Status: done
+- Confirmed: yes
+- Goal link: Establishes the game's existence in the site — registry, page, routes, build, and PWA — so all subsequent legs have a runnable shell to build on.
+- Depends on: none
+- Owned files:
+  - `games/music-pad/controller.tsx`
+  - `games/music-pad/info.ts`
+  - `games/music-pad/attributions.ts`
+  - `public/music-pad/manifest.json`
+  - `public/music-pad/sw.js`
+  - `public/styles/music-pad.css`
+- Read-only:
+  - `games/squares/controller.tsx` - reference for controller structure, screen IDs, GameTabbedModal usage, and Document integration
+  - `games/squares/info.ts` - reference for info shape
+  - `games/squares/attributions.ts` - reference for attribution shape
+  - `public/squares/manifest.json` - reference for PWA manifest shape
+  - `public/squares/sw.js` - reference for SW cleanup pattern
+  - `app/ui/game-shell.tsx` - reference for shared components (GameScreen, GameTabbedModal, GameHeader, SettingsToggle, etc.)
+  - `app/ui/document.tsx` - reference for Document component props
+  - `client/audio.ts` - reference for bus gain defaults
+- Deferred shared edits:
+  - `app/data/game-registry.ts` - add `{ slug: 'music-pad', name: 'Music Pad', description: 'Tap, loop, and layer beats on a neon drum pad.', icon: '🥁', status: 'live' }` to the `games` array
+  - `app/routes.ts` - add `musicPadInfo: '/music-pad/info/'` and `musicPad: '/music-pad/'` to the routes object
+  - `app/router.ts` - import `musicPadAction` from `'../games/music-pad/controller.js'`, add `router.get(routes.musicPadInfo, () => gameInfoAction('music-pad'))` and `router.get(routes.musicPad, () => musicPadAction())`
+  - `app/data/attribution-index.ts` - import `musicPadAttribution` from `'../../games/music-pad/attributions.js'` and `musicPadInfo` from `'../../games/music-pad/info.js'`, add `{ attribution: musicPadAttribution, info: musicPadInfo }` to `gameEntries`
+  - `build.ts` - add `'games/music-pad/main.ts'` to game entryPoints, add `mkdirSync(join(outputDir, 'client', 'music-pad'), { recursive: true })` to directory creation, add `{ url: 'http://localhost/music-pad/', outPath: 'music-pad/index.html' }` and `{ url: 'http://localhost/music-pad/info/', outPath: 'music-pad/info/index.html' }` to staticRoutes
+  - `server.ts` - add `'games/music-pad/main.ts'` to gameCtx entryPoints
+- Verification: `pnpm check`
+- Intent: |
+    Create the game scaffold for `music-pad` following the exact patterns in `games/squares/`.
+
+    **`games/music-pad/controller.tsx`**: Server-rendered page controller exporting `musicPadAction()`. Use `Document` with `includeNav={false}`, `includeFooter={false}`, title `"Music Pad"`, `clientScript` pointing to `client/music-pad/main.js`, `gameStylesheet` pointing to `styles/music-pad.css`. Body class: `music-pad`. Include:
+    - Start screen (`#start-screen`) with heading "Music Pad", subtitle "Tap, loop, and layer beats.", a "Start" button (`#start-btn`)
+    - Game screen (`#game-screen`, hidden by default) with: a header area for mode indicator and tempo display, a pad grid container (`#pad-grid`) with 8 `<button>` elements (`#pad-0` through `#pad-7`, class `pad`, each with `data-pad="0"` through `data-pad="7"`), a control bar with Record (`#record-btn`), Play/Stop (`#play-btn`), Clear (`#clear-btn`), and tempo toggle (`#tempo-btn`)
+    - `GameTabbedModal` with Settings tab (SFX toggle via `SettingsToggle`, reduce-motion toggle) and Info tab (game description, controls help with keyboard mapping: top row Q/W/E/R → pads 0–3, bottom row A/S/D/F → pads 4–7, Space → record toggle). Footer: Restart button (`#restart-btn`) + Quit link (site root via `withBasePath`)
+    - Menu button visible on both screens
+    - Live regions: `#game-status` (polite) and `#game-feedback` (assertive)
+    - Noscript fallback
+    - PWA manifest link to `music-pad/manifest.json`, SW registration for `music-pad/sw.js`
+
+    **`games/music-pad/info.ts`**: Export `musicPadInfo` with summary: `"Music Pad is a neon drum pad instrument. Tap eight color-coded pads to trigger percussion sounds, record loops, and layer up to three parts with adjustable tempo. All sounds are synthesized in the browser at runtime."`.
+
+    **`games/music-pad/attributions.ts`**: Export `musicPadAttribution` with slug `'music-pad'`, name `'Music Pad'`, codeLicense from `repositoryCodeLicense`. Include entries for synthesized drum sounds and synthesized sound effects (same pattern as Squares — "Generated in-browser with the Web Audio API"). Leave a placeholder entry for CC0 samples with a note that sourcing is deferred.
+
+    **`public/music-pad/manifest.json`**: PWA manifest with `id: "./"`, `name: "Music Pad"`, `short_name: "Music Pad"`, `start_url: "./"`, `scope: "./"`, `display: "standalone"`, `background_color: "#0a0a1a"`, `theme_color: "#0a0a1a"`, icons referencing `../favicon-game-music-pad.svg` and `../apple-touch-icon.png`.
+
+    **`public/music-pad/sw.js`**: Cleanup service worker following the Squares pattern — `install` → `skipWaiting()`, `activate` → delete caches starting with `'music-pad'` then unregister.
+
+    **`public/styles/music-pad.css`**: CSS skeleton with:
+    - `@font-face` comment placeholder for potential retro display font
+    - CSS custom properties on `body.music-pad`: `--font: system-ui, sans-serif`, `--font-title: system-ui, sans-serif`, `--bg: #0a0a1a`, `--text: #e0e0e0`, `--pad-0` through `--pad-7` with 8 distinct neon colors (hot pink `#ff2d78`, cyan `#00e5ff`, lime `#76ff03`, orange `#ff9100`, purple `#d500f9`, yellow `#ffea00`, red `#ff1744`, blue `#2979ff`)
+    - `body.music-pad` background color and font
+    - Pad grid container: CSS Grid, `grid-template-columns: repeat(4, 1fr)`, `grid-template-rows: repeat(2, 1fr)`, gap
+    - `.pad` base: rounded corners, neon `box-shadow` with color from `var(--pad-N)`, min-height 80px, no border, cursor pointer, `-webkit-touch-callout: none`, `user-select: none`, `touch-action: manipulation`
+    - Screen transitions following game-shell shared patterns
+    - Responsive: landscape adjusts pad aspect ratios
+    - `@media (prefers-reduced-motion: reduce)` and `[data-reduce-motion="true"]` overrides for instant transitions
+    - Viewport checkpoints: 390×844, 844×390, 1024×768, 1280×800
+
+### LEG-2: Sound Engine — Synthesized drum kit and sample manifest
+- Status: done
+- Confirmed: yes
+- Goal link: Creates the instrument's voice — the sounds that make tapping pads satisfying and musical.
+- Depends on: none
+- Owned files:
+  - `games/music-pad/sounds.ts`
+  - `games/music-pad/sample-manifest.ts`
+- Read-only:
+  - `client/audio.ts` - reference for `getAudioContext()`, `createMusicBus()`, `createSfxBus()`, `playTone()`, `playNotes()`, oscillator/noise patterns
+  - `client/game-audio.ts` - reference for `getGameAudioBuses()` return shape `{ music, sfx, ctx }`
+  - `client/sfx-catalog.ts` - reference for existing synthesis patterns (noise generation, bandpass filters, envelopes)
+  - `games/chompers/sample-manifest.ts` - reference for sample manifest shape (FreesoundSource, processing metadata)
+  - `games/chompers/sounds.ts` - reference for game-specific sound synthesis patterns
+- Deferred shared edits: none
+- Verification: `pnpm check`
+- Intent: |
+    Create the synthesized drum kit and sample manifest for Music Pad.
+
+    **`games/music-pad/sounds.ts`**: Export 8 individual pad sound functions, each taking an `SfxBusNode` (the sfx gain node from `getGameAudioBuses`) and an `AudioContext`:
+
+    1. `playKick(sfx, ctx)` — Low sine oscillator (60Hz) with rapid pitch sweep down to 30Hz over 150ms, gain envelope attack 0.01s decay 0.3s. Punchy sub-bass thump.
+    2. `playSnare(sfx, ctx)` — White noise burst through bandpass filter (center 3000Hz, Q 1.0), 100ms duration with sharp attack and fast decay. Layer a brief sine at 200Hz for body.
+    3. `playHiHatClosed(sfx, ctx)` — White noise through highpass filter (8000Hz), very short decay (50ms). Crisp tick.
+    4. `playHiHatOpen(sfx, ctx)` — White noise through highpass filter (6000Hz), longer decay (300ms). Sizzle.
+    5. `playClap(sfx, ctx)` — Three rapid noise bursts (10ms each, 15ms apart) through bandpass (1500Hz), followed by a 100ms noise tail. Mimics layered hand claps.
+    6. `playRim(sfx, ctx)` — High sine (800Hz) with very short duration (30ms), sharp transient. Click-like rim shot.
+    7. `playTom(sfx, ctx)` — Mid sine (150Hz) with pitch sweep down to 80Hz over 200ms, moderate decay (250ms). Mid tom.
+    8. `playCymbal(sfx, ctx)` — White noise through a resonant bandpass (4000Hz, Q 3.0), long decay (800ms), gradual gain fade. Shimmery crash.
+
+    Export a `PAD_SOUNDS` array indexed by pad number (0–7) mapping to these functions in order: kick, snare, closed hat, open hat, clap, rim, tom, cymbal.
+
+    Export `PAD_NAMES: readonly string[]` = `['Kick', 'Snare', 'Hi-Hat', 'Open Hat', 'Clap', 'Rim', 'Tom', 'Cymbal']`.
+
+    Each function creates its own oscillator/noise nodes, connects to the passed sfx bus, and schedules cleanup. Use `ctx.currentTime` for scheduling. All gains should be moderate (0.3–0.6 range) since the SFX bus gain is already 0.12 — these are foreground instrument sounds, so per-voice gain can be higher than typical UI SFX.
+
+    Noise generation helper: create a `createNoiseBuffer(ctx, durationSec)` internal function that generates a mono AudioBuffer filled with `Math.random() * 2 - 1`.
+
+    **`games/music-pad/sample-manifest.ts`**: Export `MusicPadSampleId` type and `musicPadSampleManifest` record following the Chompers pattern. Initially define 2–3 placeholder entries (e.g., `'loop-shaker'`, `'loop-tambourine'`) with `bundled: false` and a comment noting CC0 sourcing is deferred. Include `FreesoundSource` stub with empty fields. These will be populated when the creative-assets workflow sources actual samples.
+
+### LEG-3: Pad Renderer & State — Game surface and state machine
+- Status: done
+- Confirmed: yes
+- Goal link: Builds the playable instrument surface — the grid of pads the player sees and taps, plus the state machine that tracks mode.
+- Depends on: LEG-1, LEG-2
+- Owned files:
+  - `games/music-pad/types.ts`
+  - `games/music-pad/state.ts`
+  - `games/music-pad/renderer.ts`
+  - `games/music-pad/main.ts`
+- Read-only:
+  - `games/music-pad/controller.tsx` - reference for DOM structure and element IDs (from LEG-1)
+  - `games/music-pad/sounds.ts` - reference for PAD_SOUNDS and PAD_NAMES (from LEG-2)
+  - `games/squares/main.ts` - reference for game lifecycle pattern (audio init, screen management, input setup)
+  - `games/squares/renderer.ts` - reference for DOM rendering patterns
+  - `games/squares/state.ts` - reference for pure state function patterns
+  - `client/game-screens.ts` - reference for `showScreen()` (screen transitions via hidden/aria-hidden)
+  - `client/game-audio.ts` - reference for `getGameAudioBuses('music-pad')`
+  - `client/preferences.ts` - reference for `getSfxEnabled()`, `getMusicEnabled()`, reduce-motion prefs
+  - `client/game-accessibility.ts` - reference for `announce()` and `moveFocusAfterTransition()`
+- Deferred shared edits: none
+- Verification: `pnpm check`
+- Intent: |
+    Create types, state logic, renderer, and main entry point for Music Pad.
+
+    **`games/music-pad/types.ts`**: Define:
+    - `PadId` = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+    - `TempoPreset` = `'slow' | 'medium' | 'fast'`
+    - `TEMPO_BPM: Record<TempoPreset, number>` = `{ slow: 80, medium: 110, fast: 140 }`
+    - `TEMPO_LABELS: Record<TempoPreset, string>` = `{ slow: 'Slow', medium: 'Medium', fast: 'Fast' }`
+    - `LOOP_BARS` = 2 (loop length in bars)
+    - `MAX_LAYERS` = 3
+    - `LoopEvent` = `{ padId: PadId; timeOffset: number }` (timeOffset in ms from loop start)
+    - `MusicPadMode` = `'free' | 'recording' | 'playing'`
+    - `MusicPadState` = `{ mode: MusicPadMode; tempo: TempoPreset; layers: LoopEvent[][]; activeLayer: number; loopStartTime: number; recordStartTime: number; currentEvents: LoopEvent[] }`
+
+    **`games/music-pad/state.ts`**: Pure state transition functions:
+    - `createInitialState(): MusicPadState` — mode `'free'`, tempo `'medium'`, empty layers, activeLayer 0
+    - `getLoopDurationMs(tempo: TempoPreset): number` — `(LOOP_BARS * 4 * 60_000) / TEMPO_BPM[tempo]` (4 beats per bar)
+    - `triggerPad(state, padId, currentTime): { state, event? }` — if recording, capture `{ padId, timeOffset: currentTime - state.recordStartTime }` into `currentEvents`; return the event so the caller can play the sound
+    - `startRecording(state, currentTime): MusicPadState` — set mode to `'recording'`, set `recordStartTime`, clear `currentEvents`
+    - `stopRecording(state): MusicPadState` — push `currentEvents` into `layers` (if under MAX_LAYERS), set mode to `'playing'`, increment `activeLayer`
+    - `togglePlayback(state): MusicPadState` — if `'playing'` → `'free'`; if `'free'` and layers exist → `'playing'`
+    - `clearLoop(state): MusicPadState` — reset layers, activeLayer, mode to `'free'`
+    - `cycleTempo(state): MusicPadState` — cycle `slow` → `medium` → `fast` → `slow`
+    - `canRecord(state): boolean` — true if layers.length < MAX_LAYERS and mode is not `'recording'`
+
+    **`games/music-pad/renderer.ts`**: DOM update functions:
+    - `initRenderer()` — cache DOM references to all pads, control buttons, mode indicator, tempo display
+    - `flashPad(padId: PadId)` — add `'hit'` class to pad button, remove after 120ms (requestAnimationFrame + setTimeout). If reduced motion, set class immediately and remove immediately (no transition).
+    - `updateModeDisplay(mode: MusicPadMode)` — update mode indicator text and aria-label. Recording: show pulsing red dot (CSS class `'recording'` on record button). Playing: show active state on play button.
+    - `updateTempoDisplay(tempo: TempoPreset)` — update tempo button text to `TEMPO_LABELS[tempo]`
+    - `updatePlaybackProgress(progress: number)` — update a progress bar width (0–1 range). If reduced motion, show static marker at current position.
+    - `updateRecordButton(canRecord: boolean, isRecording: boolean)` — enable/disable, update aria-label
+    - `updateLayerIndicator(layerCount: number, maxLayers: number)` — show "Layer 1/3" or similar
+
+    **`games/music-pad/main.ts`**: Game entry point:
+    - Import and initialize `getGameAudioBuses('music-pad')`
+    - Initialize state via `createInitialState()`
+    - Set up screen management: start screen → game screen via `showScreen()`
+    - Start button click → show game screen, focus first pad
+    - Wire pad clicks: each pad button's click → `triggerPad(state, padId, performance.now())`, play sound via `PAD_SOUNDS[padId](sfx, ctx)` if SFX enabled, call `flashPad(padId)`, announce pad name
+    - Wire control buttons: Record → `startRecording` / `stopRecording` (auto-stop when loop duration elapsed via setTimeout), Play/Stop → `togglePlayback`, Clear → `clearLoop`, Tempo → `cycleTempo`
+    - Playback loop: when mode is `'playing'`, use `setInterval` at ~16ms resolution to check loop position, schedule pad sounds at correct offsets using Web Audio API timing (`ctx.currentTime`). On each loop cycle, reset position to 0. Update progress display.
+    - Wire menu button → open settings modal, Escape → close modal, Restart → show start screen, re-init state
+    - Respect preferences: check `getSfxEnabled()` before playing sounds
+    - Handle visibility: pause playback when tab hidden (use `document.visibilitychange`)
+
+### LEG-4: Input — Keyboard, touch, and gamepad mapping
+- Status: done
+- Confirmed: yes
+- Goal link: Makes the instrument playable on every device — keyboard keys, touchscreen taps, and gamepad buttons all trigger pads.
+- Depends on: LEG-3
+- Owned files:
+  - `games/music-pad/input.ts`
+- Read-only:
+  - `client/game-input.ts` - reference for `createGamepadPoller()`, `GamepadCallbacks` interface, dead zone/debounce values
+  - `games/squares/input.ts` - reference for input handler patterns (coordinate parsing, focus management, cleanup)
+  - `games/music-pad/types.ts` - reference for PadId type (from LEG-3)
+  - `games/music-pad/main.ts` - reference for how input callbacks integrate with the game loop (from LEG-3)
+- Deferred shared edits: none
+- Verification: `pnpm check`
+- Intent: |
+    Create unified input handling for Music Pad.
+
+    **`games/music-pad/input.ts`**: Export `setupMusicPadInput(callbacks)` and `cleanupMusicPadInput()`.
+
+    Callbacks interface:
+    ```typescript
+    interface MusicPadInputCallbacks {
+      onPadTrigger(padId: PadId): void
+      onRecord(): void
+      onPlayStop(): void
+      onClear(): void
+      onTempo(): void
+      onMenu(): void
+    }
+    ```
+
+    **Keyboard mapping:**
+    - Keys `q`, `w`, `e`, `r` → pads 0, 1, 2, 3 (top row)
+    - Keys `a`, `s`, `d`, `f` → pads 4, 5, 6, 7 (bottom row)
+    - Also map number keys `1`–`8` as alternative pad triggers
+    - Space → toggle record
+    - Enter → toggle play/stop
+    - Backspace or Delete → clear
+    - `t` → cycle tempo
+    - Key events fire on `keydown` only (no repeat: check `event.repeat`)
+    - Attach to `document`, remove on cleanup
+
+    **Touch/pointer:** Handled by DOM click events on `<button>` elements — no custom pointer tracking. The controller.tsx markup already provides `<button>` pads. The click handler in `main.ts` wires these. Input.ts does not duplicate this; it only provides keyboard and gamepad.
+
+    **Gamepad:**
+    - Use `createGamepadPoller()` from `client/game-input.ts`
+    - D-pad navigates focus between pad buttons in the 2×4 grid (up/down switches rows, left/right switches columns). Use `document.activeElement` to determine current focused pad, compute neighbor, call `.focus()`.
+    - A / Button-0 → trigger the focused pad (if a pad has focus) or act as Enter (if a control button has focus)
+    - Start / Button-9 → open/close menu
+    - Shoulder buttons (L1/Button-4, R1/Button-5) → cycle tempo
+    - Analog stick: same as D-pad with ±0.5 dead zone and 200ms debounce
+
+    Clean up all event listeners and stop gamepad polling on `cleanupMusicPadInput()`.
+
+### LEG-5: Looper — Record, play, layer, and tempo control
+- Status: done
+- Confirmed: yes
+- Goal link: Adds the layering magic — kids can record a beat, loop it, and tap additional parts on top.
+- Depends on: LEG-2, LEG-3
+- Owned files:
+  - `games/music-pad/state.ts`
+  - `games/music-pad/renderer.ts`
+  - `games/music-pad/main.ts`
+- Read-only:
+  - `client/audio.ts` - reference for scheduling with `ctx.currentTime`, gain node patterns
+  - `games/music-pad/types.ts` - reference for LoopEvent, TempoPreset, MAX_LAYERS, LOOP_BARS
+  - `games/music-pad/sounds.ts` - reference for PAD_SOUNDS array (from LEG-2)
+- Deferred shared edits: none
+- Verification: `pnpm check`
+- Intent: |
+    Extend state, renderer, and main to support the looper functionality.
+
+    **State extensions in `state.ts`** (if not already covered by LEG-3 — LEG-3 defines the signatures, LEG-5 ensures the loop scheduling logic is complete):
+    - `getLoopPositionMs(state, currentTime)` — returns current position within the loop based on `loopStartTime` and loop duration, wrapping on overflow
+    - `getEventsInWindow(layers, startMs, endMs, loopDuration)` — returns all events from all layers whose `timeOffset` falls within the given window (handling wrap-around). Used by the playback scheduler.
+    - Auto-stop recording: when elapsed time since `recordStartTime` exceeds `getLoopDurationMs(state.tempo)`, auto-call `stopRecording`. This is triggered by a timer set in `main.ts` when recording starts.
+
+    **Renderer extensions in `renderer.ts`**:
+    - Progress bar: a `<div>` inside a container that sweeps from 0% to 100% width over each loop cycle. Updated via `requestAnimationFrame` during playback.
+    - Recording indicator: pulsing red dot (CSS animation on `.recording` class) on the record button.
+    - Layer indicator: text showing "Layer N/3" or dot indicators (●●○) for filled/empty layers.
+    - When playback triggers a pad from a recorded layer, call `flashPad()` so the pad visually lights up on playback too — the instrument feels alive.
+
+    **Main extensions in `main.ts`**:
+    - Playback scheduler: on each `requestAnimationFrame`, compute current loop position, find events in a ~20ms lookahead window, schedule their sounds using `ctx.currentTime + offsetSeconds`. Track which events have been scheduled in the current loop cycle to avoid double-triggering. Reset tracking on loop wrap.
+    - Record button: on click, if `canRecord(state)`, call `startRecording(state, performance.now())`. Set a `setTimeout` for auto-stop at loop duration. While recording, live pad taps still play sounds AND get captured.
+    - Play/Stop button: on click, call `togglePlayback(state)`. If transitioning to playing, set `loopStartTime = performance.now()` and start the RAF loop. If stopping, cancel RAF.
+    - Clear button: on click, call `clearLoop(state)`, stop playback if active, reset progress bar.
+    - Tempo button: on click, call `cycleTempo(state)`. If currently playing, adjust loop timing (restart the loop at the new tempo to avoid drift). Update display.
+    - Visibility handler: on `document.visibilitychange`, pause playback when hidden, resume when visible (with adjusted `loopStartTime` to prevent a burst of catch-up events).
+
+    **Tempo presets:** Slow = 80 BPM, Medium = 110 BPM, Fast = 140 BPM. Loop = 2 bars × 4 beats. So: Slow = 6000ms, Medium ≈ 4364ms, Fast ≈ 3429ms per loop.
+
+    **Max layers = 3.** When all layers are full, the Record button is disabled (grayed out, `aria-disabled="true"`). Clear resets to 0 layers.
+
+### LEG-6: Accessibility & Menu — A11y, focus, and settings modal
+- Status: done
+- Confirmed: yes
+- Goal link: Ensures every player can use the instrument — screen reader announcements, keyboard focus management, and the standard settings modal.
+- Depends on: LEG-1, LEG-3
+- Owned files:
+  - `games/music-pad/accessibility.ts`
+- Read-only:
+  - `client/game-accessibility.ts` - reference for `announce()`, `moveFocusAfterTransition()`
+  - `client/modal.ts` - reference for modal open/close patterns and focus trapping
+  - `client/game-menu.ts` - reference for menu button wiring
+  - `app/ui/game-shell.tsx` - reference for GameTabbedModal structure
+  - `games/music-pad/controller.tsx` - reference for modal markup and live region IDs (from LEG-1)
+  - `games/music-pad/sounds.ts` - reference for PAD_NAMES (from LEG-2)
+- Deferred shared edits: none
+- Verification: `pnpm check`
+- Intent: |
+    Create accessibility helpers and wire the settings modal for Music Pad.
+
+    **`games/music-pad/accessibility.ts`**: Export functions:
+    - `announcePadHit(padId: PadId)` — announce pad name from `PAD_NAMES[padId]` via `announce(name, 'polite')` to `#game-status`. Use debounce: if the same pad is hit within 200ms, skip the repeat announcement (rapid drumming shouldn't flood the screen reader).
+    - `announceModeChange(mode: MusicPadMode)` — announce via `announce(msg, 'assertive')` to `#game-feedback`: "Recording started", "Recording stopped, playing loop", "Playback stopped", "Loop cleared"
+    - `announceTempoChange(tempo: TempoPreset)` — announce "Tempo: Slow" / "Tempo: Medium" / "Tempo: Fast" via polite
+    - `announceLayerChange(layerCount: number, maxLayers: number)` — announce "Layer N of M" or "All layers full" via polite
+
+    **Settings modal wiring** (in `main.ts`, extending LEG-3):
+    - Menu button → open `#settings-modal` (use shared modal open/close from `client/modal.ts`)
+    - Escape → close modal
+    - On close, return focus to the previously focused element (the pad or control button that was active before opening)
+    - Settings tab: SFX toggle wired to `setSfxEnabled()` / `getSfxEnabled()`, reduce-motion toggle wired to `setReduceMotionPreference()` / `getStoredReduceMotionPreference()`
+    - Info tab: game description + controls help (keyboard mapping table)
+    - Restart button (`#restart-btn`): stop playback, reset state, show start screen
+    - Quit link: already rendered in controller as `<a>` to site root
+
+    **Focus management:**
+    - On transition from start screen to game screen: focus `#pad-0` after transition completes (use `moveFocusAfterTransition`)
+    - Pad buttons have `aria-label="Kick"` etc. (set from PAD_NAMES in renderer or controller)
+    - Record button: `aria-label` changes with state: "Record loop" / "Stop recording" / "Recording unavailable, all layers full"
+    - Play button: `aria-label` changes: "Play loop" / "Stop loop"
+    - Tempo button: `aria-label="Tempo: Medium"` etc.
+
+### LEG-7: Visual Polish — Neon retro theme, animations, responsive layout
+- Status: done
+- Confirmed: yes
+- Goal link: Brings the neon/retro identity to life — dark background, bright glowing pads, satisfying hit animations.
+- Depends on: LEG-3
+- Owned files:
+  - `public/styles/music-pad.css`
+  - `games/music-pad/animations.ts`
+- Read-only:
+  - `client/game-animations.ts` - reference for `animateClass()` helper
+  - `public/styles/squares.css` - reference for game CSS patterns (themes, responsive breakpoints, reduced-motion)
+  - `games/squares/animations.ts` - reference for CSS-first animation patterns
+- Deferred shared edits: none
+- Verification: `pnpm check` + manual visual check at 390×844, 844×390, 1024×768, 1280×800
+- Intent: |
+    Complete the neon/retro visual identity for Music Pad and add hit animations.
+
+    **`public/styles/music-pad.css`** (extends skeleton from LEG-1):
+
+    Full CSS including:
+    - **Pad hit animation** (`@keyframes pad-hit`): scale 1.0 → 0.92 → 1.0, box-shadow intensity doubles then returns, over 120ms ease-out. `.pad.hit` class triggers this.
+    - **Pad glow**: each pad gets a `box-shadow: 0 0 15px 3px var(--pad-N-color), inset 0 0 10px 2px var(--pad-N-color-dim)`. On hit, outer glow expands to `0 0 30px 8px`. The pad background is a slightly darkened version of its neon color.
+    - **Pad labels**: each pad shows its instrument name (Kick, Snare, etc.) and keyboard shortcut in small text below. Use `:after` pseudo or inner span. Neon color text on dark pad surface.
+    - **Control bar**: horizontal row below the pad grid. Buttons styled as rounded pill shapes with neon borders. Record button: red accent. Play button: green accent. Clear button: white/gray. Tempo button: cyan accent.
+    - **Recording state**: `.recording` class on record button adds a pulsing `box-shadow` animation (red glow pulse, 1s infinite ease-in-out).
+    - **Playback progress**: a thin horizontal bar below the pad grid, neon gradient sweep (left to right) that resets each loop cycle. CSS `width` transition or JS-driven width.
+    - **Layer indicator**: small dots or pills showing filled layers (bright) vs empty (dim).
+    - **Start screen**: centered title in neon glow text (`text-shadow`), simple Start button with neon border.
+    - **Responsive layout**:
+      - 390×844 portrait: pad grid 2 rows × 4 columns, pads fill available space, control bar below
+      - 844×390 landscape: pad grid may shift to 4×2 or pads become wider rectangles, control bar on the side or compressed below
+      - 1024×768 / 1280×800: pads have max-width, centered, comfortable spacing
+    - **Reduced motion**: `@media (prefers-reduced-motion: reduce)` and `[data-reduce-motion="true"]`: no pad scale animation (instant color flash), no recording pulse (solid red instead), no progress sweep (static bar position), no glow transitions (instant).
+    - Safe area padding: `env(safe-area-inset-*)` on game root.
+
+    **Visual checkpoints** (for navigator acceptance):
+    - Idle: 8 glowing neon pads on dark background, control bar below, no active states
+    - Hit: tapped pad scales down and glows brighter, then returns
+    - Recording: record button pulses red, mode indicator shows "REC"
+    - Playing: progress bar sweeps, pads flash on playback events
+    - Complete (all layers): record button dimmed, 3 layer dots lit
+
+    **`games/music-pad/animations.ts`**: Export:
+    - `animatePadHit(element: HTMLElement): Promise<void>` — add `'hit'` class, wait 120ms, remove class. Respect reduced motion (instant add/remove, no wait). Use `animateClass` from shared helpers or implement inline.
+    - `animateRecordPulse(element: HTMLElement, active: boolean): void` — toggle `'recording'` class.
+    - `animateProgressSweep(element: HTMLElement, progress: number): void` — set `style.width` to `${progress * 100}%`.
+
+### LEG-8: Tests & Attributions — Unit tests, e2e smoke, and attribution sync
+- Status: done
+- Confirmed: yes
+- Goal link: Validates the game works correctly and credits all sources before declaring it human-ready.
+- Depends on: LEG-1, LEG-2, LEG-3, LEG-4, LEG-5, LEG-6, LEG-7
+- Owned files:
+  - `games/music-pad/state.test.ts`
+- Read-only:
+  - `games/squares/state.test.ts` - reference for test patterns
+  - `games/music-pad/state.ts` - test target
+  - `games/music-pad/types.ts` - reference for type definitions
+  - `games/music-pad/attributions.ts` - verify attribution entries exist
+- Deferred shared edits:
+  - `e2e/site-07-game-smoke.spec.ts` - add Music Pad smoke tests: (1) "Music Pad — start screen is visible" (navigate to `/music-pad/`, verify `#start-screen` visible, heading "Music Pad" visible), (2) "Music Pad — pad grid renders on start" (click `#start-btn`, verify `#game-screen` visible, verify `#pad-grid` visible, verify `#pad-0` through `#pad-7` exist and are in viewport), (3) "Music Pad — controller opens menu" (install mock gamepad, navigate, tap Start/Button-9, verify `#settings-modal` visible)
+- Verification: `pnpm test:local`
+- Intent: |
+    Create unit tests for state logic and wire the e2e smoke test.
+
+    **`games/music-pad/state.test.ts`**: Test the pure state functions from `state.ts`:
+    1. `createInitialState()` returns mode `'free'`, tempo `'medium'`, empty layers
+    2. `getLoopDurationMs('slow')` returns 6000, `('medium')` ≈ 4364, `('fast')` ≈ 3429
+    3. `triggerPad` in free mode returns state unchanged (no event captured) but returns the event for sound playback
+    4. `triggerPad` in recording mode captures event with correct `timeOffset`
+    5. `startRecording` sets mode to `'recording'` and clears currentEvents
+    6. `stopRecording` pushes currentEvents into layers, sets mode to `'playing'`, increments activeLayer
+    7. `stopRecording` does not exceed MAX_LAYERS
+    8. `togglePlayback` from `'free'` with layers → `'playing'`; from `'playing'` → `'free'`; from `'free'` with no layers → stays `'free'`
+    9. `clearLoop` resets layers, mode, activeLayer
+    10. `cycleTempo` cycles `slow` → `medium` → `fast` → `slow`
+    11. `canRecord` returns true when layers < MAX_LAYERS and mode is not recording, false otherwise
+    12. `getEventsInWindow` returns correct events for a given time window, including wrap-around
+
+    Run `pnpm sync:attributions` to regenerate `ATTRIBUTIONS.md` with music-pad entries.
+
+    Verify `pnpm check` passes before running `pnpm test:local`.
+
+## Dispatch Order
+Sequential via runSubagent (navigator reviews between each):
+1. LEG-1 (Scaffold) - no dependencies
+2. LEG-2 (Sound Engine) - no dependencies, but serial after LEG-1 for navigator flow
+3. LEG-3 (Pad Renderer & State) - depends on LEG-1, LEG-2
+4. LEG-4 (Input) - depends on LEG-3
+5. LEG-5 (Looper) - depends on LEG-2, LEG-3
+6. LEG-6 (Accessibility & Menu) - depends on LEG-1, LEG-3
+7. LEG-7 (Visual Polish) - depends on LEG-3
+8. LEG-8 (Tests & Attributions) - depends on all prior
+After all complete: deferred shared edits → `pnpm sync:attributions` → `pnpm test:local` → delivery verification → commit → push.
