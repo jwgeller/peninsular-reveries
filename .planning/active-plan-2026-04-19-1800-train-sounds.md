@@ -1,0 +1,265 @@
+# Plan: Train Sounds — Interactive Engine and Railcar Sound Toy
+
+## Project Context
+- Sources:
+  - `README.md` - source of truth for project principles: offline-first, every input method, accessible defaults, and synthesized or lightweight media where practical.
+  - `AGENTS.md` - repo workflow, human-ready expectation, validation gate, and styling guidance.
+  - `.github/skills/review/references/architecture.md` - game module contract, add-a-game checklist, DOM-first runtime rules, iOS Safari interaction rules, and input conventions.
+  - `.github/skills/review/references/game-quality.md` - full-screen layout rules, viewport checkpoints, input coverage, and in-game menu standard.
+  - `.github/skills/review/references/testing.md` - colocated test layout, smoke-test expectations, and attribution sync requirement.
+  - `.github/skills/creative-assets/SKILL.md` - CC0 or public-domain requirement for recorded samples, fetch-tool workflow, and human-audio-verification boundary.
+  - `.github/skills/creative-assets/references/audio-source-notes.md` - mono OGG defaults, trim and fade guidance, and real-speaker audibility checks.
+  - `games/music-pad/controller.tsx` - closest existing sound-toy shell using `GameScreen`, `GameTabbedModal`, live regions, and full-screen document setup.
+  - `games/music-pad/sounds.ts` - localized sound-routing pattern for interactive buttons.
+  - `games/music-pad/sample-manifest.ts` - placeholder manifest shape for per-game audio assets.
+  - `games/chompers/sample-manifest.ts` - concrete sourced-audio manifest shape with processing metadata and bundled outputs.
+  - `app/routes.ts` - exact route naming pattern for game and info pages.
+  - `app/router.ts` - exact controller wiring pattern for a live game.
+  - `app/data/attribution-index.ts` - exact attribution and summary registration pattern.
+  - `build.ts` - exact build entry, static route, service-worker stamp, and budget-page wiring.
+  - `server.ts` - exact dev entry-point wiring.
+- Constraints:
+  - New game slug is `train-sounds`; public name is `Train Sounds`.
+  - This is a calm sound toy only: no scoring, unlocks, or progression loop.
+  - Use stylized DOM/CSS train scenes, not canvas and not sourced train illustrations.
+  - All tappable train parts and switch arrows must be native `<button>` elements; follow iOS Safari rules from architecture guidance.
+  - Four curated train presets only in v1: steam, diesel, electric, and high-speed.
+  - Each preset needs a visible train name only. Do not add extra per-train info text in the play scene.
+  - Left and right arrows switch whole train presets. Do not implement independent engine-plus-car mix-and-match in v1, but leave the data model open enough that a future pass could add it.
+  - Recorded audio samples must be CC0 or public domain only, trimmed to tight mono OGG one-shots, and fully attributed.
+  - The agent may fetch and process approved samples, but a human must verify final speaker quality and audibility before the work is considered human-ready.
+  - Keyboard, touch/pointer, and gamepad input are required. Maintain repo conventions: D-pad navigation, A/Button-0 select, Start/Button-9 menu.
+  - Full-screen layout with no document scroll. At `390x844` portrait and `844x390` landscape, the train scene must remain dominant, arrows and hotspots must stay comfortable to use, and every interactive target must remain at least 44px.
+  - Use the repo-standard `GameTabbedModal` with Settings and Info tabs, Restart and Quit footer actions, `#game-status`, `#game-feedback`, and a noscript fallback.
+  - Respect reduced motion: pressing and switching states still render correctly when motion is reduced.
+  - Scoped PWA manifest and service worker are required under `public/train-sounds/`.
+  - Attributions must be synced with `pnpm sync:attributions` before handoff.
+  - Build budgets from `config/budget.json` still apply.
+- Full validation:
+  - `pnpm test:local`
+- Delivery verification:
+  - local-only
+  - `pnpm dev` -> open `/train-sounds/` -> verify start screen, active scene, left/right switching across all four trains, hotspot playback, menu open/close via pointer and controller, and clear layout at `390x844`, `844x390`, `1024x768`, and `1280x800`
+  - Human audio check on real speakers or headphones after the recorded OGG outputs are rendered
+
+## User Intent
+Train Sounds should be a calm sound toy, not a progression game. Players should see a full-screen stylized train scene, tap or click accessible hotspots on the engine and visible cars to hear recorded train sounds, and use left and right arrows to cycle through four curated presets: steam, diesel, electric, and high-speed. Each preset only needs a visible train name, not extra per-train info text, while the game still follows the repo’s standard expectations for keyboard, touch, gamepad, reduced motion, PWA wiring, CC0 attribution, and validation.
+
+## Legs
+
+### LEG-1: Shell - Game page, modal shell, CSS system, and PWA files
+- Status: done
+- Confirmed: yes
+- Goal link: Establishes Train Sounds as a real game page with the full-screen shell, modal structure, scene container, and PWA footprint that every later leg builds on.
+- Depends on: none
+- Owned files:
+  - `games/train-sounds/controller.tsx`
+  - `games/train-sounds/info.ts`
+  - `public/styles/train-sounds.css`
+  - `public/train-sounds/manifest.json`
+  - `public/train-sounds/sw.js`
+- Read-only:
+  - `games/music-pad/controller.tsx` - reference for the closest sound-toy controller structure and modal layout.
+  - `app/ui/document.tsx` - reference for `Document` props, scripts, stylesheets, manifest, and service-worker wiring.
+  - `app/ui/game-shell.tsx` - reference for `GameScreen`, `GameHeader`, `GameTabbedModal`, `SettingsSection`, `SettingsToggle`, `InfoSection`, and live-region helpers.
+  - `public/music-pad/manifest.json` - reference for scoped game PWA manifest shape.
+  - `public/music-pad/sw.js` - reference for cleanup service-worker shape.
+- Deferred shared edits:
+  - none
+- Verification: `pnpm check`
+- Intent: |
+    Create the initial Train Sounds shell without touching shared registry or routing files yet.
+
+    **`games/train-sounds/controller.tsx`**: Export `trainSoundsAction()` using `Document` with `title="Train Sounds"`, a short summary description, `path="/train-sounds/"`, `includeNav={false}`, `includeFooter={false}`, `includeDefaultStyles={false}`, `stylesheets={['/styles/train-sounds.css']}`, `scripts={['/client/train-sounds/main.js']}`, `bodyClass="train-sounds"`, `viewportFitCover`, `faviconPath`, `manifestPath="/train-sounds/manifest.json"`, `serviceWorkerPath="/train-sounds/sw.js"`, and `serviceWorkerScope="/train-sounds/"`.
+    Render:
+    (1) a start screen with title, a short subtitle such as "Tap the train. Hear the parts.", and `#start-btn`.
+    (2) a game screen containing a persistent `Menu` button, visible train name container `#train-name`, left and right train-switch buttons `#train-prev-btn` and `#train-next-btn`, a central scene wrapper `#train-scene`, and a hotspot layer container `#train-hotspots` where later legs can render native button hotspots.
+    (3) a `GameTabbedModal` with Settings tab containing SFX and reduce-motion toggles, and an Info tab containing the general game summary from `trainSoundsInfo` plus an empty credits mount node such as `#train-credits` for a later leg to populate from attribution data.
+    Include `#game-status`, `#game-feedback`, and a noscript fallback.
+
+    **`games/train-sounds/info.ts`**: Export `trainSoundsInfo` with a short general summary only. Do not add per-train descriptive blurbs.
+
+    **`public/styles/train-sounds.css`**: Own the full visual CSS system for the game page so later legs only toggle classes, attributes, and scene markup. Define per-game font tokens (`--font`, `--font-title`), safe-area-aware full-screen layout, train-scene framing, arrow button styling, hotspot button base rules, pressed and switched-state classes, modal-specific styling, and responsive checkpoints for portrait phone, landscape phone, tablet, and desktop. The scene should feel like a playful train display, but all final interaction states must already have CSS hooks here. Use reduced-motion overrides so state changes remain visible without relying on animated transforms.
+
+    **`public/train-sounds/manifest.json`**: Add a standard scoped standalone manifest following the existing per-game pattern.
+
+    **`public/train-sounds/sw.js`**: Add the standard cleanup worker pattern that clears old train-sounds caches and unregisters.
+
+### LEG-2: Train Catalog - Presets, hotspots, and pure switching state
+- Status: done
+- Confirmed: yes
+- Goal link: Defines exactly which trains exist, which parts are clickable, and how train switching behaves before runtime and audio wiring start.
+- Depends on: LEG-1
+- Owned files:
+  - `games/train-sounds/types.ts`
+  - `games/train-sounds/catalog.ts`
+  - `games/train-sounds/state.ts`
+- Read-only:
+  - `games/music-pad/sounds.ts` - reference for readable per-control naming and button-to-sound organization.
+  - `games/squares/state.ts` - reference for pure state helper style.
+  - `games/music-pad/controller.tsx` - reference for DOM IDs and screen IDs already established by LEG-1.
+- Deferred shared edits:
+  - none
+- Verification: `pnpm check`
+- Intent: |
+    Create the data model and pure state transitions for the Train Sounds toy.
+
+    **`games/train-sounds/types.ts`**: Define the core types such as `TrainPresetId`, `TrainHotspotId`, `TrainHotspotCategory`, `TrainHotspotDefinition`, `TrainPresetDefinition`, and `TrainSoundsState`. The state should be minimal and toy-oriented: current preset id or index, optionally focused hotspot id, and any ephemeral pressed-state bookkeeping needed by the renderer. Do not introduce score, completion, or unlock state.
+
+    **`games/train-sounds/catalog.ts`**: Export the four curated presets: steam, diesel, electric, and high-speed. Each preset should include a visible train name, art tokens or structural metadata for the renderer, and a hotspot definition list covering both engine and car interaction points. Target a small but satisfying hotspot set per preset, such as whistle or horn, bell or power hum, brake or coupler, wheels or rods, and a carriage-specific point such as a passenger door or cargo latch. The catalog should support whole-preset switching only in v1.
+
+    **`games/train-sounds/state.ts`**: Export pure helpers such as `createInitialTrainSoundsState()`, `getCurrentPreset(state)`, `selectNextTrain(state)`, `selectPreviousTrain(state)`, `selectHotspot(state, hotspotId)`, and `resetTrainSoundsState()`. Wraparound behavior for preset switching is required. Switching trains should clear any transient pressed hotspot state rather than carrying the previous preset's hotspot selection forward.
+
+### LEG-3: Audio Assets - Sample manifest, playback map, rendered one-shots, and attributions
+- Status: done
+- Confirmed: yes
+- Goal link: Gives each train part a recorded voice with real train character while keeping licensing, file size, and audibility under control.
+- Depends on: LEG-2
+- Owned files:
+  - `games/train-sounds/sample-manifest.ts`
+  - `games/train-sounds/sounds.ts`
+  - `games/train-sounds/attributions.ts`
+  - `public/train-sounds/audio/steam-whistle.ogg`
+  - `public/train-sounds/audio/steam-bell.ogg`
+  - `public/train-sounds/audio/steam-chuff.ogg`
+  - `public/train-sounds/audio/diesel-horn.ogg`
+  - `public/train-sounds/audio/diesel-idle.ogg`
+  - `public/train-sounds/audio/air-brake-hiss.ogg`
+  - `public/train-sounds/audio/electric-horn.ogg`
+  - `public/train-sounds/audio/electric-hum.ogg`
+  - `public/train-sounds/audio/passenger-door-chime.ogg`
+  - `public/train-sounds/audio/highspeed-horn.ogg`
+  - `public/train-sounds/audio/highspeed-passby.ogg`
+  - `public/train-sounds/audio/coupler-clank.ogg`
+- Read-only:
+  - `.github/skills/creative-assets/SKILL.md` - constraints for CC0 sourcing, fetch tooling, and human verification boundaries.
+  - `.github/skills/creative-assets/references/audio-source-notes.md` - processing defaults and audibility checks.
+  - `games/chompers/sample-manifest.ts` - concrete processed-sample manifest example.
+  - `games/music-pad/sample-manifest.ts` - placeholder manifest structure for a sound toy.
+  - `client/game-audio.ts` - shared game audio buses.
+  - `client/audio.ts` - Web Audio helpers and bus expectations.
+- Deferred shared edits:
+  - `.github/skills/creative-assets/scripts/fetch-game-audio.ts` - add a `train-sounds` config so future regenerations route through the shared fetch tool; if implementation lands the audio files via manual processing first, sync this shared script during integration before handoff.
+- Verification: `pnpm check`
+- Intent: |
+    Build the full Train Sounds audio asset set and the playback metadata that maps it to hotspots.
+
+    **`games/train-sounds/sample-manifest.ts`**: Define a manifest for the recorded one-shots above using the concrete processed-sample pattern from Chompers. Each entry must include source metadata, gain, file name, URL, and processing plan (trim window, mono output, bitrate, filters, fade in, and fade out). Prefer a compact, reusable set: shared sounds such as coupler clank can serve more than one preset when the match is believable.
+
+    **`games/train-sounds/sounds.ts`**: Export the sample-loading and hotspot-routing layer. Load the recorded OGGs through Web Audio or a similarly reliable low-latency path tied to the shared SFX bus. Expose a hotspot-to-sound mapping per preset so the runtime can ask for a sound by hotspot id instead of hard-coding file paths. Recorded samples remain primary. If one specific sample still reads muddy after careful sourcing and filtering, allow only a subtle low-gain synthetic reinforcement layer under that sample rather than replacing the recorded sound outright.
+
+    **`games/train-sounds/attributions.ts`**: Record the exact source, creator, license, and modification notes for every bundled recorded sample. Do not leave generic placeholder text if concrete sources are used.
+
+    **Audio outputs under `public/train-sounds/audio/`**: Render tight mono OGG files at the repo's preferred size profile. The agent may fetch and process approved CC0 sources, but the leg must explicitly stop short of claiming final audio quality is approved until a human listens on real hardware.
+
+### LEG-5: Input and Accessibility - Keyboard, controller, focus, and announcements
+- Status: done
+- Confirmed: yes
+- Goal link: Makes the toy actually compliant with the repo's every-input rule before the main runtime wires everything together.
+- Depends on: LEG-1
+- Owned files:
+  - `games/train-sounds/input.ts`
+  - `games/train-sounds/accessibility.ts`
+- Read-only:
+  - `client/game-input.ts` - reference for gamepad polling, focusable control scanning, and button conventions.
+  - `client/game-accessibility.ts` - reference for announcements and focus-move helpers.
+  - `client/modal.ts` - reference for modal setup and close behavior.
+  - `games/train-sounds/catalog.ts` - hotspot names and preset names for announcements.
+  - `games/train-sounds/controller.tsx` - concrete button IDs and screen structure from LEG-1.
+- Deferred shared edits:
+  - none
+- Verification: `pnpm check`
+- Intent: |
+    Create the input and accessibility helpers that the main runtime will consume.
+
+    **`games/train-sounds/input.ts`**: Export `setupTrainSoundsInput(callbacks)` and a cleanup function. Keep touch behavior native by relying on the existing buttons from the controller and renderer. Add keyboard support built around visible controls only: left and right train switching, focus navigation among arrows, hotspots, and menu controls, and activation through native button semantics. Do not add direct number-key hotspot shortcuts. Add gamepad support with D-pad or analog-stick focus navigation, A/Button-0 activation, and Start/Button-9 menu open or close. Keep the logic robust when the settings modal is open.
+
+    **`games/train-sounds/accessibility.ts`**: Export helpers such as `announceTrainChange(presetName)`, `announceHotspotActivated(trainName, hotspotName)`, and any focus-transfer helpers the runtime needs. Prevent live-region spam when the same hotspot is triggered repeatedly in quick succession. The announced text should stay simple and concrete.
+
+### LEG-4: Runtime and Scene Interaction - Renderer, animations, and main entry point
+- Status: done
+- Confirmed: yes
+- Goal link: Turns the shell, train catalog, audio assets, and input helpers into the actual playable train toy.
+- Depends on: LEG-2
+- Owned files:
+  - `games/train-sounds/renderer.ts`
+  - `games/train-sounds/animations.ts`
+  - `games/train-sounds/main.ts`
+- Read-only:
+  - `games/train-sounds/controller.tsx` - scene container, live region, and modal IDs.
+  - `games/train-sounds/catalog.ts` - preset and hotspot definitions.
+  - `games/train-sounds/state.ts` - pure switching and hotspot state transitions.
+  - `games/train-sounds/sounds.ts` - hotspot-to-sound routing and sample playback.
+  - `games/train-sounds/attributions.ts` - populate the credits mount inside the Info tab after LEG-3 has created concrete credits.
+  - `games/train-sounds/input.ts` - input helper from LEG-5.
+  - `games/train-sounds/accessibility.ts` - announcement helper from LEG-5.
+  - `client/game-screens.ts` - screen transitions and active-screen behavior.
+  - `client/preferences.ts` - SFX and reduce-motion preference helpers.
+  - `client/game-menu.ts` - standard modal menu wiring.
+  - `client/game-animations.ts` - shared animation helper patterns.
+- Deferred shared edits:
+  - none
+- Verification: `pnpm check`
+- Intent: |
+    Implement the Train Sounds runtime using the scene containers and CSS hooks from LEG-1.
+
+    **`games/train-sounds/renderer.ts`**: Cache the DOM nodes created by the controller, render the active preset into `#train-scene` and `#train-hotspots`, update the visible train name, and ensure every hotspot is a native button anchored to the correct engine or car part. The renderer should generate the scene from `catalog.ts` data instead of hard-coding four unrelated DOM trees.
+
+    **`games/train-sounds/animations.ts`**: Toggle pressed and switched-state classes in a CSS-first way. Reduced-motion mode must still show clear state changes instantly rather than silently skipping feedback.
+
+    **`games/train-sounds/main.ts`**: Initialize the audio buses, lazy-load the recorded samples, move from start screen to active game screen, wire left and right switching, wire hotspot activation, connect the LEG-5 input and accessibility helpers, bind SFX and reduce-motion toggles, and populate the Info-tab credits mount from `trainSoundsAttribution`. The runtime must keep the play scene clear and comfortable at the required viewports: the train scene is the dominant element, arrows are always reachable, and hotspot targets do not collapse below touch-safe size.
+
+### LEG-6: Validation and Integration - Tests, shared wiring, smoke coverage, and sync
+- Status: done
+- Confirmed: yes
+- Goal link: Proves Train Sounds works in isolation and then integrates it cleanly into the site, build, and attribution pipeline.
+- Depends on: LEG-4
+- Owned files:
+  - `games/train-sounds/state.test.ts`
+  - `games/train-sounds/input.test.ts`
+  - `games/train-sounds/sounds.test.ts`
+- Read-only:
+  - `games/train-sounds/state.ts` - target for switching-state tests.
+  - `games/train-sounds/input.ts` - target for keyboard and gamepad behavior tests.
+  - `games/train-sounds/sounds.ts` - target for hotspot-to-sound mapping tests.
+  - `e2e/site-07-game-smoke.spec.ts` - shared smoke coverage location.
+  - `app/routes.ts` - deferred integration target.
+  - `app/router.ts` - deferred integration target.
+  - `app/data/game-registry.ts` - deferred integration target.
+  - `app/data/attribution-index.ts` - deferred integration target.
+  - `build.ts` - deferred integration target.
+  - `server.ts` - deferred integration target.
+  - `.github/skills/creative-assets/scripts/fetch-game-audio.ts` - deferred shared fetch-tool config target.
+- Deferred shared edits:
+  - `app/data/game-registry.ts` - add `{ slug: 'train-sounds', name: 'Train Sounds', description: 'Tap different parts of a train to hear it come alive.', icon: '🚆', status: 'live' }` to the games array.
+  - `app/routes.ts` - add `trainSoundsInfo: '/train-sounds/info/'` and `trainSounds: '/train-sounds/'` to the routes object.
+  - `app/router.ts` - import `trainSoundsAction` from `../games/train-sounds/controller.js`, add `router.get(routes.trainSoundsInfo, () => gameInfoAction('train-sounds'))`, and add `router.get(routes.trainSounds, () => trainSoundsAction())`.
+  - `app/data/attribution-index.ts` - import `trainSoundsAttribution` and `trainSoundsInfo`, then add `{ attribution: trainSoundsAttribution, info: trainSoundsInfo }` to `gameEntries`.
+  - `build.ts` - add `train-sounds/sw.js` to `swFiles`, add `mkdirSync(join(outputDir, 'client', 'train-sounds'), { recursive: true })`, add `games/train-sounds/main.ts` to the game entry points, add `http://localhost/train-sounds/` and `http://localhost/train-sounds/info/` to `staticRoutes`, and add the `train-sounds` page bundle to `pages` for budget reporting.
+  - `server.ts` - add `games/train-sounds/main.ts` to the watched game entry points.
+  - `.github/skills/creative-assets/scripts/fetch-game-audio.ts` - add `train-sounds` to `gameAudioConfigs` so the sample manifest can be regenerated through the shared tool after implementation.
+  - `e2e/site-07-game-smoke.spec.ts` - add Train Sounds smoke coverage for: start screen visible, active train scene visible after start, left or right arrow switching changes the visible train name, the scene remains in viewport, and Start/Button-9 opens the menu. Include a `page.screenshot()` capture or clearly labeled screenshot step for one active train scene so the visual leg has an automated checkpoint beyond lint.
+- Verification: `pnpm test:local`
+- Intent: |
+    Validate the Train Sounds feature set and complete the site integration.
+
+    **`games/train-sounds/state.test.ts`**: Cover initial state, next and previous wraparound behavior, hotspot selection, and reset behavior.
+
+    **`games/train-sounds/input.test.ts`**: Cover keyboard left and right switching, modal-safe input behavior, and gamepad mapping for focus navigation, activation, and menu open or close.
+
+    **`games/train-sounds/sounds.test.ts`**: Cover hotspot-to-sound mapping consistency, manifest lookup validity, and any fallback reinforcement configuration so the runtime does not point to missing sample ids.
+
+    After the owned-file tests exist, apply the deferred shared edits, run `pnpm sync:attributions`, then run the full repo validation gate. The leg is not done until the smoke coverage exists and the plan explicitly records the remaining human-only audio-quality check.
+
+## Dispatch Order
+Sequential via runSubagent (navigator reviews between each):
+1. LEG-1 (Shell) - no dependencies
+2. LEG-2 (Train Catalog) - depends on LEG-1
+3. LEG-3 (Audio Assets) - depends on LEG-2
+4. LEG-5 (Input and Accessibility) - depends on LEG-1
+5. LEG-4 (Runtime and Scene Interaction) - depends on LEG-2, LEG-3, LEG-5
+6. LEG-6 (Validation and Integration) - depends on LEG-4
+After all complete: deferred edits → `pnpm sync:attributions` → `pnpm test:local` → delivery verification → commit → push.
+
+## Manual Verification
+- Remaining human-only check: listen to the Train Sounds one-shots on real speakers or headphones after landing to confirm final audibility and quality.
