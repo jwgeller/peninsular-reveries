@@ -13,6 +13,7 @@
 - Build: `tsx --tsconfig config/tsconfig.json build.ts`
 - Dev: `tsx --tsconfig config/tsconfig.json server.ts`
 - Base path: GitHub Pages deploys under a project subpath; builds use `SITE_BASE_PATH` and `SITE_ORIGIN` env vars for asset URLs, nav links, OG metadata, and service worker registration.
+- Runtime asset fetches must NOT use root-relative URLs like `/<game>/audio/x.ogg`. On GitHub Pages the project base path (e.g. `/peninsular-reveries/`) is dropped from a leading `/`, so the request 404s in production while passing locally. Use `resolveAssetUrl()` from `client/audio.ts` (or an equivalent baseURI/location-relative resolution) for any `fetch()` of static assets that the server does not URL-rewrite. This bug went unnoticed for the recorded-SFX games because audio failures are silent.
 - Design: clean typography, good spacing, a few intentional personality touches without heavy maintenance cost
 
 ## Technology Stack

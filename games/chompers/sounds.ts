@@ -1,5 +1,5 @@
 import { chompersSampleManifest, getBundledChompersSamples, type ChompersSampleDefinition, type ChompersSampleId } from './sample-manifest.js'
-import { ensureAudioUnlocked as baseEnsureAudioUnlocked } from '../../client/audio.js'
+import { ensureAudioUnlocked as baseEnsureAudioUnlocked, resolveAssetUrl } from '../../client/audio.js'
 import { getGameAudioBuses } from '../../client/game-audio.js'
 
 let sampleLoadPromise: Promise<void> | null = null
@@ -100,7 +100,7 @@ async function decodeSample(sample: ChompersSampleDefinition): Promise<void> {
   if (!context || decodedSamples.has(sample.id) || failedSamples.has(sample.id)) return
 
   try {
-    const response = await fetch(sample.url, { cache: 'force-cache' })
+    const response = await fetch(resolveAssetUrl(sample.url), { cache: 'force-cache' })
     if (!response.ok) {
       failedSamples.add(sample.id)
       return

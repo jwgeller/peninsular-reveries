@@ -32,6 +32,24 @@ export function ensureAudioUnlocked(): void {
   unlocked = true
 }
 
+// ── Asset URL resolution ─────────────────────────────────────────────────────
+// Manifest URLs in this repo are root-relative like `/<game>/audio/foo.ogg`.
+// On GitHub Pages the site is published under a project base path
+// (e.g. `/peninsular-reveries/`), so a raw root-relative fetch would skip the
+// base path and 404. Resolve the URL against the page's current location's
+// directory so it works under any base path.
+export function resolveAssetUrl(rootRelativeUrl: string): string {
+  if (!rootRelativeUrl.startsWith('/')) return rootRelativeUrl
+
+  const { origin, pathname } = window.location
+  const pageDir = pathname.endsWith('/') ? pathname : pathname.replace(/[^/]*$/, '')
+  // Strip the leading `/<gameSlug>/` segment from the manifest URL because the
+  // page is already inside that directory. e.g. on `/peninsular-reveries/train-sounds/`
+  // a manifest url of `/train-sounds/audio/foo.ogg` becomes `audio/foo.ogg`.
+  const trimmed = rootRelativeUrl.replace(/^\/[^/]+\//, '')
+  return new URL(trimmed, origin + pageDir).toString()
+}
+
 // ── Gain fade helper ──────────────────────────────────────────────────────────
 
 export function fadeBusGain(bus: GainNode, targetGain: number, durationMs: number): void {
