@@ -318,17 +318,12 @@ body.train-sounds main {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition:
-    letter-spacing 220ms ease,
-    color 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease;
 }
 
 .train-name.is-switching,
 #train-scene.is-switching + .train-name,
 #train-scene[data-scene-state='switching'] + .train-name {
-  letter-spacing: 0.12em;
+  /* Train Sounds has no animations; transient state class is a no-op. */
 }
 
 .train-switch-btn {
@@ -357,12 +352,6 @@ body.train-sounds main {
   box-shadow: var(--shadow-strong);
   overflow: hidden;
   isolation: isolate;
-  transition:
-    transform 280ms ease,
-    box-shadow 280ms ease,
-    filter 280ms ease,
-    background 280ms ease,
-    outline-color 280ms ease;
 }
 
 .train-scene::before,
@@ -389,23 +378,17 @@ body.train-sounds main {
 }
 
 .train-scene.is-switching,
-.train-scene[data-scene-state='switching'] {
-  transform: scale(1.012);
-  box-shadow: 0 26px 76px rgba(8, 26, 40, 0.26), 0 0 0 8px rgba(255, 249, 222, 0.24);
-  animation: train-scene-switch 620ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
+.train-scene[data-scene-state='switching'],
 .train-scene.is-switched,
-.train-scene[data-scene-state='switched'] {
-  outline: 3px solid rgba(255, 245, 205, 0.55);
-  outline-offset: -10px;
-}
-
+.train-scene[data-scene-state='switched'],
 .train-scene.is-pressed .train-display,
 .train-scene[data-scene-state='pressed'] .train-display,
-.train-display.is-pressed {
-  transform: translateY(4px) scale(0.992);
-  filter: saturate(1.05);
+.train-display.is-pressed,
+.train-name.is-switching,
+.train-hotspot.is-pressed,
+.train-hotspot[aria-pressed='true'],
+.train-switch-btn.is-active {
+  /* Train Sounds intentionally has no animations; transient state classes are no-ops. */
 }
 
 .train-scene-sky {
@@ -438,7 +421,6 @@ body.train-sounds main {
     1.4rem -0.5rem 0 0 rgba(255, 255, 255, 0.72),
     3rem 0.2rem 0 0 rgba(255, 255, 255, 0.72),
     1.7rem 0.6rem 0 0 rgba(255, 255, 255, 0.72);
-  animation: train-cloud-drift 24s linear infinite;
 }
 
 .train-cloud--one {
@@ -451,7 +433,6 @@ body.train-sounds main {
   top: 22%;
   right: 28%;
   width: clamp(2.6rem, 7vw, 4.2rem);
-  animation-duration: 32s;
 }
 
 .train-hill {
@@ -488,8 +469,6 @@ body.train-sounds main {
   justify-self: center;
   width: min(100%, 52rem);
   height: clamp(9rem, 30vw, 16rem);
-  transition: transform 220ms ease, filter 220ms ease;
-  animation: train-bob 5.2s ease-in-out infinite;
 }
 
 .train-locomotive,
@@ -625,51 +604,53 @@ body.train-sounds main {
 }
 
 .train-track {
-  left: 1%;
-  right: 1%;
-  bottom: 0.55rem;
-  height: 2.2rem;
-  border-radius: 1rem;
-  background:
-    linear-gradient(180deg, rgba(129, 104, 84, 0), rgba(129, 104, 84, 0.12)),
-    linear-gradient(180deg, rgba(109, 80, 63, 0.72), rgba(88, 62, 49, 0.92));
+  left: 0;
+  right: 0;
+  bottom: 0.45rem;
+  height: 1rem;
+  background: transparent;
 }
 
+/* Side-view rails: a single bright rail line near the top of the track region,
+   with a slightly darker shadow line under it to read as the rail's bottom edge. */
 .train-track::before,
 .train-track::after {
   content: '';
   position: absolute;
   left: 0.4rem;
   right: 0.4rem;
-  height: 0.24rem;
+  height: 0.18rem;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(230, 234, 240, 0.94), rgba(180, 190, 202, 0.98));
 }
 
 .train-track::before {
-  top: 0.45rem;
+  top: 0.18rem;
 }
 
 .train-track::after {
-  bottom: 0.45rem;
+  top: 0.5rem;
+  height: 0.12rem;
+  background: linear-gradient(90deg, rgba(140, 150, 162, 0.7), rgba(110, 120, 132, 0.8));
 }
 
+/* Sleepers, side-view: small vertical notches peeking out beneath the rail. */
 .train-sleeper {
   position: absolute;
-  top: 50%;
-  width: 10%;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: rgba(90, 62, 47, 0.76);
-  transform: translateY(-50%);
+  top: 0.7rem;
+  width: 0.32rem;
+  height: 0.46rem;
+  border-radius: 0.08rem;
+  background: rgba(76, 54, 38, 0.78);
+  transform: none;
 }
 
-.train-sleeper:nth-child(1) { left: 3%; }
-.train-sleeper:nth-child(2) { left: 20%; }
-.train-sleeper:nth-child(3) { left: 37%; }
+.train-sleeper:nth-child(1) { left: 6%; }
+.train-sleeper:nth-child(2) { left: 22%; }
+.train-sleeper:nth-child(3) { left: 38%; }
 .train-sleeper:nth-child(4) { left: 54%; }
-.train-sleeper:nth-child(5) { left: 71%; }
-.train-sleeper:nth-child(6) { left: 88%; }
+.train-sleeper:nth-child(5) { left: 70%; }
+.train-sleeper:nth-child(6) { left: 86%; }
 
 .train-hotspots {
   position: absolute;
@@ -694,13 +675,6 @@ body.train-sounds main {
   font-weight: 700;
   line-height: 1;
   pointer-events: auto;
-  transition:
-    transform 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease,
-    opacity 180ms ease;
 }
 
 .train-hotspot::after {
@@ -921,6 +895,40 @@ body.train-sounds main {
   border-radius: 0.2rem;
 }
 
+/* Diesel cars are boxcars, not passenger coaches: closed sides with a sliding door,
+   no row of windows. */
+.train-scene--diesel .train-car::before,
+#train-scene[data-train-preset='diesel'] .train-car::before {
+  inset: 18% 8% 30% 8%;
+  border-radius: 0.35rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.06)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.04) 0 0.6rem,
+      rgba(255, 255, 255, 0.04) 0.6rem 1.2rem
+    ),
+    var(--train-body);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+
+/* Cargo door panel on the diesel boxcar. */
+.train-scene--diesel .train-car::after,
+#train-scene[data-train-preset='diesel'] .train-car::after {
+  background:
+    radial-gradient(circle at 15% 48%, var(--train-wheel) 0 0.72rem, transparent 0.74rem),
+    radial-gradient(circle at 50% 48%, var(--train-wheel) 0 0.72rem, transparent 0.74rem),
+    radial-gradient(circle at 85% 48%, var(--train-wheel) 0 0.72rem, transparent 0.74rem);
+}
+
+.train-scene--diesel .train-car--first::before,
+#train-scene[data-train-preset='diesel'] .train-car--first::before {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 2px, transparent 2px) 50% 0 / 100% 100% no-repeat,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.06)),
+    var(--train-body);
+}
+
 .train-scene--electric,
 #train-scene[data-train-preset='electric'] {
   --scene-sky-top: #8fc7ff;
@@ -966,9 +974,17 @@ body.train-sounds main {
   --locomotive-radius: 44% 14% 16% 32%;
 }
 
+.train-scene--high-speed .train-stack,
+#train-scene[data-train-preset='high-speed'] .train-stack {
+  /* High-speed locomotives are aerodynamic and have no exhaust stack. */
+  display: none;
+}
+
 .train-scene--high-speed .train-locomotive,
 #train-scene[data-train-preset='high-speed'] .train-locomotive {
   height: 38%;
+  width: 38%;
+  border-top-left-radius: 70% 100%;
 }
 
 .train-scene--high-speed .train-headlight,
@@ -1157,92 +1173,5 @@ html[data-reduce-motion='reduce'] .train-sounds .tab-btn,
 html[data-reduce-motion='reduce'] .train-sounds .settings-restart-btn,
 html[data-reduce-motion='reduce'] .train-sounds .settings-quit-link,
 html[data-reduce-motion='reduce'] .train-sounds .modal-close {
-  animation: none !important;
-  transition-duration: 0.01ms !important;
-}
-
-html[data-reduce-motion='reduce'] .train-sounds .train-scene.is-switching,
-html[data-reduce-motion='reduce'] .train-sounds .train-scene[data-scene-state='switching'] {
-  transform: none;
-  filter: saturate(1.05);
-  box-shadow: 0 0 0 6px rgba(255, 245, 205, 0.26), var(--shadow-strong);
-}
-
-html[data-reduce-motion='reduce'] .train-sounds .train-scene.is-pressed .train-display,
-html[data-reduce-motion='reduce'] .train-sounds .train-scene[data-scene-state='pressed'] .train-display,
-html[data-reduce-motion='reduce'] .train-sounds .train-display.is-pressed,
-html[data-reduce-motion='reduce'] .train-sounds .train-hotspot.is-pressed,
-html[data-reduce-motion='reduce'] .train-sounds .train-hotspot[aria-pressed='true'] {
-  transform: none;
-  filter: saturate(1.08) brightness(0.99);
-  box-shadow: 0 0 0 4px rgba(255, 214, 93, 0.2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-cloud,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-display,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-scene,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-hotspot,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-menu-btn,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-primary-btn,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-switch-btn,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .tab-btn,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .settings-restart-btn,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .settings-quit-link,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .modal-close {
-    animation: none !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-scene.is-switching,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-scene[data-scene-state='switching'] {
-    transform: none;
-    filter: saturate(1.05);
-    box-shadow: 0 0 0 6px rgba(255, 245, 205, 0.26), var(--shadow-strong);
-  }
-
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-scene.is-pressed .train-display,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-scene[data-scene-state='pressed'] .train-display,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-display.is-pressed,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-hotspot.is-pressed,
-  html:not([data-reduce-motion='no-preference']) .train-sounds .train-hotspot[aria-pressed='true'] {
-    transform: none;
-    filter: saturate(1.08) brightness(0.99);
-    box-shadow: 0 0 0 4px rgba(255, 214, 93, 0.2);
-  }
-}
-
-@keyframes train-cloud-drift {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(10%);
-  }
-}
-
-@keyframes train-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-0.22rem);
-  }
-}
-
-@keyframes train-scene-switch {
-  0% {
-    filter: saturate(0.96) brightness(0.98);
-  }
-
-  35% {
-    filter: saturate(1.08) brightness(1.03);
-  }
-
-  100% {
-    filter: saturate(1) brightness(1);
-  }
+  /* Train Sounds has no animations or transitions; reduce-motion has nothing to gate. */
 }

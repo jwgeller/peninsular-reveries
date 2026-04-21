@@ -26,6 +26,23 @@ List the candidates briefly with their backlog text. Wait for the user's respons
 
 **Background music legs:** When a leg specifies a background or ambient music profile, require an explicit target volume character in the intent — e.g., "ambient texture, not foreground melody" — or a numeric bus gain reference. The shared `createMusicBus` defaults to 0.20 bus gain; per-event gains of 0.06–0.10 are still perceptible as foreground at that level.
 
+**Recorded SFX audibility gate:** When a leg ships recorded one-shot SFX through `createSfxBus()`, require a final-chain loudness check in the leg's verification — not just human-listen. The shared SFX bus defaults to 0.12 gain with a compressor at threshold −18 dB. Per-sample `gain` values must be sized so the net signal (sample.gain × bus.gain) reaches the compressor's threshold on peaks; otherwise the result reads as silent on phone speakers and many laptops. Suggested floor: per-sample `gain ≥ 1.0` for normal-loudness sources, with the OfflineAudioContext loudness probe documented in `.github/skills/creative-assets/references/audio-source-notes.md`. **Community Candidate** (for gnd upstream): general principle for any project mixing recorded audio through a quiet shared bus.
+
+**Visual fidelity for stylized DOM/CSS scenes:** When a plan says "stylized DOM/CSS scene" with multiple variants (e.g., several train types, several characters, several environments), the leg intent must declare:
+- A single shared scene perspective (side / top-down / 3/4 isometric) that all layers (vehicle, ground, background) follow.
+- Per-variant structural specs that make each variant visually distinct (e.g., "high-speed train: aerodynamic nose, no smoke stack, low-profile silhouette").
+- Per-car/per-segment differentiation when the variant has multiple cars (e.g., "passenger car: row of windows; cargo car: closed sides with latches; tender: coal hump").
+
+Without these, the implementation tends to ship visually-similar variants that fail the "feels like a real X" bar.
+
+**Density caps for small viewports:** When a leg adds N interactive targets to a single scene, declare an explicit cap for the smallest required viewport (typically 390×844 portrait): "≤4 hotspots visible at 390×844 without overlap; targets ≥44px; horizontal padding ≥8px between adjacent targets." Without a cap, sound-toy and similar plans tend to crowd the playfield.
+
+**Reduce-motion default is a question, not an assumption:** Do not auto-include a "reduce-motion" toggle in Settings just because the repo standard mentions it. For sound toys and other low-animation games, ask during Workshop: *"Does this game have animations that warrant a reduce-motion toggle, or should the toggle be skipped (no animations)?"* The repo standard from `.github/skills/review/references/game-quality.md` permits skipping the toggle when there are no animations to gate.
+
+## Clarifying Questions
+
+**Always use `vscode_askQuestions` for clarifying questions.** When a chart, alignment, or workshop question needs a user response, present it through the askQuestions tool — not as plain prose in chat. This applies to every phase of the chart workflow: Discovery, Alignment, Workshop, and Refinement. The tool gives the user explicit options and structured input that is easier to answer reliably than freeform chat. **Community Candidate** (for gnd upstream): pure UX improvement for any agent-driven workflow that asks the user questions.
+
 **Sandbox budget limits:** For any game with a placement, resource, or move budget, ask during Workshop: *"What is the single-row or single-path saturation threshold — how many placements does it take to block the primary game channel completely?"* The budget must be set below that threshold. Also ask: *"Can a player exhaust the game experience using the budget alone — i.e., is there a state where no more interesting play is possible before the budget runs out?"*
 
 **Pointer interaction on touch (toggle mechanics):** When a leg specifies "tap on empty → place, tap on barrier → remove" or similar touch-toggle behavior, explicitly state this in the leg intent as *"pointer mode is determined by the current cell type at tap, not by mouse button — right-click is not a valid removal path on touch devices."* Do not leave it implied by keyboard behavior.

@@ -41,3 +41,7 @@ Prefer to land critique-related artifacts once, at the end of the completed crit
 - **Incomplete review state:** The only time critique or field-review notes should remain local by default is when the review is explicitly still in progress, intentionally provisional, or paused before its archive/backlog/process updates are finalized.
 
 **Community Candidate:** The base `gnd-critique` landing guidance could more explicitly state that a completed critique pass should land its archive, backlog, and process updates even when the output is primarily review metadata rather than product code.
+
+## Clarifying Questions
+
+**Always use `vscode_askQuestions` for critique beats and confirmations.** Phase 2 beats (Intent Check, Leg Walkthrough, Open Impressions), Field Review observation triage prompts, and the "proceed with applying findings?" confirmation in Phase 4 must be presented through the askQuestions tool — not freeform prose in chat. This keeps responses structured, easy to answer, and reliably mapped back to the question. **Community Candidate** (for gnd upstream): pure UX improvement applicable to every critique-style agent flow.

@@ -35,7 +35,7 @@ export interface TrainSoundsRenderer {
 const SCENE_PRESET_CLASSES = TRAIN_PRESET_IDS.map((presetId) => `train-scene--${presetId}`)
 const HOTSPOT_TOUCH_TARGET_PX = 44
 const HOTSPOT_EDGE_GUTTER_PX = 8
-const HOTSPOT_MAX_WIDTH_RATIO = 0.24
+const HOTSPOT_MAX_WIDTH_RATIO = 0.34
 const HOTSPOT_MAX_WIDTH_PX = 104
 const COMPACT_SCENE_MEDIA_QUERY = '(orientation: landscape) and (max-height: 540px)'
 const COMPACT_SCENE_TOP_PADDING_MIN_PX = 8
@@ -332,8 +332,28 @@ function layoutHotspots(refs: RendererRefs, hotspotLayouts: readonly HotspotLayo
     return
   }
 
+  const display = getDisplayElement(refs.displayFrame)
+  if (!display) {
+    return
+  }
+
+  // Anchor hotspots to the train-display rect (not the scene rect) so percent-based
+  // bounds in the catalog land on actual train parts at every viewport. The scene is
+  // typically taller and wider than the train; without this offset, hotspots drift into
+  // empty sky/ground area on tall portrait viewports.
+  const sceneRect = refs.scene.getBoundingClientRect()
+  const displayRect = display.getBoundingClientRect()
+  const displayLeft = displayRect.left - sceneRect.left
+  const displayTop = displayRect.top - sceneRect.top
+  const displayWidth = displayRect.width
+  const displayHeight = displayRect.height
+
+  if (displayWidth <= 0 || displayHeight <= 0) {
+    return
+  }
+
   const hotspotMaxWidthPx = Math.round(
-    clamp(sceneWidth * HOTSPOT_MAX_WIDTH_RATIO, HOTSPOT_TOUCH_TARGET_PX, HOTSPOT_MAX_WIDTH_PX),
+    clamp(displayWidth * HOTSPOT_MAX_WIDTH_RATIO, HOTSPOT_TOUCH_TARGET_PX, HOTSPOT_MAX_WIDTH_PX),
   )
 
   for (const { definition, button } of hotspotLayouts) {
@@ -341,8 +361,8 @@ function layoutHotspots(refs: RendererRefs, hotspotLayouts: readonly HotspotLayo
 
     const buttonWidth = button.offsetWidth
     const buttonHeight = button.offsetHeight
-    const anchorXPx = sceneWidth * ((definition.bounds.x + definition.bounds.width / 2) / 100)
-    const anchorYPx = sceneHeight * ((definition.bounds.y + definition.bounds.height / 2) / 100)
+    const anchorXPx = displayLeft + displayWidth * ((definition.bounds.x + definition.bounds.width / 2) / 100)
+    const anchorYPx = displayTop + displayHeight * ((definition.bounds.y + definition.bounds.height / 2) / 100)
     const maxLeftPx = Math.max(HOTSPOT_EDGE_GUTTER_PX, sceneWidth - buttonWidth - HOTSPOT_EDGE_GUTTER_PX)
     const maxTopPx = Math.max(HOTSPOT_EDGE_GUTTER_PX, sceneHeight - buttonHeight - HOTSPOT_EDGE_GUTTER_PX)
     const leftPx = clamp(anchorXPx - buttonWidth / 2, HOTSPOT_EDGE_GUTTER_PX, maxLeftPx)

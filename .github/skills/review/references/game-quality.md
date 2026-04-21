@@ -32,6 +32,8 @@
 - Visual feedback must match gameplay logic.
 - If hit testing or movement uses percentage-based coordinates, visual ranges must scale with the same frame of reference.
 - Avoid fixed pixel motion values when gameplay space is responsive.
+- For stylized DOM/CSS scenes with multiple variants (e.g., several vehicles, characters, or environments), declare a single shared scene perspective (side, top-down, or 3/4 isometric) and apply it consistently across all scene layers — vehicle, ground, background, and any overlays. Mixing perspectives (e.g., top-down tracks beneath a side-view train) reads as broken even when individual elements look correct.
+- Multi-variant scenes must give each variant a structurally distinct silhouette and per-segment differentiation when the variant has multiple parts (e.g., passenger car windows vs. cargo car latches; high-speed train aerodynamic nose vs. steam train smoke stack). Variants that differ only by color tend to read as the same object.
 
 ## Orientation Coverage
 
@@ -88,6 +90,8 @@
 ## In-Game Menu Standard
 
 Every game's settings modal uses a two-tab layout (Settings / Info) rendered by `GameTabbedModal`. An X close button (`aria-label="Close menu"`, `id="settings-close-btn"`, `className="modal-close"`) appears in the top-right corner of the dialog. The footer inside the dialog contains exactly two actions: **Restart** (a `<button>` with `id="restart-btn"` wired in the game's `main.ts`, returns player to the game's own start screen — no navigation away from the page) and **Quit** (an `<a>` element pointed at the site root via `withBasePath('/', siteBasePath)`, `className="...-quit-link"`). Use the exact labels "Restart" and "Quit". The former "Home" link in existing games must be relabeled "Quit". Games still using the legacy `GameSettingsModal` will be migrated to `GameTabbedModal` in a future migration pass. Restart does not apply on the start screen itself (hide or omit in that context if needed, but consistency across games is more important — keeping it visible and simply re-showing the same screen is acceptable).
+
+The Settings tab includes audio toggles (SFX, music when applicable). A reduce-motion toggle is **only** included when the game actually has animations to gate. Sound toys and other low-animation experiences should skip the reduce-motion toggle entirely rather than ship a no-op control.
 
 ## Quality Benchmarks
 

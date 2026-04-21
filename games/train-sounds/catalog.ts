@@ -33,18 +33,11 @@ const STEAM_PRESET = {
       bounds: { x: 18, y: 61, width: 18, height: 15 },
     },
     {
-      id: 'steam-coupler',
-      label: 'Coupler',
-      category: 'carriage',
-      zone: 'carriage',
-      bounds: { x: 39, y: 55, width: 12, height: 13 },
-    },
-    {
       id: 'steam-passenger-door',
       label: 'Passenger Door',
       category: 'carriage',
       zone: 'carriage',
-      bounds: { x: 55, y: 38, width: 14, height: 22 },
+      bounds: { x: 65, y: 38, width: 14, height: 22 },
     },
   ],
 } as const satisfies TrainPresetDefinition
@@ -72,7 +65,7 @@ const DIESEL_PRESET = {
       label: 'Engine Hum',
       category: 'engine',
       zone: 'engine',
-      bounds: { x: 22, y: 35, width: 18, height: 17 },
+      bounds: { x: 24, y: 35, width: 18, height: 17 },
     },
     {
       id: 'diesel-brake',
@@ -82,18 +75,11 @@ const DIESEL_PRESET = {
       bounds: { x: 30, y: 60, width: 12, height: 14 },
     },
     {
-      id: 'diesel-wheels',
-      label: 'Wheels',
-      category: 'motion',
-      zone: 'engine',
-      bounds: { x: 16, y: 63, width: 20, height: 14 },
-    },
-    {
       id: 'diesel-cargo-latch',
       label: 'Cargo Latch',
       category: 'carriage',
       zone: 'carriage',
-      bounds: { x: 60, y: 42, width: 13, height: 18 },
+      bounds: { x: 65, y: 42, width: 13, height: 18 },
     },
   ],
 } as const satisfies TrainPresetDefinition
@@ -121,7 +107,7 @@ const ELECTRIC_PRESET = {
       label: 'Power Hum',
       category: 'engine',
       zone: 'engine',
-      bounds: { x: 25, y: 27, width: 16, height: 16 },
+      bounds: { x: 27, y: 30, width: 16, height: 16 },
     },
     {
       id: 'electric-brake',
@@ -131,18 +117,11 @@ const ELECTRIC_PRESET = {
       bounds: { x: 32, y: 60, width: 12, height: 13 },
     },
     {
-      id: 'electric-wheels',
-      label: 'Wheels',
-      category: 'motion',
-      zone: 'engine',
-      bounds: { x: 18, y: 63, width: 20, height: 14 },
-    },
-    {
       id: 'electric-passenger-door',
       label: 'Passenger Door',
       category: 'carriage',
       zone: 'carriage',
-      bounds: { x: 58, y: 37, width: 14, height: 23 },
+      bounds: { x: 66, y: 37, width: 14, height: 23 },
     },
   ],
 } as const satisfies TrainPresetDefinition
@@ -170,7 +149,7 @@ const HIGH_SPEED_PRESET = {
       label: 'Power Hum',
       category: 'engine',
       zone: 'engine',
-      bounds: { x: 26, y: 31, width: 18, height: 16 },
+      bounds: { x: 28, y: 32, width: 18, height: 16 },
     },
     {
       id: 'high-speed-brake',
@@ -180,18 +159,11 @@ const HIGH_SPEED_PRESET = {
       bounds: { x: 33, y: 59, width: 12, height: 13 },
     },
     {
-      id: 'high-speed-wheels',
-      label: 'Wheels',
-      category: 'motion',
-      zone: 'engine',
-      bounds: { x: 20, y: 63, width: 21, height: 13 },
-    },
-    {
       id: 'high-speed-passenger-door',
       label: 'Passenger Door',
       category: 'carriage',
       zone: 'carriage',
-      bounds: { x: 60, y: 37, width: 13, height: 22 },
+      bounds: { x: 66, y: 37, width: 13, height: 22 },
     },
   ],
 } as const satisfies TrainPresetDefinition

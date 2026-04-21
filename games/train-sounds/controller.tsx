@@ -167,15 +167,6 @@ export async function trainSoundsAction() {
                 helpId="sfx-enabled-help"
               />
             </SettingsSection>
-
-            <SettingsSection title="Accessibility">
-              <SettingsToggle
-                id="reduce-motion-toggle"
-                label="Reduce motion"
-                helpText="Defaults to your device setting until you change it here."
-                helpId="reduce-motion-help"
-              />
-            </SettingsSection>
           </>}
           infoContent={<>
             <InfoSection title="About Train Sounds">
