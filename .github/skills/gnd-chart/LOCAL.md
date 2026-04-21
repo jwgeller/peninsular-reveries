@@ -20,6 +20,8 @@ List the candidates briefly with their backlog text. Wait for the user's respons
 
 **Game design lenses (optional, new-mechanic legs):** For legs introducing a new loop or mechanic, run a quick lens check before finalising the intent: Does it satisfy basic Feedback and Loop lenses (Schell)? Is it simple enough for the youngest intended player? Is there enough "toy" quality that experimenting is rewarding without instruction?
 
+**New-game feel probes:** For a new game or toy, run a short idea probe before finalising legs: pressure-test the public name, how the primary mechanic communicates timing/state, and 2-3 concise experiential alternatives. The goal is not a long brainstorm; it is to surface whether the concept is readable and evocative enough before LEG-1 locks routes, shell copy, and other player-facing labels. **Community Candidate** (for gnd upstream): a compact feel-probe pass for new toy/mechanic plans would generalize beyond this repo.
+
 **iOS long-press mechanics:** When a leg specifies long-hold, long-press, or sustained-touch mechanics, explicitly require `-webkit-touch-callout: none; user-select: none` on the affected interactive elements in the leg intent. iOS Safari's native copy callout fires at a similar threshold and will intrude on the game UI otherwise. **Community Candidate** (for gnd upstream): universal mobile web concern, not project-specific.
 
 **Background music legs:** When a leg specifies a background or ambient music profile, require an explicit target volume character in the intent — e.g., "ambient texture, not foreground melody" — or a numeric bus gain reference. The shared `createMusicBus` defaults to 0.20 bus gain; per-event gains of 0.06–0.10 are still perceptible as foreground at that level.

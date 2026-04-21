@@ -31,3 +31,13 @@ If the URL is confirmed, note where it should be recorded (e.g. `README.md`) so 
 At the end of PC Phase 5, transfer any Field Review Holding List items to `.planning/gnd-backlog.md`. Append them under the appropriate game or area section (create the section if it doesn't exist). Remove them from the plan's Critique section after transfer — they live in the backlog now, not the archive.
 
 If `.planning/gnd-backlog.md` does not exist, create it with a brief header and the items.
+
+## Critique Landing Timing
+
+Prefer to land critique-related artifacts once, at the end of the completed critique cycle, mirroring the navigator's wrap-up behavior and the base FR landing flow.
+
+- **Plan critique:** When PC Phase 5 appends the critique, updates local process files, transfers backlog items, and archives the plan, treat that as a completed review pass. Commit and push those critique artifacts at the end unless the user explicitly says to keep them local or the working tree is mixed enough that landing would be risky.
+- **Field review:** When FR reaches a completed pass — whether that outcome is implemented fixes, archived findings, backlog transfer, or process-file updates — commit and push the resulting artifacts at the end of that pass unless the user explicitly keeps the work local or the tree is too risky to land safely.
+- **Incomplete review state:** The only time critique or field-review notes should remain local by default is when the review is explicitly still in progress, intentionally provisional, or paused before its archive/backlog/process updates are finalized.
+
+**Community Candidate:** The base `gnd-critique` landing guidance could more explicitly state that a completed critique pass should land its archive, backlog, and process updates even when the output is primarily review metadata rather than product code.

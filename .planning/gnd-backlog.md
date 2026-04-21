@@ -10,6 +10,11 @@ Items collected from field reviews, critiques, and conversations. The `gnd-criti
 
 - **Inventory feel refinement (iPhone portrait):** The equip loop is mechanically correct but the feel isn't settled — visual weight/density of selection state and interaction pacing on phone portrait may need tuning. (From plan critique 2026-04-17.)
 
+## Music Pad
+
+- **Potential rename after live use:** "Drum Pad" may land better than "Music Pad" after seeing it shipped; revisit the public title on the live surface before planning any rename pass. (From plan critique 2026-04-20.)
+- **Low-end workshop:** Some players may expect more low bass range than the current percussion-only kit provides. Workshop options before implementation: deepen the existing kick/tom voices, add a visible `Kit / Bass` bank, or explore a larger secondary low-end pad treatment on bigger screens. Also pressure-test whether hidden extra hit zones or sustained drones are discoverable enough to be worth keeping in scope. (From field review 2026-04-20.)
+
 ## Cross-Game
 
 - **Manual gamepad hardware testing:** Pixel Passport, Mission Orbit, and Story Trail all received controller support but have not been tested on a real gamepad yet. (From plan critique 2026-04-17.)
