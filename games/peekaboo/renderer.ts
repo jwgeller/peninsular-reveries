@@ -90,8 +90,9 @@ function randomScenery(): string {
 export function showScreen(screenId: string): void {
   getGameArea().dataset['activeScreen'] = screenId
 
+  const fullId = `peekaboo-${screenId}`
   for (const screen of Array.from(document.querySelectorAll<HTMLElement>('.screen'))) {
-    const isActive = screen.id === screenId
+    const isActive = screen.id === fullId
     screen.classList.toggle('active', isActive)
     screen.classList.toggle('leaving', false)
     screen.setAttribute('aria-hidden', String(!isActive))
