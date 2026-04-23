@@ -179,15 +179,8 @@ export function renderEnterScene(state: PeekabooState): void {
   scene.style.gridTemplateColumns = `repeat(${state.cols}, 1fr)`
   scene.style.gridTemplateRows = `repeat(${state.rows}, 1fr)`
 
-  const targetEl = document.createElement('span')
-  targetEl.className = 'peekaboo-scene-target'
-  targetEl.textContent = state.currentTarget.emoji
-  targetEl.style.gridRow = String(state.targetRow + 1)
-  targetEl.style.gridColumn = String(state.targetCol + 1)
-  scene.appendChild(targetEl)
-
+  // Show scenery only — no target, so the player doesn't see the hiding spot
   const occupied = new Set<string>()
-  occupied.add(`${state.targetRow},${state.targetCol}`)
 
   for (let i = 0; i < Math.min(state.rows * state.cols, 12); i++) {
     let row: number
@@ -239,12 +232,6 @@ export function renderGrid(state: PeekabooState): void {
         revealed ? `Revealed, row ${row + 1}, column ${col + 1}` : `Fog, row ${row + 1}, column ${col + 1}`,
       )
       cell.style.animationDelay = `${(row * state.cols + col) * 40}ms`
-      // Slightly varied border-radius for organic look
-      const tl = 30 + Math.random() * 40
-      const tr = 30 + Math.random() * 40
-      const br = 30 + Math.random() * 40
-      const bl = 30 + Math.random() * 40
-      cell.style.setProperty('--peekaboo-cell-br', `${tl}% ${tr}% ${br}% ${bl}%`)
       if (revealed) {
         cell.classList.add('peekaboo-fog-cell--revealed')
       }
@@ -261,11 +248,6 @@ export function revealCellVisual(row: number, col: number): void {
     `[data-peekaboo-row="${row}"][data-peekaboo-col="${col}"]`,
   )
   if (!cell) return
-  // Set reveal origin to where the user clicked (or center as fallback)
-  const revealX = cell.dataset['peekabooRevealX'] ?? '50%'
-  const revealY = cell.dataset['peekabooRevealY'] ?? '50%'
-  cell.style.setProperty('--peekaboo-reveal-x', revealX)
-  cell.style.setProperty('--peekaboo-reveal-y', revealY)
   cell.dataset['revealed'] = 'true'
   cell.classList.add('peekaboo-fog-cell--revealed')
   cell.setAttribute('aria-label', `Revealed, row ${row + 1}, column ${col + 1}`)

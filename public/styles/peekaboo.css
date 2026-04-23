@@ -368,6 +368,7 @@ body.peekaboo-game .screen {
   margin-inline: auto;
   overflow: hidden;
   border-radius: var(--peekaboo-cell-radius);
+  background-color: var(--peekaboo-fog);
 }
 
 .peekaboo-fog-cell {
@@ -377,25 +378,22 @@ body.peekaboo-game .screen {
   place-items: center;
   min-width: 44px;
   min-height: 44px;
-  border-radius: var(--peekaboo-cell-br, var(--peekaboo-cell-radius));
   border: none;
+  border-radius: 0;
   background-color: var(--peekaboo-fog);
   color: transparent;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-touch-callout: none;
   user-select: none;
-  overflow: visible;
   opacity: 1;
-  clip-path: circle(100% at 50% 50%);
-  transition: clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  transition: opacity 0.35s ease;
   animation: peekaboo-fog-appear 0.4s ease both;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .peekaboo-fog-cell:focus-visible {
   outline: 3px solid var(--peekaboo-accent);
-  outline-offset: 2px;
+  outline-offset: -3px;
   z-index: 2;
 }
 
@@ -407,14 +405,12 @@ body.peekaboo-game .screen {
   opacity: 0;
   pointer-events: none;
   cursor: default;
-  box-shadow: none;
-  border-color: transparent;
-  clip-path: circle(150% at var(--peekaboo-reveal-x, 50%) var(--peekaboo-reveal-y, 50%));
+  background-color: transparent;
 }
 
 /* Animation classes added by JS */
 .peekaboo-cell--revealing {
-  transition: clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  transition: opacity 0.35s ease;
 }
 
 .peekaboo-cell--fog {
