@@ -89,6 +89,13 @@ function randomScenery(): string {
 
 export function showScreen(screenId: string): void {
   getGameArea().dataset['activeScreen'] = screenId
+
+  for (const screen of Array.from(document.querySelectorAll<HTMLElement>('.screen'))) {
+    const isActive = screen.id === screenId
+    screen.classList.toggle('active', isActive)
+    screen.classList.toggle('leaving', false)
+    screen.setAttribute('aria-hidden', String(!isActive))
+  }
 }
 
 // ── Meet screen ────────────────────────────────────────────────

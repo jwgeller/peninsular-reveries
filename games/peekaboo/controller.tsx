@@ -20,7 +20,7 @@ import { peekabooInfo } from './info.js'
 
 const peekabooModalOverlayStyles = {
   zIndex: 100,
-  background: 'rgba(9, 12, 16, 0.78)',
+  background: 'var(--peekaboo-modal-overlay, rgba(5, 8, 14, 0.92))',
 }
 
 export async function peekabooAction() {
@@ -99,11 +99,14 @@ export async function peekabooAction() {
               </button>}
             />
 
-            <div className="peekaboo-enter-body">
-              <p>Someone is hiding in the scene...</p>
-            </div>
+            <div className="peekaboo-enter-scene" aria-hidden="true"></div>
+            <div className="peekaboo-enter-content">
+              <div className="peekaboo-enter-body">
+                <p>Someone is hiding in the scene...</p>
+              </div>
 
-            <button type="button" className="peekaboo-primary-btn peekaboo-proceed-btn">Find them!</button>
+              <button type="button" className="peekaboo-primary-btn peekaboo-proceed-btn">Find them!</button>
+            </div>
           </div>
         </GameScreen>
 

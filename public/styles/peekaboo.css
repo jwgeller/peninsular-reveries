@@ -1,21 +1,21 @@
 /* ── Peekaboo game styles ─────────────────────────────────────── */
 
 body.peekaboo-game {
-  --peekaboo-fog: #2a3142;
+  --peekaboo-fog: #1a1e2e;
   --peekaboo-fog-transition: 0.3s;
   --peekaboo-cell-radius: clamp(0.5rem, 1vw, 0.75rem);
   --peekaboo-celebration-scale: 2.5;
-  --peekaboo-reveal-radius: 0;
   --peekaboo-bg-top: #f4efe2;
   --peekaboo-bg-bottom: #d9ead8;
   --peekaboo-ink: #181b1e;
   --peekaboo-muted: #4d5359;
   --peekaboo-accent: #5d8a4e;
   --peekaboo-accent-soft: rgba(93, 138, 78, 0.16);
-  --peekaboo-panel: rgba(250, 248, 243, 0.82);
+  --peekaboo-panel: rgba(250, 248, 243, 0.95);
   --peekaboo-font: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
   --peekaboo-font-title: Georgia, "Times New Roman", serif;
   --peekaboo-emoji-font: "Noto Color Emoji", "Noto Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  --peekaboo-modal-overlay: rgba(5, 8, 14, 0.92);
   min-height: 100dvh;
   margin: 0;
   overflow: hidden;
@@ -24,17 +24,17 @@ body.peekaboo-game {
   background: linear-gradient(180deg, var(--peekaboo-bg-top) 0%, var(--peekaboo-bg-bottom) 100%);
 }
 
-/* ── Dark / light theme adaptation ───────────────────────────── */
-/* In light theme: dark fog over a bright scene */
-body.peekaboo-game[data-peekaboo-theme='dark'] {
-  --peekaboo-fog: #4a5266;
+/* ── Dark theme ──────────────────────────────────────────────── */
+html[data-theme="dark"] body.peekaboo-game {
+  --peekaboo-fog: #3a4260;
   --peekaboo-bg-top: #1a1d24;
   --peekaboo-bg-bottom: #252830;
   --peekaboo-ink: #e8e6e0;
   --peekaboo-muted: #9ca0a6;
   --peekaboo-accent: #7dba6a;
   --peekaboo-accent-soft: rgba(125, 186, 106, 0.18);
-  --peekaboo-panel: rgba(30, 34, 42, 0.88);
+  --peekaboo-panel: rgba(30, 34, 42, 0.95);
+  --peekaboo-modal-overlay: rgba(2, 4, 8, 0.95);
 }
 
 body.peekaboo-game main {
@@ -79,21 +79,53 @@ body.peekaboo-game .screen {
   gap: clamp(0.75rem, 2vh, 1.25rem);
 }
 
-/* ── Meet screen ─────────────────────────────────────────────── */
+/* ── Screen panels ──────────────────────────────────────────── */
 
-#peekaboo-meet-screen {
+.peekaboo-screen-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 36rem;
+  margin-inline: auto;
+  gap: clamp(0.75rem, 2vh, 1.25rem);
+  box-sizing: border-box;
+}
+
+.peekaboo-meet-panel,
+.peekaboo-found-panel {
   text-align: center;
 }
 
-.peekaboo-meet-emoji {
-  font-family: var(--peekaboo-emoji-font);
-  font-size: clamp(4rem, 18vw, 8rem);
-  line-height: 1;
-  user-select: none;
-  margin-bottom: 0.25rem;
+.peekaboo-enter-panel,
+.peekaboo-fog-panel {
+  text-align: center;
 }
 
-.peekaboo-meet-heading {
+.peekaboo-playing-panel {
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ── Header / heading ───────────────────────────────────────── */
+
+.peekaboo-heading-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.peekaboo-kicker {
+  margin: 0;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--peekaboo-muted);
+}
+
+.peekaboo-title {
   margin: 0;
   font-family: var(--peekaboo-font-title);
   font-size: clamp(1.5rem, 5vw, 2.5rem);
@@ -101,9 +133,43 @@ body.peekaboo-game .screen {
   line-height: 1.2;
 }
 
-/* ── Shared button styles ───────────────────────────────────── */
+.peekaboo-title-small {
+  font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+}
 
-.peekaboo-btn {
+/* ── Menu button ────────────────────────────────────────────── */
+
+.peekaboo-menu-btn {
+  appearance: none;
+  border: 1px solid var(--peekaboo-accent-soft);
+  border-radius: 999px;
+  background: var(--peekaboo-accent-soft);
+  color: var(--peekaboo-accent);
+  font-family: var(--peekaboo-font);
+  font-weight: 700;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  padding: 0.35rem 0.9rem;
+  min-height: 44px;
+  min-width: 44px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.peekaboo-menu-btn:hover {
+  background: var(--peekaboo-accent);
+  color: #fff;
+  border-color: var(--peekaboo-accent);
+}
+
+.peekaboo-menu-btn:focus-visible {
+  outline: 3px solid var(--peekaboo-accent);
+  outline-offset: 3px;
+}
+
+/* ── Primary button ─────────────────────────────────────────── */
+
+.peekaboo-primary-btn {
   appearance: none;
   border: 1px solid var(--peekaboo-accent);
   border-radius: 999px;
@@ -120,26 +186,70 @@ body.peekaboo-game .screen {
   box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.12);
 }
 
-.peekaboo-btn:hover {
+.peekaboo-primary-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.15);
 }
 
-.peekaboo-btn:focus-visible {
+.peekaboo-primary-btn:focus-visible {
   outline: 3px solid var(--peekaboo-accent);
   outline-offset: 3px;
 }
 
-.peekaboo-btn:active {
+.peekaboo-primary-btn:active {
   transform: translateY(0);
   box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.1);
+}
+
+/* ── Secondary link ─────────────────────────────────────────── */
+
+.peekaboo-secondary-link {
+  display: inline-block;
+  color: var(--peekaboo-muted);
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  padding: 0.4rem 0.5rem;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.peekaboo-secondary-link:hover {
+  color: var(--peekaboo-ink);
+}
+
+.peekaboo-secondary-link:focus-visible {
+  outline: 3px solid var(--peekaboo-accent);
+  outline-offset: 3px;
+}
+
+/* ── Meet screen ─────────────────────────────────────────────── */
+
+.peekaboo-meet-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.peekaboo-meet-emoji {
+  font-family: var(--peekaboo-emoji-font);
+  font-size: clamp(4rem, 18vw, 8rem);
+  line-height: 1;
+  user-select: none;
+  margin-bottom: 0.25rem;
+}
+
+.peekaboo-meet-subtitle {
+  margin: 0;
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  color: var(--peekaboo-muted);
 }
 
 /* ── Enter screen ────────────────────────────────────────────── */
 
 #peekaboo-enter-screen {
   position: relative;
-  text-align: center;
 }
 
 .peekaboo-enter-scene {
@@ -156,6 +266,16 @@ body.peekaboo-game .screen {
   z-index: 1;
 }
 
+.peekaboo-enter-body {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: var(--peekaboo-muted);
+  text-align: center;
+}
+
+.peekaboo-enter-body p {
+  margin: 0;
+}
+
 /* Fly-in animation for enter screen */
 .peekaboo-enter-fly {
   position: absolute;
@@ -165,7 +285,7 @@ body.peekaboo-game .screen {
   top: 10%;
   left: 5%;
   z-index: 2;
-  animation: peekaboo-enter var(--peekaboo-fog-transition, 1.2s) ease-out forwards;
+  animation: peekaboo-enter 1.2s ease-out forwards;
   pointer-events: none;
 }
 
@@ -186,24 +306,29 @@ body.peekaboo-game .screen {
 
 /* ── Fog screen ──────────────────────────────────────────────── */
 
-#peekaboo-fog-screen {
+.peekaboo-fog-body {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: var(--peekaboo-muted);
   text-align: center;
+}
+
+.peekaboo-fog-body p {
+  margin: 0;
 }
 
 /* ── Playing screen ──────────────────────────────────────────── */
 
 #peekaboo-playing-screen {
   position: relative;
-  text-align: center;
   padding: clamp(0.5rem, 1.5vw, 1rem) !important;
 }
 
-.peekaboo-playing-container {
+.peekaboo-game-body {
   position: relative;
   width: 100%;
   max-width: min(100%, 36rem);
   margin-inline: auto;
-  aspect-ratio: auto;
+  aspect-ratio: 4 / 3;
 }
 
 /* ── Scene layer (behind fog) ──────────────────────────────── */
@@ -249,9 +374,8 @@ body.peekaboo-game .screen {
   grid-template-rows: repeat(6, 1fr);
   gap: clamp(2px, 0.5vw, 4px);
   width: 100%;
-  max-width: min(100%, 36rem);
+  height: 100%;
   margin-inline: auto;
-  aspect-ratio: 4 / 3;
 }
 
 .peekaboo-fog-cell {
@@ -293,6 +417,15 @@ body.peekaboo-game .screen {
   border-color: transparent;
 }
 
+/* Animation classes added by JS */
+.peekaboo-cell--revealing {
+  transition: opacity var(--peekaboo-fog-transition) ease;
+}
+
+.peekaboo-cell--fog {
+  animation: peekaboo-fog-appear 0.4s ease both;
+}
+
 /* Staggered fog appear animation */
 @keyframes peekaboo-fog-appear {
   from {
@@ -311,6 +444,13 @@ body.peekaboo-game .screen {
   text-align: center;
   position: relative;
   overflow: hidden;
+}
+
+.peekaboo-found-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 2vh, 1.25rem);
 }
 
 .peekaboo-found-emoji {
@@ -335,14 +475,6 @@ body.peekaboo-game .screen {
     transform: scale(var(--peekaboo-celebration-scale)) rotate(0deg);
     opacity: 1;
   }
-}
-
-.peekaboo-found-heading {
-  margin: 0;
-  font-family: var(--peekaboo-font-title);
-  font-size: clamp(1.4rem, 5vw, 2.2rem);
-  color: var(--peekaboo-ink);
-  line-height: 1.2;
 }
 
 /* ── Confetti particles ──────────────────────────────────────── */
@@ -381,12 +513,17 @@ body.peekaboo-game .screen {
   }
 }
 
-/* ── Round info ──────────────────────────────────────────────── */
+/* ── Modal overlay ──────────────────────────────────────────── */
 
-.peekaboo-round-label {
-  margin: 0;
-  font-size: clamp(0.85rem, 2.3vw, 1rem);
-  color: var(--peekaboo-muted);
+body.peekaboo-game .settings-modal {
+  background: var(--peekaboo-modal-overlay) !important;
+}
+
+body.peekaboo-game .settings-content {
+  background: var(--peekaboo-panel);
+  border-radius: 12px;
+  max-width: 320px;
+  width: 100%;
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */
@@ -408,13 +545,13 @@ body.peekaboo-game .screen {
     font-size: clamp(3rem, 14vw, 5rem);
   }
 
-  .peekaboo-meet-heading,
-  .peekaboo-found-heading {
+  .peekaboo-title {
     font-size: clamp(1.2rem, 4vw, 1.6rem);
   }
 }
 
 @media (min-width: 768px) {
+  .peekaboo-game-body,
   .peekaboo-fog-grid {
     max-width: 32rem;
   }
@@ -427,14 +564,12 @@ body.peekaboo-game .screen {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
-    /* Show static at center */
     top: 40%;
     left: 45%;
   }
 
   .peekaboo-fog-cell {
     animation: none !important;
-    /* All cells appear at once — no stagger */
   }
 
   .peekaboo-found-emoji {
@@ -444,13 +579,13 @@ body.peekaboo-game .screen {
 
   .peekaboo-confetti {
     animation: none !important;
-    /* Static sparkle — show at end position with opacity */
     opacity: 0.6 !important;
     transform: translate(-50%, -50%) scale(0.5);
   }
 
   .peekaboo-fog-cell,
-  .peekaboo-btn {
+  .peekaboo-primary-btn,
+  .peekaboo-menu-btn {
     transition-duration: 0s !important;
   }
 }
