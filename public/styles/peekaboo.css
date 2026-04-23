@@ -1,0 +1,456 @@
+/* ── Peekaboo game styles ─────────────────────────────────────── */
+
+body.peekaboo-game {
+  --peekaboo-fog: #2a3142;
+  --peekaboo-fog-transition: 0.3s;
+  --peekaboo-cell-radius: clamp(0.5rem, 1vw, 0.75rem);
+  --peekaboo-celebration-scale: 2.5;
+  --peekaboo-reveal-radius: 0;
+  --peekaboo-bg-top: #f4efe2;
+  --peekaboo-bg-bottom: #d9ead8;
+  --peekaboo-ink: #181b1e;
+  --peekaboo-muted: #4d5359;
+  --peekaboo-accent: #5d8a4e;
+  --peekaboo-accent-soft: rgba(93, 138, 78, 0.16);
+  --peekaboo-panel: rgba(250, 248, 243, 0.82);
+  --peekaboo-font: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+  --peekaboo-font-title: Georgia, "Times New Roman", serif;
+  --peekaboo-emoji-font: "Noto Color Emoji", "Noto Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  min-height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--peekaboo-font);
+  color: var(--peekaboo-ink);
+  background: linear-gradient(180deg, var(--peekaboo-bg-top) 0%, var(--peekaboo-bg-bottom) 100%);
+}
+
+/* ── Dark / light theme adaptation ───────────────────────────── */
+/* In light theme: dark fog over a bright scene */
+body.peekaboo-game[data-peekaboo-theme='dark'] {
+  --peekaboo-fog: #4a5266;
+  --peekaboo-bg-top: #1a1d24;
+  --peekaboo-bg-bottom: #252830;
+  --peekaboo-ink: #e8e6e0;
+  --peekaboo-muted: #9ca0a6;
+  --peekaboo-accent: #7dba6a;
+  --peekaboo-accent-soft: rgba(125, 186, 106, 0.18);
+  --peekaboo-panel: rgba(30, 34, 42, 0.88);
+}
+
+body.peekaboo-game main {
+  overflow: hidden;
+}
+
+body.peekaboo-game .screen {
+  transition-duration: 0ms;
+}
+
+/* ── Screen visibility ──────────────────────────────────────── */
+
+#peekaboo-game-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#peekaboo-meet-screen,
+#peekaboo-enter-screen,
+#peekaboo-fog-screen,
+#peekaboo-playing-screen,
+#peekaboo-found-screen {
+  display: none;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#peekaboo-game-area[data-active-screen="meet-screen"] #peekaboo-meet-screen,
+#peekaboo-game-area[data-active-screen="enter-screen"] #peekaboo-enter-screen,
+#peekaboo-game-area[data-active-screen="fog-screen"] #peekaboo-fog-screen,
+#peekaboo-game-area[data-active-screen="playing-screen"] #peekaboo-playing-screen,
+#peekaboo-game-area[data-active-screen="found-screen"] #peekaboo-found-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: safe center;
+  min-height: 0;
+  padding: clamp(1rem, 3vw, 2rem);
+  gap: clamp(0.75rem, 2vh, 1.25rem);
+}
+
+/* ── Meet screen ─────────────────────────────────────────────── */
+
+#peekaboo-meet-screen {
+  text-align: center;
+}
+
+.peekaboo-meet-emoji {
+  font-family: var(--peekaboo-emoji-font);
+  font-size: clamp(4rem, 18vw, 8rem);
+  line-height: 1;
+  user-select: none;
+  margin-bottom: 0.25rem;
+}
+
+.peekaboo-meet-heading {
+  margin: 0;
+  font-family: var(--peekaboo-font-title);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  color: var(--peekaboo-ink);
+  line-height: 1.2;
+}
+
+/* ── Shared button styles ───────────────────────────────────── */
+
+.peekaboo-btn {
+  appearance: none;
+  border: 1px solid var(--peekaboo-accent);
+  border-radius: 999px;
+  background: var(--peekaboo-accent);
+  color: #fff;
+  font-family: var(--peekaboo-font);
+  font-weight: 700;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  padding: 0.75rem 2rem;
+  min-height: 44px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+  box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.12);
+}
+
+.peekaboo-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.15);
+}
+
+.peekaboo-btn:focus-visible {
+  outline: 3px solid var(--peekaboo-accent);
+  outline-offset: 3px;
+}
+
+.peekaboo-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.1);
+}
+
+/* ── Enter screen ────────────────────────────────────────────── */
+
+#peekaboo-enter-screen {
+  position: relative;
+  text-align: center;
+}
+
+.peekaboo-enter-scene {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.65), transparent 38%),
+    linear-gradient(180deg, var(--peekaboo-bg-top) 0%, var(--peekaboo-bg-bottom) 100%);
+  z-index: 0;
+}
+
+.peekaboo-enter-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fly-in animation for enter screen */
+.peekaboo-enter-fly {
+  position: absolute;
+  font-family: var(--peekaboo-emoji-font);
+  font-size: clamp(3rem, 12vw, 5rem);
+  line-height: 1;
+  top: 10%;
+  left: 5%;
+  z-index: 2;
+  animation: peekaboo-enter var(--peekaboo-fog-transition, 1.2s) ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes peekaboo-enter {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(calc(40vw), calc(30vh)) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(calc(60vw), calc(50vh)) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* ── Fog screen ──────────────────────────────────────────────── */
+
+#peekaboo-fog-screen {
+  text-align: center;
+}
+
+/* ── Playing screen ──────────────────────────────────────────── */
+
+#peekaboo-playing-screen {
+  position: relative;
+  text-align: center;
+  padding: clamp(0.5rem, 1.5vw, 1rem) !important;
+}
+
+.peekaboo-playing-container {
+  position: relative;
+  width: 100%;
+  max-width: min(100%, 36rem);
+  margin-inline: auto;
+  aspect-ratio: auto;
+}
+
+/* ── Scene layer (behind fog) ──────────────────────────────── */
+
+.peekaboo-scene-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.55), transparent 38%),
+    linear-gradient(180deg, var(--peekaboo-bg-top) 0%, var(--peekaboo-bg-bottom) 100%);
+  overflow: hidden;
+}
+
+.peekaboo-scene-target {
+  font-family: var(--peekaboo-emoji-font);
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  line-height: 1;
+  place-self: center;
+  z-index: 2;
+}
+
+.peekaboo-scene-scenery {
+  font-family: var(--peekaboo-emoji-font);
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  line-height: 1;
+  place-self: center;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+/* ── Fog grid ──────────────────────────────────────────────── */
+
+.peekaboo-fog-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: clamp(2px, 0.5vw, 4px);
+  width: 100%;
+  max-width: min(100%, 36rem);
+  margin-inline: auto;
+  aspect-ratio: 4 / 3;
+}
+
+.peekaboo-fog-cell {
+  appearance: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--peekaboo-cell-radius);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: var(--peekaboo-fog);
+  color: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  user-select: none;
+  opacity: 1;
+  transition: opacity var(--peekaboo-fog-transition) ease, box-shadow var(--peekaboo-fog-transition) ease;
+  animation: peekaboo-fog-appear 0.4s ease both;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.peekaboo-fog-cell:focus-visible {
+  outline: 3px solid var(--peekaboo-accent);
+  outline-offset: 2px;
+  z-index: 2;
+}
+
+.peekaboo-fog-cell:hover {
+  filter: brightness(1.08);
+}
+
+.peekaboo-fog-cell--revealed {
+  opacity: 0;
+  pointer-events: none;
+  cursor: default;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* Staggered fog appear animation */
+@keyframes peekaboo-fog-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Found screen ────────────────────────────────────────────── */
+
+#peekaboo-found-screen {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.peekaboo-found-emoji {
+  font-family: var(--peekaboo-emoji-font);
+  font-size: clamp(4rem, 16vw, 7rem);
+  line-height: 1;
+  user-select: none;
+  animation: peekaboo-celebrate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform: scale(var(--peekaboo-celebration-scale));
+}
+
+@keyframes peekaboo-celebrate {
+  0% {
+    transform: scale(0.3) rotate(-12deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(var(--peekaboo-celebration-scale)) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(var(--peekaboo-celebration-scale)) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.peekaboo-found-heading {
+  margin: 0;
+  font-family: var(--peekaboo-font-title);
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  color: var(--peekaboo-ink);
+  line-height: 1.2;
+}
+
+/* ── Confetti particles ──────────────────────────────────────── */
+
+.peekaboo-confetti {
+  position: absolute;
+  width: clamp(6px, 2vw, 10px);
+  height: clamp(6px, 2vw, 10px);
+  border-radius: 50%;
+  background: var(--peekaboo-confetti-color, #f59e0b);
+  top: 40%;
+  left: 50%;
+  pointer-events: none;
+  animation: peekaboo-confetti-burst 1s ease-out both;
+  animation-delay: var(--peekaboo-confetti-delay, 0ms);
+  z-index: 5;
+}
+
+@keyframes peekaboo-confetti-burst {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform:
+      translate(
+        var(--peekaboo-confetti-x, 0px),
+        var(--peekaboo-confetti-y, -4rem)
+      )
+      scale(0.4)
+      rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* ── Round info ──────────────────────────────────────────────── */
+
+.peekaboo-round-label {
+  margin: 0;
+  font-size: clamp(0.85rem, 2.3vw, 1rem);
+  color: var(--peekaboo-muted);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .peekaboo-fog-grid {
+    gap: 1px;
+  }
+
+  .peekaboo-fog-cell {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-height: 500px) {
+  .peekaboo-meet-emoji,
+  .peekaboo-found-emoji {
+    font-size: clamp(3rem, 14vw, 5rem);
+  }
+
+  .peekaboo-meet-heading,
+  .peekaboo-found-heading {
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .peekaboo-fog-grid {
+    max-width: 32rem;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .peekaboo-enter-fly {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    /* Show static at center */
+    top: 40%;
+    left: 45%;
+  }
+
+  .peekaboo-fog-cell {
+    animation: none !important;
+    /* All cells appear at once — no stagger */
+  }
+
+  .peekaboo-found-emoji {
+    animation: none !important;
+    transform: scale(var(--peekaboo-celebration-scale));
+  }
+
+  .peekaboo-confetti {
+    animation: none !important;
+    /* Static sparkle — show at end position with opacity */
+    opacity: 0.6 !important;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+
+  .peekaboo-fog-cell,
+  .peekaboo-btn {
+    transition-duration: 0s !important;
+  }
+}

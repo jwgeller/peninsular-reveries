@@ -513,3 +513,11 @@
 - Source: Freesound (https://freesound.org/people/craigsmith/sounds/480819/)
 - License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
 - Modifications: Trimmed into a 0.64 second mono OGG clank and reused with a slightly slower playback rate for the cargo latch.
+
+### Peekaboo
+
+- Slug: peekaboo
+- Code license: GPL-3.0
+- Summary: Peekaboo — find the hidden character! Look through the fog to discover who's hiding.
+
+- No attribution entries recorded.

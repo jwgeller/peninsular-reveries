@@ -70,4 +70,11 @@ export const games: GameEntry[] = [
     icon: '🚆',
     status: 'live',
   },
+  {
+    slug: 'peekaboo',
+    name: 'Peekaboo',
+    description: "Find the hidden character! Look through the fog to discover who's hiding.",
+    icon: '👁️',
+    status: 'live',
+  },
 ]

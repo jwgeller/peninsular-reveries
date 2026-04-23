@@ -16,6 +16,8 @@ import { waterwallAttribution } from '../../games/waterwall/attributions.js'
 import { waterwallInfo } from '../../games/waterwall/info.js'
 import { musicPadAttribution } from '../../games/music-pad/attributions.js'
 import { musicPadInfo } from '../../games/music-pad/info.js'
+import { peekabooAttribution } from '../../games/peekaboo/attributions.js'
+import { peekabooInfo } from '../../games/peekaboo/info.js'
 import type { GameAttribution, GameInfo } from './attribution-types.js'
 import { attributionsPagePath, repositoryCodeLicense } from './attribution-types.js'
 
@@ -36,6 +38,7 @@ const gameEntries: readonly { attribution: GameAttribution; info: GameInfo }[] =
   { attribution: waterwallAttribution, info: waterwallInfo },
   { attribution: musicPadAttribution, info: musicPadInfo },
   { attribution: trainSoundsAttribution, info: trainSoundsInfo },
+  { attribution: peekabooAttribution, info: peekabooInfo },
 ]
 
 export const gameAttributions: readonly GameAttributionWithInfo[] = gameEntries.map(

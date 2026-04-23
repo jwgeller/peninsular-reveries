@@ -13,6 +13,7 @@ import { storyTrailAction } from '../games/story-trail/controller.js'
 import { trainSoundsAction } from '../games/train-sounds/controller.js'
 import { waterwallAction } from '../games/waterwall/controller.js'
 import { musicPadAction } from '../games/music-pad/controller.js'
+import { peekabooAction } from '../games/peekaboo/controller.js'
 
 export function createAppRouter() {
   const router = createRouter()
@@ -28,6 +29,7 @@ export function createAppRouter() {
   router.get(routes.waterwallInfo, () => gameInfoAction('waterwall'))
   router.get(routes.musicPadInfo, () => gameInfoAction('music-pad'))
   router.get(routes.trainSoundsInfo, () => gameInfoAction('train-sounds'))
+  router.get(routes.peekabooInfo, () => gameInfoAction('peekaboo'))
   router.get(routes.missionOrbit, () => missionOrbitAction())
   router.get(routes.superWord, () => superWordAction())
   router.get(routes.chompers, () => chompersAction())
@@ -37,6 +39,7 @@ export function createAppRouter() {
   router.get(routes.waterwall, () => waterwallAction())
   router.get(routes.musicPad, () => musicPadAction())
   router.get(routes.trainSounds, () => trainSoundsAction())
+  router.get(routes.peekaboo, () => peekabooAction())
   router.get(routes.notFound, () => notFoundAction())
 
   return router

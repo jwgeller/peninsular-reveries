@@ -13,6 +13,7 @@ export const routes = route({
   waterwallInfo: '/waterwall/info/',
   musicPadInfo: '/music-pad/info/',
   trainSoundsInfo: '/train-sounds/info/',
+  peekabooInfo: '/peekaboo/info/',
   missionOrbit: '/mission-orbit/',
   superWord: '/super-word/',
   chompers: '/chompers/',
@@ -22,5 +23,6 @@ export const routes = route({
   waterwall: '/waterwall/',
   musicPad: '/music-pad/',
   trainSounds: '/train-sounds/',
+  peekaboo: '/peekaboo/',
   notFound: '/404.html',
 })

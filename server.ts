@@ -46,6 +46,7 @@ const gameCtx = await esbuild.context({
     'games/waterwall/main.ts',
     'games/music-pad/main.ts',
     'games/train-sounds/main.ts',
+    'games/peekaboo/main.ts',
   ],
   bundle: true,
   outbase: 'games',
