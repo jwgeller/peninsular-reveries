@@ -10,6 +10,10 @@ If the leg's intent names a visual checkpoint (e.g., specific viewport dimension
 
 If a leg creates a helper module or claims a user-facing affordance layer (live regions, indicators, prompts, overlays, and similar), file presence is not enough. During review, verify that the runtime imports or calls the helper, or that the affordance produces at least one observable effect in browser or test verification, before marking the leg done. **Community Candidate** (for gnd upstream): general review guard for shipped behavior vs. file-only completion.
 
+## CSS/HTML Class Cross-Reference
+
+When reviewing a visual leg that adds or modifies CSS, grep for all `className=` strings in the game's TSX/controller files and cross-check against CSS class selectors. Any HTML class without a matching CSS rule is a boundary violation. Conversely, any CSS class selector that never appears in HTML is dead CSS that signals a naming mismatch. Fix before marking the leg done. **Why:** Peekaboo shipped with CSS classes (`.peekaboo-btn`, `.peekaboo-playing-container`) that the HTML never used, while the HTML used classes (`.peekaboo-primary-btn`, `.peekaboo-game-body`) with zero CSS rules — the entire game was unstyled despite passing lint and typecheck. **Community Candidate** (for gnd upstream): CSS/HTML class alignment is a universal review risk when separate legs or agents produce CSS vs. markup.
+
 ## Plan File Commit Timing
 
 The plan file (`.planning/active-plan-*.md`) should be committed by gnd-chart when first written — before any implementation begins. Do not bundle the plan file into the implementation commit. During wrap-up, update `## Implementation` with commit SHA and push date, then commit that update separately with a short message like `Update plan: record implementation commit SHA`. **Community Candidate** (for gnd upstream): purely a workflow hygiene rule with no project-specific coupling.

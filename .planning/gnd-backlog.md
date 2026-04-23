@@ -25,6 +25,7 @@ Items collected from field reviews, critiques, and conversations. The `gnd-criti
 - **Shared assets between games:** Audio buses, font tokens, and UI patterns now use shared modules (LEG-5/LEG-7 of consolidation plan). Remaining: sprite sheets and per-game CSS identity tokens not yet shared.
 - **Build step elimination:** Investigated in LEG-13 of consolidation plan — deferred indefinitely. No bare specifiers, TS transpilation still needed, unbundled request count too high.
 - **Menu UX refinement:** Global menu shell shipped (LEG-8) but user reports menus still need work — layout, interaction feel, and content. (Updated from plan critique 2026-04-17.)
+- **Menu contrast/accessibility:** Shared `GameTabbedModal` uses semi-transparent overlay backgrounds (`rgba(4, 10, 20, 0.72)`) and `rgba(255, 255, 255, 0.5)` text that create poor contrast. User reports this is a persistent issue across games. Fixing the shared component once (making overlays opaque, improving text contrast) would improve all games. Individual games like peekaboo can also customize overlay opacity per-game. (From peekaboo plan critique 2026-04-22.)
 
 ## Meta / gnd Tooling
 
