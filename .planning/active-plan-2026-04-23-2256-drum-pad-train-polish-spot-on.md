@@ -318,11 +318,21 @@ Rename "Music Pad" to "Drum Pad" across all surfaces and replace all its synthes
 
 ## Dispatch Order
 Sequential via runSubagent (navigator reviews between each):
-1. LEG-1 (Drum Pad Rename) - no dependencies
-2. LEG-2 (Train Sounds Hotspot Overhaul) - no dependencies (parallel with LEG-1 possible but sequential for safety)
-3. LEG-3 (Train Sounds All Aboard & Scene Animation) - depends on LEG-2
-4. LEG-4 (Replace Synthesized Sounds & Fix Quiet Audio) - depends on LEG-1
-5. LEG-5 (Spot On — New Game Scaffold) - no dependencies (parallel with earlier legs possible)
-6. LEG-6 (Spot On — Gameplay Implementation) - depends on LEG-5
+1. LEG-1 (Drum Pad Rename) - no dependencies ✅
+2. LEG-2 (Train Sounds Hotspot Overhaul) - no dependencies ✅
+3. LEG-3 (Train Sounds All Aboard & Scene Animation) - depends on LEG-2 ✅
+4. LEG-4 (Replace Synthesized Sounds & Fix Quiet Audio) - depends on LEG-1 ✅
+5. LEG-5 (Spot On — New Game Scaffold) - no dependencies ✅
+6. LEG-6 (Spot On — Gameplay Implementation) - depends on LEG-5 ✅
 
 After all complete: `pnpm sync:attributions` → `pnpm build` → `pnpm test` → delivery verification → commit → push.
+
+## Implementation
+Commit: a2d0765
+Pushed: 2025-07-10
+
+### Post-dispatch corrections:
+- LEG-1: Restored missing `sounds.ts` (not carried over during rename) from git. Updated `attribution-index.ts` deferred edit (music-pad→drum-pad imports).
+- LEG-3: Fixed `state.test.ts` — updated deep-equal assertions to handle new randomized state fields (trainDirection, hasRainbow, cloudOffset, departing). Removed `onButtonB` gamepad callback that didn't exist in `GamepadCallbacks` type.
+- LEG-5: Applied all deferred shared edits (game-registry, routes, router, build.ts, attribution-index). Fixed missing `{` in game-registry spot-on entry.
+- LEG-6: Fixed lint errors — removed unused imports (`announce`, `countPlaced`, `RoomId`) in spot-on/main.ts and spot-on/renderer.ts.
