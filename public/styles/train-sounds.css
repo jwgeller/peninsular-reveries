@@ -117,7 +117,7 @@ body.train-sounds main {
 }
 
 .train-panel--game {
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
 }
 
 .train-header {
@@ -257,9 +257,6 @@ body.train-sounds main {
 .train-sounds .settings-restart-btn:active,
 .train-sounds .settings-quit-link:active,
 .train-sounds .modal-close:active,
-.train-hotspot:active,
-.train-hotspot[aria-pressed='true'],
-.train-hotspot.is-pressed,
 .train-switch-btn[aria-pressed='true'],
 .train-switch-btn.is-active {
   transform: translateY(2px);
@@ -270,7 +267,6 @@ body.train-sounds main {
 .train-menu-btn:focus-visible,
 .train-primary-btn:focus-visible,
 .train-switch-btn:focus-visible,
-.train-hotspot:focus-visible,
 .train-sounds .tab-btn:focus-visible,
 .train-sounds .settings-restart-btn:focus-visible,
 .train-sounds .settings-quit-link:focus-visible,
@@ -665,25 +661,31 @@ body.train-sounds main {
   place-items: center;
   min-width: 44px;
   min-height: 44px;
-  padding: 0.55rem 0.8rem;
-  border: 2px solid rgba(12, 79, 130, 0.22);
+  padding: 0;
+  border: 2px solid transparent;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 10px 28px rgba(13, 79, 130, 0.16);
-  color: var(--button-ink-strong);
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1;
+  background: transparent;
+  box-shadow: none;
+  color: transparent;
   pointer-events: auto;
+  overflow: hidden;
 }
 
-.train-hotspot::after {
-  content: '';
-  position: absolute;
-  inset: -0.45rem;
-  border-radius: inherit;
-  border: 1px dashed rgba(12, 79, 130, 0.18);
-  pointer-events: none;
+.train-hotspot:hover {
+  border-color: rgba(12, 79, 130, 0.4);
+  box-shadow: 0 0 12px rgba(12, 79, 130, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.train-hotspot:focus-visible {
+  outline: 3px solid rgba(10, 62, 104, 0.5);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.train-hotspot:active,
+.train-hotspot.is-pressed {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .train-hotspot.is-hidden,
@@ -861,6 +863,156 @@ body.train-sounds main {
 .train-sounds-noscript p {
   margin: 0;
   line-height: 1.5;
+}
+
+/* ── All Aboard button ── */
+
+.train-all-aboard-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.7rem 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  color: var(--button-ink-strong);
+  background: linear-gradient(180deg, var(--button-wash) 0%, var(--button-wash-strong) 100%);
+  box-shadow: 0 10px 24px rgba(13, 79, 130, 0.18);
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.train-all-aboard-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(13, 79, 130, 0.22);
+}
+
+.train-all-aboard-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 5px 12px rgba(13, 79, 130, 0.2);
+  filter: saturate(1.08);
+}
+
+.train-all-aboard-btn:focus-visible {
+  outline: 3px solid rgba(10, 62, 104, 0.42);
+  outline-offset: 3px;
+}
+
+/* ── Train departure / arrival animations ── */
+
+.train-departing .train-display {
+  animation: train-depart-left 600ms ease-in forwards;
+}
+
+.train-departing .train-display[data-direction='right'] {
+  animation: train-depart-right 600ms ease-in forwards;
+}
+
+.train-entering .train-display {
+  animation: train-arrive-left 500ms ease-out forwards;
+}
+
+.train-entering .train-display[data-direction='right'] {
+  animation: train-arrive-right 500ms ease-out forwards;
+}
+
+.train-display[data-direction='right'] {
+  transform: scaleX(-1);
+}
+
+@keyframes train-depart-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes train-depart-right {
+  from {
+    transform: scaleX(-1) translateX(0);
+  }
+  to {
+    transform: scaleX(-1) translateX(-100%);
+  }
+}
+
+@keyframes train-arrive-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes train-arrive-right {
+  from {
+    transform: scaleX(-1) translateX(100%);
+  }
+  to {
+    transform: scaleX(-1) translateX(0);
+  }
+}
+
+/* ── Scene randomness: rainbow overlay ── */
+
+.train-scene--rainbow::after {
+  content: '';
+  position: absolute;
+  top: 4%;
+  left: 15%;
+  right: 15%;
+  height: 30%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.28;
+  background: conic-gradient(
+    from 180deg at 50% 100%,
+    #ff0000 0deg,
+    #ff8800 30deg,
+    #ffff00 60deg,
+    #00cc44 90deg,
+    #0066ff 120deg,
+    #8800cc 150deg,
+    transparent 180deg
+  );
+  border-radius: 50% 50% 0 0;
+  filter: blur(2px);
+}
+
+/* ── Cloud drift animation ── */
+
+.train-cloud {
+  animation: cloud-drift 50s linear infinite;
+}
+
+@keyframes cloud-drift {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(8%);
+  }
+}
+
+.train-exiting .train-display {
+  animation: train-depart-left 600ms ease-in forwards;
+}
+
+.train-exiting .train-display[data-direction='right'] {
+  animation: train-depart-right 600ms ease-in forwards;
 }
 
 .train-scene--steam,
@@ -1122,10 +1274,6 @@ body.train-sounds main {
     height: clamp(10rem, 26vw, 17rem);
   }
 
-  .train-hotspot {
-    font-size: 0.96rem;
-  }
-
   .train-sounds .settings-content {
     width: min(100%, 37rem);
   }
@@ -1162,16 +1310,44 @@ body.train-sounds main {
   }
 }
 
-html[data-reduce-motion='reduce'] .train-sounds .train-cloud,
-html[data-reduce-motion='reduce'] .train-sounds .train-display,
-html[data-reduce-motion='reduce'] .train-sounds .train-scene,
-html[data-reduce-motion='reduce'] .train-sounds .train-hotspot,
-html[data-reduce-motion='reduce'] .train-sounds .train-menu-btn,
-html[data-reduce-motion='reduce'] .train-sounds .train-primary-btn,
-html[data-reduce-motion='reduce'] .train-sounds .train-switch-btn,
-html[data-reduce-motion='reduce'] .train-sounds .tab-btn,
-html[data-reduce-motion='reduce'] .train-sounds .settings-restart-btn,
-html[data-reduce-motion='reduce'] .train-sounds .settings-quit-link,
-html[data-reduce-motion='reduce'] .train-sounds .modal-close {
-  /* Train Sounds has no animations or transitions; reduce-motion has nothing to gate. */
+html[data-reduce-motion='reduce'] .train-sounds .train-cloud {
+  animation: none !important;
+}
+
+html[data-reduce-motion='reduce'] .train-sounds .train-departing .train-display,
+html[data-reduce-motion='reduce'] .train-sounds .train-entering .train-display {
+  transition: none !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+html[data-reduce-motion='reduce'] .train-sounds .train-exiting .train-display {
+  transition: none !important;
+  animation: none !important;
+}
+
+html[data-reduce-motion='reduce'] .train-sounds .train-scene--rainbow::after {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .train-sounds .train-cloud {
+    animation: none !important;
+  }
+
+  .train-sounds .train-departing .train-display,
+  .train-sounds .train-entering .train-display {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .train-sounds .train-exiting .train-display {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .train-sounds .train-scene--rainbow::after {
+    display: none !important;
+  }
 }

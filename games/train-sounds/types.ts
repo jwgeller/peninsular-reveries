@@ -34,6 +34,8 @@ export type TrainCarToken = 'coach' | 'boxcar' | 'metro' | 'streamlined-coach'
 
 export type TrainLiveryToken = 'burgundy-gold' | 'pine-cream' | 'amber-slate' | 'silver-crimson'
 
+export type TrainDirection = 'left' | 'right'
+
 export interface TrainHotspotBounds {
   readonly x: number
   readonly y: number
@@ -44,6 +46,7 @@ export interface TrainHotspotBounds {
 export interface TrainHotspotDefinition {
   readonly id: TrainHotspotId
   readonly label: string
+  readonly ariaDescription: string
   readonly category: TrainHotspotCategory
   readonly zone: TrainHotspotZone
   readonly bounds: TrainHotspotBounds
@@ -68,4 +71,8 @@ export interface TrainSoundsState {
   readonly currentPresetId: TrainPresetId
   readonly focusedHotspotId: TrainHotspotId | null
   readonly pressedHotspotId: TrainHotspotId | null
+  readonly trainDirection: TrainDirection
+  readonly hasRainbow: boolean
+  readonly cloudOffset: number
+  readonly departing: boolean
 }

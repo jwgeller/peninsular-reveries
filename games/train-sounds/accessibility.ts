@@ -73,6 +73,13 @@ export function announceHotspotActivated(trainName: string, hotspotName: string)
   announce(`${trainName}, ${hotspotName}.`, 'assertive')
 }
 
+export function announceAllAboard(trainName: string, nextTrainName: string): void {
+  announce(`All aboard! ${trainName} departing.`, 'assertive')
+  window.setTimeout(() => {
+    announce(`${nextTrainName} arriving.`, 'polite')
+  }, 650)
+}
+
 export function focusStartButton(delayMs: number = 260): void {
   moveFocusAfterTransition('start-btn', delayMs)
 }

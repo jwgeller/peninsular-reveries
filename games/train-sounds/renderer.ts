@@ -1,11 +1,12 @@
 import { TRAIN_PRESET_IDS, getTrainPresetDefinition } from './catalog.js'
-import type { TrainHotspotDefinition, TrainHotspotId, TrainPresetDefinition, TrainSoundsState } from './types.js'
+import type { TrainHotspotDefinition, TrainHotspotId, TrainPresetDefinition, TrainSoundsState, TrainDirection } from './types.js'
 
 interface RendererRefs {
   readonly gameScreen: HTMLElement
   readonly panel: HTMLElement
   readonly header: HTMLElement
   readonly selectorBar: HTMLElement
+  readonly allAboardButton: HTMLButtonElement
   readonly scene: HTMLElement
   readonly displayFrame: HTMLElement
   readonly hotspots: HTMLElement
@@ -25,6 +26,8 @@ export interface TrainSoundsRenderer {
   readonly trainName: HTMLElement
   readonly prevButton: HTMLButtonElement
   readonly nextButton: HTMLButtonElement
+  readonly allAboardButton: HTMLButtonElement
+  readonly displayFrame: HTMLElement
   render(state: TrainSoundsState): void
   syncLayout(): void
   dispose(): void
@@ -177,15 +180,6 @@ function createDisplay(preset: TrainPresetDefinition): HTMLElement {
   return display
 }
 
-function getVisibleHotspotLabel(label: string): string {
-  if (label.length <= 10) {
-    return label
-  }
-
-  const words = label.trim().split(/\s+/)
-  return words[words.length - 1] ?? label
-}
-
 function createHotspotButton(
   preset: TrainPresetDefinition,
   hotspot: TrainHotspotDefinition,
@@ -202,15 +196,11 @@ function createHotspotButton(
   button.dataset.hotspotZone = hotspot.zone
   button.dataset.hotspotCategory = hotspot.category
   button.dataset.presetId = preset.id
-  button.textContent = getVisibleHotspotLabel(hotspot.label)
-  button.title = hotspot.label
-  button.setAttribute('aria-label', `${hotspot.label} on ${preset.name}`)
+  button.setAttribute('aria-label', `${hotspot.label} — ${hotspot.ariaDescription}`)
   button.style.minWidth = `${HOTSPOT_TOUCH_TARGET_PX}px`
   button.style.minHeight = `${HOTSPOT_TOUCH_TARGET_PX}px`
   button.style.maxWidth = `${HOTSPOT_MAX_WIDTH_PX}px`
   button.style.overflow = 'hidden'
-  button.style.textOverflow = 'ellipsis'
-  button.style.whiteSpace = 'nowrap'
 
   return button
 }
@@ -283,7 +273,8 @@ function syncResponsiveSceneLayout(refs: RendererRefs): void {
     refs.panel.clientHeight
       - refs.header.getBoundingClientRect().height
       - refs.selectorBar.getBoundingClientRect().height
-      - panelGapPx * 2,
+      - refs.allAboardButton.getBoundingClientRect().height
+      - panelGapPx * 3,
   )
 
   if (availableSceneHeight <= 0) {
@@ -324,7 +315,7 @@ function syncResponsiveSceneLayout(refs: RendererRefs): void {
   display.style.height = `${displayHeightPx}px`
 }
 
-function layoutHotspots(refs: RendererRefs, hotspotLayouts: readonly HotspotLayoutRef[]): void {
+function layoutHotspots(refs: RendererRefs, hotspotLayouts: readonly HotspotLayoutRef[], trainDirection: TrainDirection): void {
   const sceneWidth = refs.scene.clientWidth
   const sceneHeight = refs.scene.clientHeight
 
@@ -337,10 +328,6 @@ function layoutHotspots(refs: RendererRefs, hotspotLayouts: readonly HotspotLayo
     return
   }
 
-  // Anchor hotspots to the train-display rect (not the scene rect) so percent-based
-  // bounds in the catalog land on actual train parts at every viewport. The scene is
-  // typically taller and wider than the train; without this offset, hotspots drift into
-  // empty sky/ground area on tall portrait viewports.
   const sceneRect = refs.scene.getBoundingClientRect()
   const displayRect = display.getBoundingClientRect()
   const displayLeft = displayRect.left - sceneRect.left
@@ -361,7 +348,15 @@ function layoutHotspots(refs: RendererRefs, hotspotLayouts: readonly HotspotLayo
 
     const buttonWidth = button.offsetWidth
     const buttonHeight = button.offsetHeight
-    const anchorXPx = displayLeft + displayWidth * ((definition.bounds.x + definition.bounds.width / 2) / 100)
+
+    let anchorXPx: number
+    if (trainDirection === 'right') {
+      // Mirror horizontally: the display is scaleX(-1), so hotspot positions need mirroring
+      anchorXPx = displayLeft + displayWidth - displayWidth * ((definition.bounds.x + definition.bounds.width / 2) / 100)
+    } else {
+      anchorXPx = displayLeft + displayWidth * ((definition.bounds.x + definition.bounds.width / 2) / 100)
+    }
+
     const anchorYPx = displayTop + displayHeight * ((definition.bounds.y + definition.bounds.height / 2) / 100)
     const maxLeftPx = Math.max(HOTSPOT_EDGE_GUTTER_PX, sceneWidth - buttonWidth - HOTSPOT_EDGE_GUTTER_PX)
     const maxTopPx = Math.max(HOTSPOT_EDGE_GUTTER_PX, sceneHeight - buttonHeight - HOTSPOT_EDGE_GUTTER_PX)
@@ -373,15 +368,54 @@ function layoutHotspots(refs: RendererRefs, hotspotLayouts: readonly HotspotLayo
   }
 }
 
+function syncSceneRandomness(scene: HTMLElement, state: TrainSoundsState): void {
+  // Rainbow
+  scene.classList.toggle('train-scene--rainbow', state.hasRainbow)
+
+  // Cloud offsets
+  const clouds = scene.querySelectorAll<HTMLElement>('.train-cloud')
+  const offset = state.cloudOffset
+  let cloudIndex = 0
+  for (const cloud of clouds) {
+    const shift = offset + cloudIndex * 3
+    cloud.style.left = `${shift}%`
+    cloudIndex += 1
+  }
+}
+
+function syncTrainDirection(display: HTMLElement | null, trainDirection: TrainDirection): void {
+  if (!display) return
+
+  if (trainDirection === 'right') {
+    display.dataset.direction = 'right'
+    display.style.transform = 'scaleX(-1)'
+  } else {
+    display.dataset.direction = 'left'
+    display.style.removeProperty('transform')
+    delete display.dataset.direction
+  }
+}
+
+function syncDepartingState(scene: HTMLElement, state: TrainSoundsState): void {
+  scene.classList.toggle('train-departing', state.departing)
+  if (state.departing) {
+    scene.dataset.sceneState = 'departing'
+  } else if (scene.dataset.sceneState === 'departing') {
+    scene.dataset.sceneState = 'idle'
+  }
+}
+
 export function initTrainSoundsRenderer(): TrainSoundsRenderer {
   const gameScreen = requireElement<HTMLElement>('game-screen')
   const hotspots = requireElement<HTMLElement>('train-hotspots')
   const scene = requireElement<HTMLElement>('train-scene')
+  const allAboardButton = requireElement<HTMLButtonElement>('all-aboard-btn')
   const refs: RendererRefs = {
     gameScreen,
     panel: requireSelector<HTMLElement>(gameScreen, '.train-panel--game'),
     header: requireSelector<HTMLElement>(gameScreen, '.train-header'),
     selectorBar: requireSelector<HTMLElement>(gameScreen, '.train-selector-bar'),
+    allAboardButton,
     scene,
     displayFrame: getOrCreateDisplayFrame(scene, hotspots),
     hotspots,
@@ -392,11 +426,12 @@ export function initTrainSoundsRenderer(): TrainSoundsRenderer {
 
   let hotspotButtons = new Map<TrainHotspotId, HTMLButtonElement>()
   let hotspotLayouts: readonly HotspotLayoutRef[] = []
+  let lastDirection: TrainDirection = 'left'
   let layoutFrame = 0
 
   const syncLayout = (): void => {
     syncResponsiveSceneLayout(refs)
-    layoutHotspots(refs, hotspotLayouts)
+    layoutHotspots(refs, hotspotLayouts, lastDirection)
   }
 
   const queueLayoutSync = (): void => {
@@ -423,10 +458,14 @@ export function initTrainSoundsRenderer(): TrainSoundsRenderer {
   function render(state: TrainSoundsState): void {
     const preset = getTrainPresetDefinition(state.currentPresetId)
     syncSceneMetadata(refs.scene, preset)
+    syncSceneRandomness(refs.scene, state)
+    syncDepartingState(refs.scene, state)
     refs.trainName.textContent = preset.name
     refs.prevButton.dataset.currentPresetId = preset.id
     refs.nextButton.dataset.currentPresetId = preset.id
     refs.displayFrame.replaceChildren(createDisplay(preset))
+    syncTrainDirection(getDisplayElement(refs.displayFrame), state.trainDirection)
+    lastDirection = state.trainDirection
     const hotspotRender = renderHotspots(refs, preset)
     hotspotButtons = hotspotRender.buttonsById
     hotspotLayouts = hotspotRender.layouts
@@ -442,6 +481,8 @@ export function initTrainSoundsRenderer(): TrainSoundsRenderer {
     trainName: refs.trainName,
     prevButton: refs.prevButton,
     nextButton: refs.nextButton,
+    allAboardButton: refs.allAboardButton,
+    displayFrame: refs.displayFrame,
     render,
     syncLayout,
     dispose(): void {

@@ -3,7 +3,7 @@ import { isReducedMotionEnabled } from '../../client/preferences.js'
 import {
   MAX_LAYERS,
   TEMPO_LABELS,
-  type MusicPadMode,
+  type DrumPadMode,
   type PadId,
   type TempoPreset,
 } from './types.js'
@@ -59,7 +59,7 @@ export function flashPad(padId: PadId): void {
   })
 }
 
-export function updateModeDisplay(mode: MusicPadMode): void {
+export function updateModeDisplay(mode: DrumPadMode): void {
   if (!refs) return
   const { modeIndicator, recordBtn, playBtn } = refs
   const label =

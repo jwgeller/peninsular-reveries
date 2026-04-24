@@ -1,15 +1,15 @@
 {
   "id": "./",
-  "name": "Music Pad",
-  "short_name": "Music Pad",
+  "name": "Spot On",
+  "short_name": "Spot On",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0a0a1a",
-  "theme_color": "#0a0a1a",
+  "background_color": "#faf6ee",
+  "theme_color": "#3a2f28",
   "icons": [
     {
-      "src": "../favicon-game-music-pad.svg",
+      "src": "../favicon-game-spot-on.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },

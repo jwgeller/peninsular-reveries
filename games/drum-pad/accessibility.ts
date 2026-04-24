@@ -1,7 +1,7 @@
 import { announce } from '../../client/game-accessibility.js'
 import { PAD_NAMES } from './sounds.js'
 import { TEMPO_LABELS } from './types.js'
-import type { MusicPadMode, PadId, TempoPreset } from './types.js'
+import type { DrumPadMode, PadId, TempoPreset } from './types.js'
 
 const PAD_REPEAT_DEBOUNCE_MS = 200
 
@@ -20,7 +20,7 @@ export function announcePadHit(padId: PadId): void {
   if (name) announce(name, 'polite')
 }
 
-export function announceModeChange(mode: MusicPadMode): void {
+export function announceModeChange(mode: DrumPadMode): void {
   switch (mode) {
     case 'recording':
       announce('Recording started', 'assertive')

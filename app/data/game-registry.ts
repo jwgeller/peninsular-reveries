@@ -57,8 +57,8 @@ export const games: GameEntry[] = [
     status: 'live',
   },
   {
-    slug: 'music-pad',
-    name: 'Music Pad',
+    slug: 'drum-pad',
+    name: 'Drum Pad',
     description: 'Tap, loop, and layer beats on a neon drum pad.',
     icon: '🥁',
     status: 'live',
@@ -68,6 +68,14 @@ export const games: GameEntry[] = [
     name: 'Train Sounds',
     description: 'Tap different parts of a train to hear it come alive.',
     icon: '🚆',
+    status: 'live',
+  },
+  {
+    slug: 'spot-on',
+    name: 'Spot On',
+    description:
+      'Tidy up cozy rooms by picking up items and finding the right spot for each one.',
+    icon: '🧹',
     status: 'live',
   },
   {

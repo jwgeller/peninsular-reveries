@@ -43,24 +43,3 @@ test('every routed Train Sounds sample id exists in the bundled manifest', () =>
     }
   }
 })
-
-test('reinforcement routes stay attached to valid electric hum samples', () => {
-  let reinforcementCount = 0
-
-  for (const preset of TRAIN_PRESETS) {
-    for (const hotspot of preset.hotspots) {
-      const route = getTrainHotspotSoundRoute(preset.id, hotspot.id)
-
-      if (!route?.reinforcement) {
-        continue
-      }
-
-      reinforcementCount += 1
-      assert.equal(route.reinforcement, 'electric-hum-brightener')
-      assert.equal(route.sampleId, 'electric-hum')
-      assert.ok(trainSoundsSampleManifest[route.sampleId])
-    }
-  }
-
-  assert.equal(reinforcementCount, 1)
-})

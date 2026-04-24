@@ -2,7 +2,7 @@ import { createGamepadPoller, type GamepadPoller } from '../../client/game-input
 
 import type { PadId } from './types.js'
 
-export interface MusicPadInputCallbacks {
+export interface DrumPadInputCallbacks {
   onPadTrigger(padId: PadId): void
   onRecord(): void
   onPlayStop(): void
@@ -87,8 +87,8 @@ function moveFocus(direction: 'up' | 'down' | 'left' | 'right'): void {
   focusPad(next)
 }
 
-export function setupMusicPadInput(callbacks: MusicPadInputCallbacks): void {
-  cleanupMusicPadInput()
+export function setupDrumPadInput(callbacks: DrumPadInputCallbacks): void {
+  cleanupDrumPadInput()
 
   keydownHandler = (event: KeyboardEvent): void => {
     if (event.repeat) return
@@ -181,7 +181,7 @@ export function setupMusicPadInput(callbacks: MusicPadInputCallbacks): void {
 
 let shoulderFrameHandle: number | null = null
 
-export function cleanupMusicPadInput(): void {
+export function cleanupDrumPadInput(): void {
   if (keydownHandler) {
     document.removeEventListener('keydown', keydownHandler)
     keydownHandler = null

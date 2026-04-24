@@ -14,6 +14,7 @@ const STEAM_PRESET = {
     {
       id: 'steam-whistle',
       label: 'Whistle',
+      ariaDescription: 'the tall pipe on top of the engine',
       category: 'signal',
       zone: 'engine',
       bounds: { x: 14, y: 18, width: 12, height: 14 },
@@ -21,6 +22,7 @@ const STEAM_PRESET = {
     {
       id: 'steam-bell',
       label: 'Bell',
+      ariaDescription: 'the brass bell hanging below the cab',
       category: 'engine',
       zone: 'engine',
       bounds: { x: 24, y: 35, width: 11, height: 13 },
@@ -28,6 +30,7 @@ const STEAM_PRESET = {
     {
       id: 'steam-rods',
       label: 'Drive Rods',
+      ariaDescription: 'the moving bars between the wheels',
       category: 'motion',
       zone: 'engine',
       bounds: { x: 18, y: 61, width: 18, height: 15 },
@@ -35,6 +38,7 @@ const STEAM_PRESET = {
     {
       id: 'steam-passenger-door',
       label: 'Passenger Door',
+      ariaDescription: 'the sliding door on the coach car',
       category: 'carriage',
       zone: 'carriage',
       bounds: { x: 65, y: 38, width: 14, height: 22 },
@@ -56,6 +60,7 @@ const DIESEL_PRESET = {
     {
       id: 'diesel-horn',
       label: 'Horn',
+      ariaDescription: 'the bright horns on the roof',
       category: 'signal',
       zone: 'engine',
       bounds: { x: 13, y: 20, width: 12, height: 14 },
@@ -63,6 +68,7 @@ const DIESEL_PRESET = {
     {
       id: 'diesel-engine-hum',
       label: 'Engine Hum',
+      ariaDescription: 'the low rumble from the engine compartment',
       category: 'engine',
       zone: 'engine',
       bounds: { x: 24, y: 35, width: 18, height: 17 },
@@ -70,6 +76,7 @@ const DIESEL_PRESET = {
     {
       id: 'diesel-brake',
       label: 'Brake',
+      ariaDescription: 'the brake lever near the wheels',
       category: 'brake',
       zone: 'engine',
       bounds: { x: 30, y: 60, width: 12, height: 14 },
@@ -77,6 +84,7 @@ const DIESEL_PRESET = {
     {
       id: 'diesel-cargo-latch',
       label: 'Cargo Latch',
+      ariaDescription: 'the heavy latch on the boxcar door',
       category: 'carriage',
       zone: 'carriage',
       bounds: { x: 65, y: 42, width: 13, height: 18 },
@@ -98,6 +106,7 @@ const ELECTRIC_PRESET = {
     {
       id: 'electric-horn',
       label: 'Horn',
+      ariaDescription: 'the twin chime horns on the roof',
       category: 'signal',
       zone: 'engine',
       bounds: { x: 15, y: 21, width: 11, height: 13 },
@@ -105,6 +114,7 @@ const ELECTRIC_PRESET = {
     {
       id: 'electric-power-hum',
       label: 'Power Hum',
+      ariaDescription: 'the transformer hum from under the car',
       category: 'engine',
       zone: 'engine',
       bounds: { x: 27, y: 30, width: 16, height: 16 },
@@ -112,6 +122,7 @@ const ELECTRIC_PRESET = {
     {
       id: 'electric-brake',
       label: 'Brake',
+      ariaDescription: 'the brake rigging near the wheels',
       category: 'brake',
       zone: 'engine',
       bounds: { x: 32, y: 60, width: 12, height: 13 },
@@ -119,6 +130,7 @@ const ELECTRIC_PRESET = {
     {
       id: 'electric-passenger-door',
       label: 'Passenger Door',
+      ariaDescription: 'the sliding door between cars',
       category: 'carriage',
       zone: 'carriage',
       bounds: { x: 66, y: 37, width: 14, height: 23 },
@@ -140,6 +152,7 @@ const HIGH_SPEED_PRESET = {
     {
       id: 'high-speed-horn',
       label: 'Horn',
+      ariaDescription: 'the aerodynamic horn in the nose',
       category: 'signal',
       zone: 'engine',
       bounds: { x: 14, y: 24, width: 12, height: 12 },
@@ -147,6 +160,7 @@ const HIGH_SPEED_PRESET = {
     {
       id: 'high-speed-power-hum',
       label: 'Power Hum',
+      ariaDescription: 'the quiet motor hum under the floor',
       category: 'engine',
       zone: 'engine',
       bounds: { x: 28, y: 32, width: 18, height: 16 },
@@ -154,6 +168,7 @@ const HIGH_SPEED_PRESET = {
     {
       id: 'high-speed-brake',
       label: 'Brake',
+      ariaDescription: 'the disc brakes near the wheels',
       category: 'brake',
       zone: 'engine',
       bounds: { x: 33, y: 59, width: 12, height: 13 },
@@ -161,6 +176,7 @@ const HIGH_SPEED_PRESET = {
     {
       id: 'high-speed-passenger-door',
       label: 'Passenger Door',
+      ariaDescription: 'the automatic door in the streamlined car',
       category: 'carriage',
       zone: 'carriage',
       bounds: { x: 66, y: 37, width: 13, height: 22 },

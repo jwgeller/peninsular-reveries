@@ -146,7 +146,7 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
     id: 'diesel-idle',
     url: '/train-sounds/audio/diesel-idle.ogg',
     fileName: 'diesel-idle.ogg',
-    gain: 2.5,
+    gain: 3.0,
     loop: false,
     bundled: true,
     source: {
@@ -226,7 +226,7 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
     id: 'electric-hum',
     url: '/train-sounds/audio/electric-hum.ogg',
     fileName: 'electric-hum.ogg',
-    gain: 2.3,
+    gain: 2.8,
     loop: false,
     bundled: true,
     source: {
@@ -252,7 +252,7 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
     id: 'passenger-door-chime',
     url: '/train-sounds/audio/passenger-door-chime.ogg',
     fileName: 'passenger-door-chime.ogg',
-    gain: 2.6,
+    gain: 3.0,
     loop: false,
     bundled: true,
     source: {
@@ -305,7 +305,7 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
     id: 'highspeed-passby',
     url: '/train-sounds/audio/highspeed-passby.ogg',
     fileName: 'highspeed-passby.ogg',
-    gain: 2.8,
+    gain: 3.2,
     loop: false,
     bundled: true,
     source: {

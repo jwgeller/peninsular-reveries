@@ -15,50 +15,50 @@ import {
   SrOnly,
 } from '../../app/ui/game-shell.js'
 
-import { musicPadAttribution } from './attributions.js'
-import { musicPadInfo } from './info.js'
+import { drumPadAttribution } from './attributions.js'
+import { drumPadInfo } from './info.js'
 import { PAD_NAMES } from './sounds.js'
 
-const musicPadModalOverlayStyles = {
+const drumPadModalOverlayStyles = {
   zIndex: 100,
   background: 'rgba(6, 6, 18, 0.82)',
 }
 
 const padKeys = ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F'] as const
 
-export async function musicPadAction() {
+export async function drumPadAction() {
   const siteBasePath = getSiteBasePath()
   const homePath = withBasePath('/', siteBasePath)
 
   const html = await renderToString(
     <Document
-      title="Music Pad"
-      description="Tap, loop, and layer beats on a neon drum pad with synthesized percussion."
-      path="/music-pad/"
+      title="Drum Pad"
+      description="Tap, loop, and layer beats on a neon drum pad."
+      path="/drum-pad/"
       includeNav={false}
       includeFooter={false}
       includeDefaultStyles={false}
-      stylesheets={['/styles/music-pad.css']}
-      scripts={['/client/music-pad/main.js']}
-      bodyClass="music-pad"
+      stylesheets={['/styles/drum-pad.css']}
+      scripts={['/client/drum-pad/main.js']}
+      bodyClass="drum-pad"
       viewportFitCover
-      faviconPath="/favicon-game-music-pad.svg"
-      manifestPath="/music-pad/manifest.json"
-      serviceWorkerPath="/music-pad/sw.js"
-      serviceWorkerScope="/music-pad/"
+      faviconPath="/favicon-game-drum-pad.svg"
+      manifestPath="/drum-pad/manifest.json"
+      serviceWorkerPath="/drum-pad/sw.js"
+      serviceWorkerScope="/drum-pad/"
     >
       <div className="scene-track">
-        <GameScreen id="start-screen" className="active" labelledBy="music-pad-title" padded>
-          <div className="music-pad-screen-panel music-pad-start-panel">
+        <GameScreen id="start-screen" className="active" labelledBy="drum-pad-title" padded>
+          <div className="drum-pad-screen-panel drum-pad-start-panel">
             <GameHeader
-              headingId="music-pad-title"
-              className="music-pad-header"
+              headingId="drum-pad-title"
+              className="drum-pad-header"
               leftContent={<>
-                <h1 id="music-pad-title" className="music-pad-title">Music Pad</h1>
+                <h1 id="drum-pad-title" className="drum-pad-title">Drum Pad</h1>
               </>}
               rightContent={<button
                 type="button"
-                className="music-pad-menu-btn"
+                className="drum-pad-menu-btn"
                 data-settings-open="true"
                 aria-haspopup="dialog"
                 aria-controls="settings-modal"
@@ -68,25 +68,25 @@ export async function musicPadAction() {
               </button>}
             />
 
-            <p className="music-pad-subtitle">Tap, loop, and layer beats.</p>
+            <p className="drum-pad-subtitle">Tap, loop, and layer beats.</p>
 
             <div>
-              <button id="start-btn" type="button" className="music-pad-primary-btn">Start</button>
+              <button id="start-btn" type="button" className="drum-pad-primary-btn">Start</button>
             </div>
           </div>
         </GameScreen>
 
-        <GameScreen id="game-screen" labelledBy="music-pad-game-heading">
-          <div className="music-pad-screen-panel music-pad-game-panel">
+        <GameScreen id="game-screen" labelledBy="drum-pad-game-heading">
+          <div className="drum-pad-screen-panel drum-pad-game-panel">
             <GameHeader
-              headingId="music-pad-game-heading"
-              className="music-pad-header"
+              headingId="drum-pad-game-heading"
+              className="drum-pad-header"
               leftContent={<>
-                <h2 id="music-pad-game-heading" className="music-pad-title">Music Pad</h2>
+                <h2 id="drum-pad-game-heading" className="drum-pad-title">Drum Pad</h2>
               </>}
               rightContent={<button
                 type="button"
-                className="music-pad-menu-btn"
+                className="drum-pad-menu-btn"
                 data-settings-open="true"
                 aria-haspopup="dialog"
                 aria-controls="settings-modal"
@@ -96,14 +96,14 @@ export async function musicPadAction() {
               </button>}
             />
 
-            <div className="music-pad-mode-bar">
-              <span className="music-pad-mode-indicator" id="mode-indicator">Idle</span>
-              <span className="music-pad-layer-indicator" id="layer-indicator" aria-live="polite">Layer 0/3</span>
-              <span className="music-pad-tempo-display" id="tempo-display">120 BPM</span>
+            <div className="drum-pad-mode-bar">
+              <span className="drum-pad-mode-indicator" id="mode-indicator">Idle</span>
+              <span className="drum-pad-layer-indicator" id="layer-indicator" aria-live="polite">Layer 0/3</span>
+              <span className="drum-pad-tempo-display" id="tempo-display">120 BPM</span>
             </div>
 
-            <div className="music-pad-grid-wrap">
-              <div id="pad-grid" className="music-pad-grid" role="group" aria-label="Drum pads">
+            <div className="drum-pad-grid-wrap">
+              <div id="pad-grid" className="drum-pad-grid" role="group" aria-label="Drum pads">
                 {padKeys.map((key, index) => (
                   <button
                     key={`pad-${index}`}
@@ -120,22 +120,22 @@ export async function musicPadAction() {
               </div>
             </div>
 
-            <div className="music-pad-progress-track" id="progress-bar-track" aria-hidden="true">
-              <div className="music-pad-progress-bar" id="progress-bar"></div>
+            <div className="drum-pad-progress-track" id="progress-bar-track" aria-hidden="true">
+              <div className="drum-pad-progress-bar" id="progress-bar"></div>
             </div>
 
-            <div className="music-pad-controls" role="group" aria-label="Loop controls">
-              <button id="record-btn" type="button" className="music-pad-btn" aria-pressed="false">Record</button>
-              <button id="play-btn" type="button" className="music-pad-btn" aria-pressed="false">Play</button>
-              <button id="clear-btn" type="button" className="music-pad-btn">Clear</button>
-              <button id="tempo-btn" type="button" className="music-pad-btn" aria-label="Change tempo">Tempo</button>
+            <div className="drum-pad-controls" role="group" aria-label="Loop controls">
+              <button id="record-btn" type="button" className="drum-pad-btn" aria-pressed="false">Record</button>
+              <button id="play-btn" type="button" className="drum-pad-btn" aria-pressed="false">Play</button>
+              <button id="clear-btn" type="button" className="drum-pad-btn">Clear</button>
+              <button id="tempo-btn" type="button" className="drum-pad-btn" aria-label="Change tempo">Tempo</button>
             </div>
           </div>
         </GameScreen>
 
         <GameTabbedModal
           title="Menu"
-          overlayStyles={musicPadModalOverlayStyles}
+          overlayStyles={drumPadModalOverlayStyles}
           quitHref={homePath}
           settingsContent={<>
             <SettingsSection title="Audio">
@@ -148,7 +148,7 @@ export async function musicPadAction() {
             </SettingsSection>
 
             <SettingsSection title="Controls">
-              <div className="music-pad-controls-help">
+              <div className="drum-pad-controls-help">
                 <p><strong>Top row:</strong> <kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd> <kbd>R</kbd> trigger pads 1–4.</p>
                 <p><strong>Bottom row:</strong> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> trigger pads 5–8.</p>
                 <p><strong>Record toggle:</strong> <kbd>Space</kbd> starts and stops recording the current loop layer.</p>
@@ -166,11 +166,11 @@ export async function musicPadAction() {
             </SettingsSection>
           </>}
           infoContent={<>
-            <InfoSection title="About Music Pad">
-              <p>{musicPadInfo.summary}</p>
+            <InfoSection title="About Drum Pad">
+              <p>{drumPadInfo.summary}</p>
             </InfoSection>
             <InfoSection title="Credits">
-              {musicPadAttribution.entries.map((entry) => <InfoAttribution attribution={{
+              {drumPadAttribution.entries.map((entry) => <InfoAttribution attribution={{
                 title: entry.title,
                 author: entry.creator,
                 license: entry.license,
@@ -186,8 +186,8 @@ export async function musicPadAction() {
       <SrOnly id="game-feedback" ariaLive="assertive" ariaAtomic />
 
       <noscript>
-        <div className="noscript-message noscript-message-music-pad">
-          <p>Music Pad needs JavaScript to synthesize sound and record loops. Turn JavaScript on and reload to play.</p>
+        <div className="noscript-message noscript-message-drum-pad">
+          <p>Drum Pad needs JavaScript to synthesize sound and record loops. Turn JavaScript on and reload to play.</p>
         </div>
       </noscript>
     </Document>,

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="sparkle" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#FAF6EE"/>
+      <stop offset="100%" stop-color="#E8DCC8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#sparkle)" stroke="#3A2F28" stroke-width="2.5"/>
+  <text x="32" y="42" text-anchor="middle" font-size="28">🧹</text>
+</svg>

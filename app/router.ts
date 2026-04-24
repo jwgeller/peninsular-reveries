@@ -5,6 +5,7 @@ import { gameInfoAction } from './controllers/game-info.js'
 import { homeAction } from './controllers/home.js'
 import { notFoundAction } from './controllers/not-found.js'
 import { chompersAction } from '../games/chompers/controller.js'
+import { drumPadAction } from '../games/drum-pad/controller.js'
 import { missionOrbitAction } from '../games/mission-orbit/controller.js'
 import { pixelPassportAction } from '../games/pixel-passport/controller.js'
 import { squaresAction } from '../games/squares/controller.js'
@@ -12,7 +13,7 @@ import { superWordAction } from '../games/super-word/controller.js'
 import { storyTrailAction } from '../games/story-trail/controller.js'
 import { trainSoundsAction } from '../games/train-sounds/controller.js'
 import { waterwallAction } from '../games/waterwall/controller.js'
-import { musicPadAction } from '../games/music-pad/controller.js'
+import { spotOnAction } from '../games/spot-on/controller.js'
 import { peekabooAction } from '../games/peekaboo/controller.js'
 
 export function createAppRouter() {
@@ -27,8 +28,9 @@ export function createAppRouter() {
   router.get(routes.storyTrailInfo, () => gameInfoAction('story-trail'))
   router.get(routes.squaresInfo, () => gameInfoAction('squares'))
   router.get(routes.waterwallInfo, () => gameInfoAction('waterwall'))
-  router.get(routes.musicPadInfo, () => gameInfoAction('music-pad'))
+  router.get(routes.drumPadInfo, () => gameInfoAction('drum-pad'))
   router.get(routes.trainSoundsInfo, () => gameInfoAction('train-sounds'))
+  router.get(routes.spotOnInfo, () => gameInfoAction('spot-on'))
   router.get(routes.peekabooInfo, () => gameInfoAction('peekaboo'))
   router.get(routes.missionOrbit, () => missionOrbitAction())
   router.get(routes.superWord, () => superWordAction())
@@ -37,8 +39,9 @@ export function createAppRouter() {
   router.get(routes.storyTrail, () => storyTrailAction())
   router.get(routes.squares, () => squaresAction())
   router.get(routes.waterwall, () => waterwallAction())
-  router.get(routes.musicPad, () => musicPadAction())
+  router.get(routes.drumPad, () => drumPadAction())
   router.get(routes.trainSounds, () => trainSoundsAction())
+  router.get(routes.spotOn, () => spotOnAction())
   router.get(routes.peekaboo, () => peekabooAction())
   router.get(routes.notFound, () => notFoundAction())
 

@@ -1,15 +1,18 @@
 import { getGameAudioBuses } from '../../client/game-audio.js'
 import { setupGameMenu } from '../../client/game-menu.js'
 import { showScreen } from '../../client/game-screens.js'
+import { isReducedMotion } from '../../client/game-animations.js'
 import { getSfxEnabled } from '../../client/preferences.js'
 
-import { announceHotspotActivated, announceTrainChange, focusStartButton, focusTrainSwitcher } from './accessibility.js'
-import { animateHotspotPress, animateTrainSwitch, resetTrainAnimationState } from './animations.js'
+import { announceAllAboard, announceHotspotActivated, announceTrainChange, focusStartButton, focusTrainSwitcher } from './accessibility.js'
+import { animateAllAboard, animateHotspotPress, animateTrainArrival, animateTrainSwitch, resetTrainAnimationState } from './animations.js'
 import { trainSoundsAttribution } from './attributions.js'
 import { cleanupTrainSoundsInput, setupTrainSoundsInput } from './input.js'
 import { initTrainSoundsRenderer, type TrainSoundsRenderer } from './renderer.js'
 import { ensureTrainSoundsAudioUnlocked, playTrainHotspotSound, preloadTrainSoundSamples } from './sounds.js'
 import {
+  allAboard,
+  clearDeparting,
   createInitialTrainSoundsState,
   getCurrentPreset,
   resetTrainSoundsState,
@@ -37,10 +40,12 @@ let settingsModal: ReturnType<typeof setupGameMenu> = { open() {}, close() {}, t
 let hotspotStateTimer: number | null = null
 let hotspotActivationToken = 0
 let initialized = false
+let allAboardInProgress = false
 
 let startClickHandler: (() => void) | null = null
 let previousTrainClickHandler: (() => void) | null = null
 let nextTrainClickHandler: (() => void) | null = null
+let allAboardClickHandler: (() => void) | null = null
 let hotspotClickHandler: ((event: Event) => void) | null = null
 let hotspotFocusHandler: ((event: FocusEvent) => void) | null = null
 let restartHandler: (() => void) | null = null
@@ -228,6 +233,55 @@ function switchTrain(
   announceTrainChange(getCurrentPreset(state).name)
 }
 
+function findSignalHotspotId(presetId: TrainSoundsState['currentPresetId']): TrainHotspotId | null {
+  const preset = getCurrentPreset({ ...state, currentPresetId: presetId })
+  const signalHotspot = preset.hotspots.find((h) => h.category === 'signal')
+  return signalHotspot?.id ?? null
+}
+
+function handleAllAboard(): void {
+  if (!renderer || allAboardInProgress) return
+
+  const currentPreset = getCurrentPreset(state)
+  const signalHotspotId = findSignalHotspotId(state.currentPresetId)
+  const currentTrainName = currentPreset.name
+
+  // Play current train's signal sound (whistle/horn)
+  if (signalHotspotId && getSfxEnabled()) {
+    ensureAudioReady()
+    playTrainHotspotSound(state.currentPresetId, signalHotspotId)
+  }
+
+  hotspotActivationToken += 1
+  clearTransientHotspotState()
+
+  if (isReducedMotion()) {
+    // No animation: immediately switch trains
+    state = allAboard(state)
+    state = clearDeparting(state)
+    renderCurrentPreset()
+    const nextTrainName = getCurrentPreset(state).name
+    announceAllAboard(currentTrainName, nextTrainName)
+    return
+  }
+
+  allAboardInProgress = true
+
+  // Animate departure then arrival
+  animateAllAboard(renderer.scene, renderer.displayFrame).then(() => {
+    state = allAboard(state)
+    state = clearDeparting(state)
+    renderCurrentPreset()
+
+    const nextTrainName = getCurrentPreset(state).name
+    announceAllAboard(currentTrainName, nextTrainName)
+
+    return animateTrainArrival(renderer!.scene, renderer!.displayFrame)
+  }).finally(() => {
+    allAboardInProgress = false
+  })
+}
+
 function activateHotspot(hotspotId: TrainHotspotId): void {
   if (!renderer) return
 
@@ -295,6 +349,11 @@ function bindRuntimeEvents(): void {
     switchTrain('next', renderer?.nextButton ?? null)
   }
   renderer.nextButton.addEventListener('click', nextTrainClickHandler)
+
+  allAboardClickHandler = (): void => {
+    handleAllAboard()
+  }
+  renderer.allAboardButton.addEventListener('click', allAboardClickHandler)
 
   hotspotClickHandler = (event: Event): void => {
     const target = event.target
@@ -365,6 +424,10 @@ function unbindRuntimeEvents(): void {
     renderer.nextButton.removeEventListener('click', nextTrainClickHandler)
   }
 
+  if (renderer && allAboardClickHandler) {
+    renderer.allAboardButton.removeEventListener('click', allAboardClickHandler)
+  }
+
   if (renderer && hotspotClickHandler) {
     renderer.hotspots.removeEventListener('click', hotspotClickHandler)
   }
@@ -384,6 +447,7 @@ function unbindRuntimeEvents(): void {
   startClickHandler = null
   previousTrainClickHandler = null
   nextTrainClickHandler = null
+  allAboardClickHandler = null
   hotspotClickHandler = null
   hotspotFocusHandler = null
   restartHandler = null
@@ -408,6 +472,7 @@ function init(): void {
     onStart: enterGame,
     onPreviousTrain: () => switchTrain('previous', renderer?.prevButton ?? null),
     onNextTrain: () => switchTrain('next', renderer?.nextButton ?? null),
+    onAllAboard: () => handleAllAboard(),
     onToggleMenu: () => settingsModal.toggle(),
   })
   warmAudioOnFirstInteraction()

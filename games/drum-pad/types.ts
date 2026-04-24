@@ -23,10 +23,10 @@ export interface LoopEvent {
   readonly timeOffset: number
 }
 
-export type MusicPadMode = 'free' | 'recording' | 'playing'
+export type DrumPadMode = 'free' | 'recording' | 'playing'
 
-export interface MusicPadState {
-  readonly mode: MusicPadMode
+export interface DrumPadState {
+  readonly mode: DrumPadMode
   readonly tempo: TempoPreset
   readonly layers: readonly (readonly LoopEvent[])[]
   readonly activeLayer: number

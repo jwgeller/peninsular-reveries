@@ -36,7 +36,7 @@ Rename "Music Pad" to "Drum Pad" across all surfaces and replace all its synthes
 ## Legs
 
 ### LEG-1: Drum Pad Rename — Music Pad → Drum Pad
-- Status: pending
+- Status: done
 - Confirmed: yes
 - Goal link: User explicitly asked to rename music pad to drum pad; backlog item also references this rename.
 - Depends on: none
@@ -71,7 +71,7 @@ Rename "Music Pad" to "Drum Pad" across all surfaces and replace all its synthes
   13. Verify no remaining references to "music-pad" in the renamed files (grep audit)
 
 ### LEG-2: Train Sounds — Hotspot Overhaul
-- Status: pending
+- Status: done
 - Confirmed: yes
 - Goal link: User wants to "hide words, and just make hotspots clickable, the spots on the trains, (maybe aria describe what it looks like, or what it is?)"
 - Depends on: none
@@ -103,7 +103,7 @@ Rename "Music Pad" to "Drum Pad" across all surfaces and replace all its synthes
   5. Density check: 4 hotspots per train at 390×844 — within LOCAL.md cap of ≤4. Targets min 44px. Horizontal padding ≥8px between adjacent hotspots.
 
 ### LEG-3: Train Sounds — All Aboard & Scene Animation
-- Status: pending
+- Status: done
 - Confirmed: yes
 - Goal link: User asked for "All Aboard!" button, train departure animation, scene randomness, and reduce-motion gating.
 - Depends on: LEG-2 (hotspot changes affect renderer structure)
@@ -159,7 +159,7 @@ Rename "Music Pad" to "Drum Pad" across all surfaces and replace all its synthes
      - Hotspot position mirroring handled in JS (renderer), not CSS
 
 ### LEG-4: Replace Synthesized Sounds & Fix Quiet Audio
-- Status: pending
+- Status: done
 - Confirmed: yes
 - Goal link: User said "let's try to get actual sounds for all of them instead of any synthesized sounds" and "some of them don't seem to work well at all (can't hear)."
 - Depends on: LEG-1 (drum-pad directory must exist before modifying its sounds)
@@ -213,7 +213,7 @@ Rename "Music Pad" to "Drum Pad" across all surfaces and replace all its synthes
      - `attributions.ts`: replace synthesized-drum and UI-sound entries with real CC0 Freesound entries once sample IDs are confirmed; keep the placeholder entry until then
 
 ### LEG-5: Spot On — New Game Scaffold
-- Status: pending
+- Status: done
 - Confirmed: yes
 - Goal link: User asked for a new game "Spot On" — this leg creates the full shell, routing, and layout so the game loads and renders a start screen and empty game screen.
 - Depends on: none (independent of other legs)
@@ -271,7 +271,7 @@ Rename "Music Pad" to "Drum Pad" across all surfaces and replace all its synthes
   15. **Emoji art is placeholder** — sourcing deferred; all item/spot emojis noted as "placeholder — sourcing deferred"
 
 ### LEG-6: Spot On — Gameplay Implementation
-- Status: pending
+- Status: done
 - Confirmed: yes
 - Goal link: User asked for a cozy organization game where you pick up items and place them anywhere you like, then click "New Room" for a fresh layout.
 - Depends on: LEG-5 (scaffold must exist)

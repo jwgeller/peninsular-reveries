@@ -1,5 +1,5 @@
 import { DEFAULT_TRAIN_PRESET_ID, TRAIN_PRESET_IDS, getTrainPresetDefinition } from './catalog.js'
-import type { TrainHotspotId, TrainPresetDefinition, TrainPresetId, TrainSoundsState } from './types.js'
+import type { TrainHotspotId, TrainPresetDefinition, TrainPresetId, TrainDirection, TrainSoundsState } from './types.js'
 
 function getPresetIndex(presetId: TrainPresetId): number {
   const presetIndex = TRAIN_PRESET_IDS.indexOf(presetId)
@@ -19,12 +19,37 @@ function hasHotspot(preset: TrainPresetDefinition, hotspotId: TrainHotspotId): b
   return preset.hotspots.some((hotspot) => hotspot.id === hotspotId)
 }
 
-export function createInitialTrainSoundsState(): TrainSoundsState {
+function randomDirection(): TrainDirection {
+  return Math.random() < 0.5 ? 'left' : 'right'
+}
+
+function randomHasRainbow(): boolean {
+  return Math.random() < 0.3
+}
+
+function randomCloudOffset(): number {
+  return Math.floor(Math.random() * 16)
+}
+
+function randomizeSceneParams(state: TrainSoundsState): TrainSoundsState {
   return {
+    ...state,
+    trainDirection: randomDirection(),
+    hasRainbow: randomHasRainbow(),
+    cloudOffset: randomCloudOffset(),
+  }
+}
+
+export function createInitialTrainSoundsState(): TrainSoundsState {
+  return randomizeSceneParams({
     currentPresetId: DEFAULT_TRAIN_PRESET_ID,
     focusedHotspotId: null,
     pressedHotspotId: null,
-  }
+    trainDirection: 'left',
+    hasRainbow: false,
+    cloudOffset: 0,
+    departing: false,
+  })
 }
 
 export function getCurrentPreset(state: TrainSoundsState): TrainPresetDefinition {
@@ -34,13 +59,32 @@ export function getCurrentPreset(state: TrainSoundsState): TrainPresetDefinition
 export function selectNextTrain(state: TrainSoundsState): TrainSoundsState {
   const currentPresetIndex = getPresetIndex(state.currentPresetId)
   const nextPresetId = TRAIN_PRESET_IDS[(currentPresetIndex + 1) % TRAIN_PRESET_IDS.length]
-  return clearTransientHotspotState(state, nextPresetId)
+  return randomizeSceneParams(clearTransientHotspotState(state, nextPresetId))
 }
 
 export function selectPreviousTrain(state: TrainSoundsState): TrainSoundsState {
   const currentPresetIndex = getPresetIndex(state.currentPresetId)
   const previousPresetId = TRAIN_PRESET_IDS[(currentPresetIndex - 1 + TRAIN_PRESET_IDS.length) % TRAIN_PRESET_IDS.length]
-  return clearTransientHotspotState(state, previousPresetId)
+  return randomizeSceneParams(clearTransientHotspotState(state, previousPresetId))
+}
+
+export function allAboard(state: TrainSoundsState, direction: 'next' | 'previous' = 'next'): TrainSoundsState {
+  const currentPresetIndex = getPresetIndex(state.currentPresetId)
+  const nextPresetId = direction === 'next'
+    ? TRAIN_PRESET_IDS[(currentPresetIndex + 1) % TRAIN_PRESET_IDS.length]
+    : TRAIN_PRESET_IDS[(currentPresetIndex - 1 + TRAIN_PRESET_IDS.length) % TRAIN_PRESET_IDS.length]
+  return randomizeSceneParams({
+    ...state,
+    currentPresetId: nextPresetId,
+    focusedHotspotId: null,
+    pressedHotspotId: null,
+    departing: true,
+  })
+}
+
+export function clearDeparting(state: TrainSoundsState): TrainSoundsState {
+  if (!state.departing) return state
+  return { ...state, departing: false }
 }
 
 export function selectHotspot(state: TrainSoundsState, hotspotId: TrainHotspotId): TrainSoundsState {

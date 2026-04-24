@@ -118,6 +118,15 @@ export async function trainSoundsAction() {
               </button>
             </div>
 
+            <button
+              id="all-aboard-btn"
+              type="button"
+              className="train-all-aboard-btn"
+              aria-label="All aboard — depart and switch trains"
+            >
+              All Aboard! 🚂
+            </button>
+
             <div id="train-scene" className="train-scene" data-train-preset="steam" data-scene-state="idle">
               <div className="train-scene-sky" aria-hidden="true">
                 <span className="train-sun"></span>

@@ -42,7 +42,6 @@ export interface TrainHotspotSoundRoute {
   readonly volumeScale?: number
   readonly attack?: number
   readonly release?: number
-  readonly reinforcement?: 'electric-hum-brightener'
 }
 
 const TRAIN_PRESET_HOTSPOT_SOUND_ROUTES: Readonly<
@@ -91,7 +90,6 @@ const TRAIN_PRESET_HOTSPOT_SOUND_ROUTES: Readonly<
     'electric-horn': { sampleId: 'electric-horn' },
     'electric-power-hum': {
       sampleId: 'electric-hum',
-      reinforcement: 'electric-hum-brightener',
     },
     'electric-brake': {
       sampleId: 'air-brake-hiss',
@@ -261,46 +259,6 @@ function playSample(
   }
 }
 
-function playElectricHumReinforcement(
-  startTime: number,
-  duration: number,
-  playbackRate: number,
-  volumeScale: number,
-): void {
-  const context = getCtx()
-  if (!context) return
-
-  const body = context.createOscillator()
-  const overtone = context.createOscillator()
-  const filter = context.createBiquadFilter()
-  const gain = createEnvelope(
-    context,
-    startTime,
-    duration,
-    0.014 * volumeScale,
-    0.03,
-    Math.min(0.22, duration * 0.4),
-  )
-
-  body.type = 'triangle'
-  overtone.type = 'sine'
-  body.frequency.setValueAtTime(240 * playbackRate, startTime)
-  overtone.frequency.setValueAtTime(480 * playbackRate, startTime)
-
-  filter.type = 'bandpass'
-  filter.frequency.setValueAtTime(980 * playbackRate, startTime)
-  filter.Q.value = 0.9
-
-  body.connect(filter)
-  overtone.connect(filter)
-  filter.connect(gain)
-  gain.connect(getSfxBusNode())
-
-  body.start(startTime)
-  overtone.start(startTime)
-  body.stop(startTime + duration)
-  overtone.stop(startTime + duration)
-}
 
 export function ensureTrainSoundsAudioUnlocked(): void {
   baseEnsureAudioUnlocked()
@@ -365,15 +323,6 @@ export function playTrainHotspotSound(
   if (!playback) {
     void preloadTrainSoundSamples()
     return false
-  }
-
-  if (route.reinforcement === 'electric-hum-brightener') {
-    playElectricHumReinforcement(
-      playback.startTime,
-      playback.duration,
-      playback.playbackRate,
-      playback.volumeScale,
-    )
   }
 
   return true

@@ -350,43 +350,33 @@
 - Modifications: Not applicable
 - Notes: All sound effects are synthesized at runtime. No bundled audio files ship with the game.
 
-### Music Pad
+### Drum Pad
 
-- Slug: music-pad
+- Slug: drum-pad
 - Code license: GPL-3.0
-- Summary: Music Pad is a neon drum pad instrument. Tap eight color-coded pads to trigger percussion sounds, record loops, and layer up to three parts with adjustable tempo. All sounds are synthesized in the browser at runtime.
+- Summary: Tap eight color-coded pads to trigger percussion sounds, record loops, and layer up to three parts with adjustable tempo.
 
 #### Entries
 
-##### Music Pad synthesized drum sounds
+##### Drum Pad percussion samples (CC0)
 
 - Type: sound effect
-- Used in: Music Pad pad triggers across all eight color-coded pads
-- Creator: Peninsular Reveries
-- Source: Generated in-browser with the Web Audio API
-- License: GPL-3.0
-- Modifications: Not applicable
-- Notes: Drum and percussion voices are synthesized at runtime with deterministic envelopes. No bundled audio files ship with the game.
-
-##### Music Pad synthesized sound effects
-
-- Type: sound effect
-- Used in: Music Pad UI feedback for record, play, stop, and clear
-- Creator: Peninsular Reveries
-- Source: Generated in-browser with the Web Audio API
-- License: GPL-3.0
-- Modifications: Not applicable
-- Notes: All UI sound effects are synthesized at runtime unless a future implementation proves external media necessary.
-
-##### Music Pad CC0 sample placeholder
-
-- Type: sound effect
-- Used in: Reserved slot for future CC0 percussion samples if needed
-- Creator: To be determined
-- Source: Sourcing deferred to a later leg
+- Used in: Drum Pad pad triggers across all eight color-coded pads
+- Creator: To be determined — Freesound CC0 sourcing pending
+- Source: https://freesound.org/
 - License: CC0
-- Modifications: To be determined
-- Notes: Placeholder entry. No external samples ship today; sourcing is deferred and will be replaced with a real attribution if a CC0 sample is later adopted.
+- Modifications: Trimmed, filtered, and normalized via creative-assets workflow
+- Notes: Eight CC0 percussion one-shots (kick, snare, closed hi-hat, open hi-hat, clap, rimshot, tom, cymbal) sourced from Freesound. Freesound IDs and creator attribution to be filled when samples are fetched and verified.
+
+##### Drum Pad UI sound effects
+
+- Type: sound effect
+- Used in: Drum Pad UI feedback for record, play, stop, and clear
+- Creator: Peninsular Reveries
+- Source: Generated in-browser with the Web Audio API
+- License: GPL-3.0
+- Modifications: Not applicable
+- Notes: UI sound effects are synthesized at runtime unless a future implementation proves external media necessary.
 
 ### Train Sounds
 
@@ -513,6 +503,64 @@
 - Source: Freesound (https://freesound.org/people/craigsmith/sounds/480819/)
 - License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
 - Modifications: Trimmed into a 0.64 second mono OGG clank and reused with a slightly slower playback rate for the cargo latch.
+
+### Spot On
+
+- Slug: spot-on
+- Code license: GPL-3.0
+- Summary: Spot On is a cozy room-tidying toy. Pick up misplaced items and put them wherever feels right — there are no wrong answers, only your way of making things tidy. When you are happy, get a new room.
+
+#### Entries
+
+##### Spot On game logic and rendering
+
+- Type: other
+- Used in: Spot On room-tidying interactive toy
+- Creator: Peninsular Reveries
+- Source: Original code
+- License: GPL-3.0
+- Modifications: Not applicable
+- Notes: Game engine, state management, and room scene rendering.
+
+##### pick-up-whoosh
+
+- Type: sound effect
+- Used in: Spot On item pickup sound
+- Creator: patchywolf
+- Source: Freesound (https://freesound.org/people/patchywolf/sounds/414/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed, normalized, high-pass and low-pass filtered, converted to OGG.
+- Notes: CC0 whoosh sample used for picking up items.
+
+##### place-thunk
+
+- Type: sound effect
+- Used in: Spot On item placement sound
+- Creator: goldsounds
+- Source: Freesound (https://freesound.org/people/goldsounds/sounds/33508/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed, normalized, filtered, converted to OGG.
+- Notes: CC0 thud sample used for placing items on spots.
+
+##### completion-chime
+
+- Type: sound effect
+- Used in: Spot On room completion sound
+- Creator: carmen_mireles_barrios
+- Source: Freesound (https://freesound.org/people/carmen_mireles_barrios/sounds/395/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed, normalized, filtered, converted to OGG.
+- Notes: CC0 chime sample used when all items in a room are placed.
+
+##### room-transition
+
+- Type: sound effect
+- Used in: Spot On room transition sound
+- Creator: fotosettile
+- Source: Freesound (https://freesound.org/people/fotosettile/sounds/17787/)
+- License: Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Modifications: Trimmed, normalized, filtered, converted to OGG.
+- Notes: CC0 swoosh sample used when switching to a new room.
 
 ### Peekaboo
 

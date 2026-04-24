@@ -13,6 +13,7 @@ export interface TrainSoundsInputCallbacks {
   onStart?: () => void
   onPreviousTrain?: () => void
   onNextTrain?: () => void
+  onAllAboard?: () => void
   onToggleMenu?: () => void
 }
 
@@ -52,6 +53,10 @@ function isHotspot(element: Element | null): boolean {
 
 function isTrainSwitchButton(element: Element | null): boolean {
   return element instanceof HTMLElement && (element.id === 'train-prev-btn' || element.id === 'train-next-btn')
+}
+
+function isAllAboardButton(element: Element | null): boolean {
+  return element instanceof HTMLElement && element.id === 'all-aboard-btn'
 }
 
 function clearGamepadFocus(): void {
@@ -109,6 +114,11 @@ function getTrainSwitchButton(buttonId: 'train-prev-btn' | 'train-next-btn'): HT
   return button instanceof HTMLButtonElement && isVisible(button) ? button : null
 }
 
+function getAllAboardButton(): HTMLButtonElement | null {
+  const button = document.getElementById('all-aboard-btn')
+  return button instanceof HTMLButtonElement && isVisible(button) ? button : null
+}
+
 function getVisibleHotspots(): HTMLElement[] {
   return getCurrentScreenControls().filter((control) => isHotspot(control))
 }
@@ -126,19 +136,20 @@ function getDefaultScreenTarget(direction: NavigationDirection = 'ArrowDown'): H
     const menuButton = getVisibleMenuButton()
     const prevButton = getTrainSwitchButton('train-prev-btn')
     const nextButton = getTrainSwitchButton('train-next-btn')
+    const allAboardBtn = getAllAboardButton()
     const hotspots = getVisibleHotspots()
     const lastHotspot = hotspots.length > 0 ? hotspots[hotspots.length - 1] : null
 
     switch (direction) {
       case 'ArrowUp':
-        return menuButton ?? prevButton ?? hotspots[0] ?? nextButton ?? null
+        return menuButton ?? prevButton ?? allAboardBtn ?? hotspots[0] ?? nextButton ?? null
       case 'ArrowLeft':
-        return prevButton ?? hotspots[0] ?? menuButton ?? nextButton ?? null
+        return prevButton ?? allAboardBtn ?? hotspots[0] ?? menuButton ?? nextButton ?? null
       case 'ArrowRight':
-        return nextButton ?? lastHotspot ?? menuButton ?? prevButton ?? null
+        return nextButton ?? lastHotspot ?? allAboardBtn ?? menuButton ?? prevButton ?? null
       case 'ArrowDown':
       default:
-        return hotspots[0] ?? prevButton ?? nextButton ?? menuButton ?? null
+        return allAboardBtn ?? hotspots[0] ?? prevButton ?? nextButton ?? menuButton ?? null
     }
   }
 
@@ -309,7 +320,7 @@ export function setupTrainSoundsInput(callbacks: TrainSoundsInputCallbacks = {})
 
     if (screen.id === 'game-screen' && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
       const current = getCurrentControl(getCurrentScreenControls())
-      const shouldSwitchTrain = !current || isTrainSwitchButton(current) || (!isHotspot(current) && !isMenuButton(current))
+      const shouldSwitchTrain = !current || isTrainSwitchButton(current) || (!isHotspot(current) && !isMenuButton(current) && !isAllAboardButton(current))
 
       if (shouldSwitchTrain) {
         event.preventDefault()
