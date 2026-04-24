@@ -2,7 +2,7 @@
 
 # Only run the full test suite when actual code/config/test files are staged.
 STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
-CODE_FILES=$(echo "$STAGED" | grep -E '\.(ts|tsx|mjs|css|json)$|^build\.ts$|^server\.ts$')
+CODE_FILES=$(echo "$STAGED" | grep -vE '^(\.agents|\.claude)/' | grep -E '\.(ts|tsx|mjs|css|json)$|^build\.ts$|^server\.ts$')
 
 if [ -z "$CODE_FILES" ]; then
   echo "pre-commit: no code files staged — skipping test:local"
