@@ -1,5 +1,4 @@
 import type { Target, PeekabooState } from './types.js'
-import { SCENE_SCENERY } from './types.js'
 
 // ── Lazy element cache ───────────────────────────────────────
 let gameAreaEl: HTMLElement | null = null
@@ -77,12 +76,6 @@ function ensureRuntimeStyles(documentRef: Document): void {
   styleElement.id = STYLE_ID
   styleElement.textContent = RUNTIME_STYLES
   documentRef.head.appendChild(styleElement)
-}
-
-// ── Decorative scene emojis ────────────────────────────────────
-
-function randomScenery(): string {
-  return SCENE_SCENERY[Math.floor(Math.random() * SCENE_SCENERY.length)]
 }
 
 // ── Screen management ─────────────────────────────────────────
@@ -178,26 +171,19 @@ export function renderEnterScene(state: PeekabooState): void {
   scene.style.gridTemplateColumns = `repeat(${state.cols}, 1fr)`
   scene.style.gridTemplateRows = `repeat(${state.rows}, 1fr)`
 
-  // Show scenery only — no target, so the player doesn't see the hiding spot
-  const occupied = new Set<string>()
+  // Render the same scenery from state.scenery (identical to the playing scene)
+  for (let row = 0; row < state.rows; row++) {
+    for (let col = 0; col < state.cols; col++) {
+      const cell = state.scenery[row][col]
+      if (cell === null) continue
 
-  for (let i = 0; i < Math.min(state.rows * state.cols, 12); i++) {
-    let row: number
-    let col: number
-    let key: string
-    do {
-      row = Math.floor(Math.random() * state.rows)
-      col = Math.floor(Math.random() * state.cols)
-      key = `${row},${col}`
-    } while (occupied.has(key))
-    occupied.add(key)
-
-    const sceneryEl = document.createElement('span')
-    sceneryEl.className = 'peekaboo-scene-scenery'
-    sceneryEl.textContent = randomScenery()
-    sceneryEl.style.gridRow = String(row + 1)
-    sceneryEl.style.gridColumn = String(col + 1)
-    scene.appendChild(sceneryEl)
+      const sceneryEl = document.createElement('span')
+      sceneryEl.className = 'peekaboo-scene-scenery'
+      sceneryEl.textContent = cell.emoji
+      sceneryEl.style.gridRow = String(row + 1)
+      sceneryEl.style.gridColumn = String(col + 1)
+      scene.appendChild(sceneryEl)
+    }
   }
 
   // Update the hint text with target name

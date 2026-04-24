@@ -4,7 +4,7 @@ body.peekaboo-game {
   --peekaboo-fog: #8b9299;
   --peekaboo-fog-transition: 0.3s;
   --peekaboo-cell-radius: clamp(0.5rem, 1vw, 0.75rem);
-  --peekaboo-celebration-scale: 2.5;
+  --peekaboo-celebration-scale: 1.4;
   --peekaboo-bg-top: #f4efe2;
   --peekaboo-bg-bottom: #d9ead8;
   --peekaboo-ink: #181b1e;
@@ -256,7 +256,7 @@ body.peekaboo-game .screen {
   max-width: min(100%, 36rem);
   margin-inline: auto;
   aspect-ratio: 4 / 3;
-  gap: clamp(2px, 0.5vw, 4px);
+  gap: 0;
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.55), transparent 38%),
     linear-gradient(180deg, var(--peekaboo-bg-top) 0%, var(--peekaboo-bg-bottom) 100%);
@@ -507,7 +507,7 @@ body.peekaboo-game .screen {
 
 .peekaboo-found-emoji {
   font-family: var(--peekaboo-emoji-font);
-  font-size: clamp(4rem, 16vw, 7rem);
+  font-size: clamp(3rem, 12vw, 5rem);
   line-height: 1;
   user-select: none;
   animation: peekaboo-celebrate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -581,10 +581,6 @@ body.peekaboo-game .settings-content {
 /* ── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
-  .peekaboo-fog-grid {
-    gap: 1px;
-  }
-
   .peekaboo-fog-cell {
     min-width: 44px;
     min-height: 44px;
@@ -594,7 +590,7 @@ body.peekaboo-game .settings-content {
 @media (max-height: 500px) {
   .peekaboo-meet-emoji,
   .peekaboo-found-emoji {
-    font-size: clamp(3rem, 14vw, 5rem);
+    font-size: clamp(2rem, 10vw, 3.5rem);
   }
 
   .peekaboo-title {
