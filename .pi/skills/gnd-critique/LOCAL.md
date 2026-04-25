@@ -30,6 +30,17 @@ What critique *does not* change:
 
 Small bugs (missing CSS classes, incorrect flags) go into the backlog or a follow-up plan — same path as design-direction changes. No shortcuts.
 
+## LOCAL.md Effectiveness Review
+
+During Phase 3 (Analysis), evaluate whether any LOCAL.md rules influenced leg outcomes — positively or negatively. For each LOCAL.md rule that was active during the plan:
+
+1. Note whether it was followed (or ignored) during charting or dispatch.
+2. Assess whether it produced better outcomes than the base SKILL.md rule alone would have (smaller legs, fewer cross-file bugs, tighter intents, etc.).
+3. If a rule clearly helped, propose it as a **Community Candidate** with a brief justification of what it prevented or improved.
+4. If a rule was ignored or caused friction, note that too — it may need revision rather than promotion.
+
+Do not propose a rule upstream unless it demonstrated measurable value in this project. Speculative candidates weaken the signal.
+
 ## Interactive Review Is a Conversation, Not a Monologue
 
 PC Phase 2 interactive review beats are hard stops, not rhetorical questions. Present each beat, ask the question, and **wait for the user's response** before advancing to the next beat or phase. Do not merge multiple beats into one message. Do not proceed to analysis until all beats have actual user responses.
@@ -41,3 +52,19 @@ PC Phase 2 interactive review beats are hard stops, not rhetorical questions. Pr
 **Beat 3 — Open Impressions.** Ask *"Anything else you noticed?"* Wait for the user's response.
 
 Only after all three beats have real responses should you proceed to Phase 3 (Analysis).
+
+## Parallel Dispatch Critique
+
+When the plan was dispatched using parallel batches, add these checks during Phase 3 (Analysis):
+
+1. **Batch correctness.** Were conflict-free sub-batches respected? If any two legs in the same parallel batch shared an owned file, that is a navigator protocol violation — flag it as a correction for `gnd-navigator-LOCAL.md`.
+
+2. **Review order effectiveness.** Did the navigator review legs that unblock dependents first? If a downstream leg was unnecessarily delayed because its dependency was reviewed late in the batch, note the pattern for improvement.
+
+3. **Cross-leg interference.** Even without shared owned files, parallel legs can interfere indirectly — for example, two legs modifying different files that both affect the same build output or test suite. If interference occurred, note whether the chart's overlap analysis should have caught it (e.g., by flagging shared build artifacts or test dependencies in the overlap check).
+
+4. **Parallel-batch sizing.** Was the batch size appropriate? Too many parallel divers can saturate rate limits or system resources. If any diver in a batch hit timeout, throttling, or resource errors that did not occur during sequential dispatch of similar legs, note it and suggest a lower default concurrency.
+
+5. **Review completeness.** Did the navigator review all legs in the batch before marking any `done`? Skipping review for "obviously correct" legs in a parallel batch is the same risk as skipping review in sequential dispatch — flag it if it occurred.
+
+6. **LOCAL.md effectiveness:** In addition to the base effectiveness review, evaluate whether the parallel-dispatch LOCAL.md rules (owned-file overlap analysis, conflict-free sub-batching) were followed during charting and dispatch. If they were ignored, document why. If they produced better outcomes (no file clobbering, faster dispatch), propose them as Community Candidates.
