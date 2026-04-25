@@ -1,5 +1,7 @@
 export type PadId = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
 
+export type BeatPadBankId = 'kit' | 'bass'
+
 export type TempoPreset = 'slow' | 'medium' | 'fast'
 
 export const TEMPO_BPM: Record<TempoPreset, number> = {
@@ -17,20 +19,26 @@ export const TEMPO_LABELS: Record<TempoPreset, string> = {
 export const LOOP_BARS = 2
 export const MAX_LAYERS = 3
 
+export const BANK_LABELS: Record<BeatPadBankId, string> = {
+  kit: 'Kit',
+  bass: 'Bass',
+}
+
 export interface LoopEvent {
   readonly padId: PadId
   /** ms from loop start */
   readonly timeOffset: number
 }
 
-export type DrumPadMode = 'free' | 'recording' | 'playing'
+export type BeatPadMode = 'free' | 'recording' | 'playing'
 
-export interface DrumPadState {
-  readonly mode: DrumPadMode
+export interface BeatPadState {
+  readonly mode: BeatPadMode
   readonly tempo: TempoPreset
   readonly layers: readonly (readonly LoopEvent[])[]
   readonly activeLayer: number
   readonly loopStartTime: number
   readonly recordStartTime: number
   readonly currentEvents: readonly LoopEvent[]
+  readonly activeBank: BeatPadBankId
 }

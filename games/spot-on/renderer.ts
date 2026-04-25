@@ -57,7 +57,7 @@ function createSurfaceElement(
   items: readonly ItemState[],
 ): HTMLDivElement {
   const container = document.createElement('div')
-  container.className = 'room-surface'
+  container.className = `room-surface room-surface--${surface.type}`
   container.dataset.surfaceId = surface.id
   container.setAttribute('aria-label', surface.label)
 
@@ -125,6 +125,35 @@ function createCellElement(
   return cell
 }
 
+// ── Theme decorative elements ───────────────────────────────────────────────
+
+/** Map of theme IDs to their decorative element identifiers */
+const THEME_DECORATIONS: Record<string, readonly string[]> = {
+  bedroom: ['headboard', 'window-frame'],
+  kitchen: ['counter-edge', 'stove-outline'],
+  study: ['desk-lamp', 'book-end'],
+  playroom: ['crayon-basket'],
+  bathroom: ['mirror-frame', 'towel-bar'],
+}
+
+/**
+ * Create theme-specific decorative elements as absolutely-positioned divs.
+ * These sit below surface grid layer (z-index: 1) and are purely visual.
+ */
+function createThemeDecorations(theme: string): DocumentFragment {
+  const frag = document.createDocumentFragment()
+  const decorations = THEME_DECORATIONS[theme] ?? []
+
+  for (const decor of decorations) {
+    const el = document.createElement('div')
+    el.className = `room-decor room-decor--${decor}`
+    el.setAttribute('aria-hidden', 'true')
+    frag.appendChild(el)
+  }
+
+  return frag
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initSpotOnRenderer(): SpotOnRenderer {
@@ -169,7 +198,7 @@ export function initSpotOnRenderer(): SpotOnRenderer {
     refs.scene.style.setProperty('--spot-on-room-wall', room.wallColor)
     refs.scene.style.setProperty('--spot-on-room-floor', room.floorColor)
 
-    // Set data attribute for debugging (not used for CSS rules)
+    // Set data attribute for theme-based CSS styling
     refs.scene.dataset.roomTheme = room.theme
 
     // Toggle carrying class on scene
@@ -189,7 +218,11 @@ export function initSpotOnRenderer(): SpotOnRenderer {
     // Clear scene children
     refs.scene.replaceChildren()
 
-    // Render surfaces first (lower z-index)
+    // Render decorative elements first (lowest z-index: 1)
+    const decorFrag = createThemeDecorations(room.theme)
+    refs.scene.appendChild(decorFrag)
+
+    // Render surfaces next (z-index: 2)
     const surfaceFrag = document.createDocumentFragment()
     for (const surface of state.surfaces) {
       const el = createSurfaceElement(surface, carrying, state.items)
@@ -197,7 +230,7 @@ export function initSpotOnRenderer(): SpotOnRenderer {
     }
     refs.scene.appendChild(surfaceFrag)
 
-    // Render floor items and carried item (higher z-index)
+    // Render floor items and carried item (highest z-index: 5+)
     const itemFrag = document.createDocumentFragment()
     for (const item of state.items) {
       // Skip items that are placed on a surface (shown inside cells)

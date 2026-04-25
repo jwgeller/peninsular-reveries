@@ -1,11 +1,11 @@
-/* Drum Pad — neon drum pad instrument
+/* Beat Pad — neon beat pad instrument
  * Viewport checkpoints: 390x844, 844x390, 1024x768, 1280x800.
  *
  * @font-face placeholder: a retro display font may be added in a later leg.
  * Today the game uses the system stack to keep the scaffold dependency-free.
  */
 
-body.drum-pad {
+body.beat-pad {
   --font: system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-title: system-ui, -apple-system, "Segoe UI", sans-serif;
   --bg: #0a0a1a;
@@ -22,6 +22,14 @@ body.drum-pad {
   --pad-5: #ffea00;
   --pad-6: #ff1744;
   --pad-7: #2979ff;
+  --bass-0: #ff6b35;
+  --bass-1: #ffa62b;
+  --bass-2: #e85d04;
+  --bass-3: #dc2f02;
+  --bass-4: #d00000;
+  --bass-5: #ffd60a;
+  --bass-6: #f48c06;
+  --bass-7: #9d0208;
 
   min-height: 100dvh;
   margin: 0;
@@ -31,11 +39,11 @@ body.drum-pad {
   background: var(--bg);
 }
 
-body.drum-pad main {
+body.beat-pad main {
   overflow: hidden;
 }
 
-body.drum-pad .screen {
+body.beat-pad .screen {
   /* Default to the shared screen transition; reduced-motion overrides below. */
 }
 
@@ -51,7 +59,7 @@ body.drum-pad .screen {
     var(--bg);
 }
 
-.drum-pad-screen-panel {
+.beat-pad-screen-panel {
   width: min(100%, 78rem);
   margin: 0 auto;
   display: grid;
@@ -64,18 +72,18 @@ body.drum-pad .screen {
   box-sizing: border-box;
 }
 
-.drum-pad-start-panel {
+.beat-pad-start-panel {
   align-content: center;
   min-height: 100dvh;
   text-align: center;
 }
 
-.drum-pad-game-panel {
+.beat-pad-game-panel {
   min-height: 100dvh;
   grid-template-rows: auto auto minmax(0, 1fr) auto auto;
 }
 
-.drum-pad-header {
+.beat-pad-header {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -85,7 +93,7 @@ body.drum-pad .screen {
   border-radius: 1rem;
 }
 
-.drum-pad-title {
+.beat-pad-title {
   margin: 0;
   font-family: var(--font-title);
   font-size: clamp(2rem, 5vw, 3.6rem);
@@ -93,7 +101,7 @@ body.drum-pad .screen {
   color: var(--text);
 }
 
-.drum-pad-start-panel .drum-pad-title {
+.beat-pad-start-panel .beat-pad-title {
   color: var(--pad-1);
   text-shadow:
     0 0 6px color-mix(in srgb, var(--pad-1) 70%, transparent),
@@ -101,13 +109,13 @@ body.drum-pad .screen {
     0 0 38px color-mix(in srgb, var(--pad-4) 35%, transparent);
 }
 
-.drum-pad-subtitle {
+.beat-pad-subtitle {
   margin: 0;
   color: var(--muted);
   font-size: clamp(1rem, 2.2vw, 1.25rem);
 }
 
-.drum-pad-mode-bar {
+.beat-pad-mode-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
@@ -120,19 +128,53 @@ body.drum-pad .screen {
   border-radius: 0.8rem;
 }
 
-.drum-pad-mode-indicator,
-.drum-pad-tempo-display {
+.beat-pad-mode-indicator,
+.beat-pad-tempo-display {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
 }
 
-.drum-pad-grid-wrap {
+.beat-pad-bank-toggle {
+  appearance: none;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--pad-1) 60%, transparent);
+  background: rgba(0, 229, 255, 0.08);
+  color: var(--pad-1);
+  cursor: pointer;
+  transition: background 160ms ease-out, transform 120ms ease-out;
+  min-width: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.beat-pad-bank-toggle:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.beat-pad-bank-toggle:active {
+  transform: scale(0.96);
+}
+
+.beat-pad-bank-toggle[aria-pressed="true"] {
+  background: rgba(255, 172, 43, 0.15);
+  border-color: color-mix(in srgb, var(--bass-1) 60%, transparent);
+  color: var(--bass-1);
+}
+
+.beat-pad-grid-wrap {
   display: grid;
   place-items: center;
   min-height: 0;
 }
 
-.drum-pad-grid {
+.beat-pad-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, 1fr);
@@ -192,6 +234,7 @@ body.drum-pad .screen {
   outline-offset: 3px;
 }
 
+/* Kit bank colors (default) */
 .pad[data-pad="0"] { --pad-color: var(--pad-0); }
 .pad[data-pad="1"] { --pad-color: var(--pad-1); }
 .pad[data-pad="2"] { --pad-color: var(--pad-2); }
@@ -200,6 +243,16 @@ body.drum-pad .screen {
 .pad[data-pad="5"] { --pad-color: var(--pad-5); }
 .pad[data-pad="6"] { --pad-color: var(--pad-6); }
 .pad[data-pad="7"] { --pad-color: var(--pad-7); }
+
+/* Bass bank colors */
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="0"] { --pad-color: var(--bass-0); }
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="1"] { --pad-color: var(--bass-1); }
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="2"] { --pad-color: var(--bass-2); }
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="3"] { --pad-color: var(--bass-3); }
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="4"] { --pad-color: var(--bass-4); }
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="5"] { --pad-color: var(--bass-5); }
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="6"] { --pad-color: var(--bass-6); }
+.beat-pad-grid[data-bank="bass"] .pad[data-pad="7"] { --pad-color: var(--bass-7); }
 
 .pad:active,
 .pad[data-active="true"] {
@@ -233,7 +286,7 @@ body.drum-pad .screen {
   }
 }
 
-.drum-pad-controls {
+.beat-pad-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
@@ -245,7 +298,7 @@ body.drum-pad .screen {
   border-radius: 1rem;
 }
 
-.drum-pad-btn {
+.beat-pad-btn {
   appearance: none;
   font-family: var(--font);
   font-size: 1rem;
@@ -260,11 +313,11 @@ body.drum-pad .screen {
   transition: background 160ms ease-out, transform 120ms ease-out;
 }
 
-.drum-pad-btn:hover { background: rgba(40, 40, 64, 0.92); }
-.drum-pad-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
-.drum-pad-btn:active { transform: scale(0.97); }
+.beat-pad-btn:hover { background: rgba(40, 40, 64, 0.92); }
+.beat-pad-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+.beat-pad-btn:active { transform: scale(0.97); }
 
-.drum-pad-btn[aria-pressed="true"] {
+.beat-pad-btn[aria-pressed="true"] {
   background: var(--pad-0);
   color: var(--bg);
   border-color: var(--pad-0);
@@ -314,7 +367,7 @@ body.drum-pad .screen {
   }
 }
 
-.drum-pad-progress-track {
+.beat-pad-progress-track {
   height: 0.4rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
@@ -323,7 +376,7 @@ body.drum-pad .screen {
   margin: 0 0.4rem;
 }
 
-.drum-pad-progress-bar {
+.beat-pad-progress-bar {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, var(--pad-1), var(--pad-4), var(--pad-0));
@@ -331,7 +384,7 @@ body.drum-pad .screen {
   transition: width 60ms linear;
 }
 
-.drum-pad-layer-indicator {
+.beat-pad-layer-indicator {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
   padding: 0.2rem 0.6rem;
@@ -341,7 +394,7 @@ body.drum-pad .screen {
   background: rgba(0, 229, 255, 0.06);
 }
 
-.drum-pad-primary-btn {
+.beat-pad-primary-btn {
   appearance: none;
   font-family: var(--font-title);
   font-size: clamp(1.1rem, 2.4vw, 1.4rem);
@@ -357,11 +410,11 @@ body.drum-pad .screen {
   transition: transform 120ms ease-out, filter 160ms ease-out;
 }
 
-.drum-pad-primary-btn:hover { filter: brightness(1.15); }
-.drum-pad-primary-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
-.drum-pad-primary-btn:active { transform: scale(0.97); }
+.beat-pad-primary-btn:hover { filter: brightness(1.15); }
+.beat-pad-primary-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
+.beat-pad-primary-btn:active { transform: scale(0.97); }
 
-.drum-pad-menu-btn {
+.beat-pad-menu-btn {
   appearance: none;
   font-family: var(--font);
   font-size: 0.95rem;
@@ -375,15 +428,15 @@ body.drum-pad .screen {
   cursor: pointer;
 }
 
-.drum-pad-menu-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+.beat-pad-menu-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
 
-.drum-pad-controls-help {
+.beat-pad-controls-help {
   display: grid;
   gap: 0.5rem;
   color: var(--muted);
 }
 
-.drum-pad-controls-help kbd {
+.beat-pad-controls-help kbd {
   font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, monospace;
   font-size: 0.9em;
   padding: 0.05rem 0.4rem;
@@ -404,7 +457,7 @@ body.drum-pad .screen {
 }
 
 @media (orientation: landscape) and (max-height: 480px) {
-  .drum-pad-grid {
+  .beat-pad-grid {
     width: min(100%, 50rem);
     aspect-ratio: 4 / 1.2;
     gap: 0.5rem;
@@ -415,31 +468,32 @@ body.drum-pad .screen {
     border-radius: 0.9rem;
   }
 
-  .drum-pad-game-panel {
+  .beat-pad-game-panel {
     gap: 0.4rem;
   }
 
-  .drum-pad-header,
-  .drum-pad-mode-bar,
-  .drum-pad-controls {
+  .beat-pad-header,
+  .beat-pad-mode-bar,
+  .beat-pad-controls {
     padding: 0.4rem 0.7rem;
   }
 }
 
 @media (orientation: portrait) and (min-width: 360px) {
-  .drum-pad-grid {
+  .beat-pad-grid {
     aspect-ratio: 4 / 3;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.drum-pad .screen {
+  body.beat-pad .screen {
     transition-duration: 0ms;
   }
 
   .pad,
-  .drum-pad-btn,
-  .drum-pad-primary-btn {
+  .beat-pad-btn,
+  .beat-pad-primary-btn,
+  .beat-pad-bank-toggle {
     transition: none;
   }
 
@@ -453,31 +507,32 @@ body.drum-pad .screen {
     box-shadow: 0 0 12px 3px var(--pad-6);
   }
 
-  .drum-pad-progress-bar {
+  .beat-pad-progress-bar {
     transition: none;
   }
 }
 
-body.drum-pad[data-reduce-motion="true"] .screen {
+body.beat-pad[data-reduce-motion="true"] .screen {
   transition-duration: 0ms;
 }
 
-body.drum-pad[data-reduce-motion="true"] .pad,
-body.drum-pad[data-reduce-motion="true"] .drum-pad-btn,
-body.drum-pad[data-reduce-motion="true"] .drum-pad-primary-btn {
+body.beat-pad[data-reduce-motion="true"] .pad,
+body.beat-pad[data-reduce-motion="true"] .beat-pad-btn,
+body.beat-pad[data-reduce-motion="true"] .beat-pad-primary-btn,
+body.beat-pad[data-reduce-motion="true"] .beat-pad-bank-toggle {
   transition: none;
 }
 
-body.drum-pad[data-reduce-motion="true"] .pad.hit {
+body.beat-pad[data-reduce-motion="true"] .pad.hit {
   animation: none;
   filter: brightness(1.6);
 }
 
-body.drum-pad[data-reduce-motion="true"] #record-btn.recording {
+body.beat-pad[data-reduce-motion="true"] #record-btn.recording {
   animation: none;
   box-shadow: 0 0 12px 3px var(--pad-6);
 }
 
-body.drum-pad[data-reduce-motion="true"] .drum-pad-progress-bar {
+body.beat-pad[data-reduce-motion="true"] .beat-pad-progress-bar {
   transition: none;
 }

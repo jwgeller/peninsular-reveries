@@ -23,7 +23,7 @@ const swFiles = [
   'story-trail/sw.js',
   'squares/sw.js',
   'waterwall/sw.js',
-  'drum-pad/sw.js',
+  'beat-pad/sw.js',
   'train-sounds/sw.js',
   'peekaboo/sw.js',
   'spot-on/sw.js',
@@ -46,7 +46,7 @@ mkdirSync(join(outputDir, 'client', 'pixel-passport'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'story-trail'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'squares'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'waterwall'), { recursive: true })
-mkdirSync(join(outputDir, 'client', 'drum-pad'), { recursive: true })
+mkdirSync(join(outputDir, 'client', 'beat-pad'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'train-sounds'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'peekaboo'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'spot-on'), { recursive: true })
@@ -91,7 +91,7 @@ await esbuild.build({
     'games/story-trail/main.ts',
     'games/squares/main.ts',
     'games/waterwall/main.ts',
-    'games/drum-pad/main.ts',
+    'games/beat-pad/main.ts',
     'games/train-sounds/main.ts',
     'games/peekaboo/main.ts',
     'games/spot-on/main.ts',
@@ -125,8 +125,8 @@ const staticRoutes: Array<{ url: string; outPath: string }> = [
   { url: 'http://localhost/squares/info/', outPath: 'squares/info/index.html' },
   { url: 'http://localhost/waterwall/', outPath: 'waterwall/index.html' },
   { url: 'http://localhost/waterwall/info/', outPath: 'waterwall/info/index.html' },
-  { url: 'http://localhost/drum-pad/', outPath: 'drum-pad/index.html' },
-  { url: 'http://localhost/drum-pad/info/', outPath: 'drum-pad/info/index.html' },
+  { url: 'http://localhost/beat-pad/', outPath: 'beat-pad/index.html' },
+  { url: 'http://localhost/beat-pad/info/', outPath: 'beat-pad/info/index.html' },
   { url: 'http://localhost/train-sounds/', outPath: 'train-sounds/index.html' },
   { url: 'http://localhost/train-sounds/info/', outPath: 'train-sounds/info/index.html' },
   { url: 'http://localhost/peekaboo/', outPath: 'peekaboo/index.html' },
@@ -187,7 +187,7 @@ const pages: Record<string, string[]> = {
   'story-trail': ['story-trail/index.html', 'styles/story-trail.css', 'client/shell.js', 'client/story-trail/main.js'],
   squares: ['squares/index.html', 'styles/squares.css', 'client/shell.js', 'client/squares/main.js'],
   waterwall: ['waterwall/index.html', 'styles/waterwall.css', 'client/shell.js', 'client/waterwall/main.js'],
-  'drum-pad': ['drum-pad/index.html', 'styles/drum-pad.css', 'client/shell.js', 'client/drum-pad/main.js'],
+  'beat-pad': ['beat-pad/index.html', 'styles/beat-pad.css', 'client/shell.js', 'client/beat-pad/main.js'],
   'train-sounds': ['train-sounds/index.html', 'styles/train-sounds.css', 'client/shell.js', 'client/train-sounds/main.js'],
   peekaboo: ['peekaboo/index.html', 'styles/peekaboo.css', 'client/shell.js', 'client/peekaboo/main.js'],
   'spot-on': ['spot-on/index.html', 'styles/spot-on.css', 'client/shell.js', 'client/spot-on/main.js'],

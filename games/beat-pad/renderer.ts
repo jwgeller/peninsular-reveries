@@ -3,13 +3,16 @@ import { isReducedMotionEnabled } from '../../client/preferences.js'
 import {
   MAX_LAYERS,
   TEMPO_LABELS,
-  type DrumPadMode,
+  BANK_LABELS,
+  type BeatPadMode,
+  type BeatPadBankId,
   type PadId,
   type TempoPreset,
 } from './types.js'
 
 interface RendererRefs {
   pads: (HTMLButtonElement | null)[]
+  bankToggle: HTMLButtonElement | null
   recordBtn: HTMLButtonElement | null
   playBtn: HTMLButtonElement | null
   clearBtn: HTMLButtonElement | null
@@ -32,6 +35,7 @@ function byId<T extends HTMLElement>(id: string): T | null {
 export function initRenderer(): void {
   refs = {
     pads: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => byId<HTMLButtonElement>(`pad-${i}`)),
+    bankToggle: byId<HTMLButtonElement>('bank-toggle'),
     recordBtn: byId<HTMLButtonElement>('record-btn'),
     playBtn: byId<HTMLButtonElement>('play-btn'),
     clearBtn: byId<HTMLButtonElement>('clear-btn'),
@@ -59,7 +63,7 @@ export function flashPad(padId: PadId): void {
   })
 }
 
-export function updateModeDisplay(mode: DrumPadMode): void {
+export function updateModeDisplay(mode: BeatPadMode): void {
   if (!refs) return
   const { modeIndicator, recordBtn, playBtn } = refs
   const label =
@@ -121,4 +125,31 @@ export function updateLayerIndicator(layerCount: number, maxLayers: number = MAX
   const el = refs?.layerIndicator
   if (!el) return
   el.textContent = `Layer ${layerCount}/${maxLayers}`
+}
+
+export function updateBankDisplay(bank: BeatPadBankId, padNames: readonly string[]): void {
+  if (!refs) return
+  const { bankToggle, pads } = refs
+
+  if (bankToggle) {
+    bankToggle.textContent = BANK_LABELS[bank]
+    bankToggle.setAttribute('aria-pressed', bank === 'bass' ? 'true' : 'false')
+    bankToggle.setAttribute('aria-label', `Bank: ${BANK_LABELS[bank]}, switch bank`)
+  }
+
+  // Update the grid's data attribute for CSS styling
+  const grid = document.getElementById('pad-grid')
+  if (grid) {
+    grid.setAttribute('data-bank', bank)
+  }
+
+  for (let i = 0; i < pads.length; i++) {
+    const pad = pads[i]
+    if (!pad) continue
+    const nameEl = pad.querySelector('.pad-name')
+    if (nameEl) {
+      nameEl.textContent = padNames[i] ?? ''
+    }
+    pad.setAttribute('aria-label', `Pad ${i + 1} ${padNames[i] ?? ''}`)
+  }
 }

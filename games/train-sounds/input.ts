@@ -51,10 +51,6 @@ function isHotspot(element: Element | null): boolean {
   return element instanceof HTMLElement && element.matches('.train-hotspot')
 }
 
-function isTrainSwitchButton(element: Element | null): boolean {
-  return element instanceof HTMLElement && (element.id === 'train-prev-btn' || element.id === 'train-next-btn')
-}
-
 function isAllAboardButton(element: Element | null): boolean {
   return element instanceof HTMLElement && element.id === 'all-aboard-btn'
 }
@@ -109,11 +105,6 @@ function getVisibleMenuButton(): HTMLElement | null {
   return getCurrentScreenControls().find((control) => isMenuButton(control)) ?? null
 }
 
-function getTrainSwitchButton(buttonId: 'train-prev-btn' | 'train-next-btn'): HTMLButtonElement | null {
-  const button = document.getElementById(buttonId)
-  return button instanceof HTMLButtonElement && isVisible(button) ? button : null
-}
-
 function getAllAboardButton(): HTMLButtonElement | null {
   const button = document.getElementById('all-aboard-btn')
   return button instanceof HTMLButtonElement && isVisible(button) ? button : null
@@ -134,22 +125,20 @@ function getDefaultScreenTarget(direction: NavigationDirection = 'ArrowDown'): H
 
   if (screen.id === 'game-screen') {
     const menuButton = getVisibleMenuButton()
-    const prevButton = getTrainSwitchButton('train-prev-btn')
-    const nextButton = getTrainSwitchButton('train-next-btn')
     const allAboardBtn = getAllAboardButton()
     const hotspots = getVisibleHotspots()
     const lastHotspot = hotspots.length > 0 ? hotspots[hotspots.length - 1] : null
 
     switch (direction) {
       case 'ArrowUp':
-        return menuButton ?? prevButton ?? allAboardBtn ?? hotspots[0] ?? nextButton ?? null
+        return menuButton ?? allAboardBtn ?? hotspots[0] ?? null
       case 'ArrowLeft':
-        return prevButton ?? allAboardBtn ?? hotspots[0] ?? menuButton ?? nextButton ?? null
+        return allAboardBtn ?? hotspots[0] ?? menuButton ?? null
       case 'ArrowRight':
-        return nextButton ?? lastHotspot ?? allAboardBtn ?? menuButton ?? prevButton ?? null
+        return lastHotspot ?? allAboardBtn ?? menuButton ?? null
       case 'ArrowDown':
       default:
-        return allAboardBtn ?? hotspots[0] ?? prevButton ?? nextButton ?? menuButton ?? null
+        return allAboardBtn ?? hotspots[0] ?? menuButton ?? null
     }
   }
 
@@ -234,16 +223,6 @@ function toggleMenu(callbacks: TrainSoundsInputCallbacks): void {
 }
 
 function switchTrain(direction: 'previous' | 'next', callbacks: TrainSoundsInputCallbacks): void {
-  const button = direction === 'previous'
-    ? getTrainSwitchButton('train-prev-btn')
-    : getTrainSwitchButton('train-next-btn')
-
-  if (button) {
-    button.focus({ preventScroll: true })
-    button.click()
-    return
-  }
-
   if (direction === 'previous') {
     callbacks.onPreviousTrain?.()
     return
@@ -320,7 +299,7 @@ export function setupTrainSoundsInput(callbacks: TrainSoundsInputCallbacks = {})
 
     if (screen.id === 'game-screen' && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
       const current = getCurrentControl(getCurrentScreenControls())
-      const shouldSwitchTrain = !current || isTrainSwitchButton(current) || (!isHotspot(current) && !isMenuButton(current) && !isAllAboardButton(current))
+      const shouldSwitchTrain = !current || (!isHotspot(current) && !isMenuButton(current) && !isAllAboardButton(current))
 
       if (shouldSwitchTrain) {
         event.preventDefault()

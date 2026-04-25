@@ -21,7 +21,7 @@ function isModalOpen(): boolean {
 }
 
 function getFocusableItemsAndCells(): HTMLElement[] {
-  const items = Array.from(document.querySelectorAll<HTMLElement>('.room-item:not(.room-item--placed)'))
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.room-item'))
   const cells = Array.from(document.querySelectorAll<HTMLElement>('.room-cell'))
   return [...items, ...cells].filter((el) => {
     if (!el || el.closest('[hidden]')) return false
@@ -149,6 +149,28 @@ export function setupSpotOnInput(callbacks: SpotOnInputCallbacks = {}): void {
   }
 
   document.addEventListener('keydown', keydownHandler)
+
+  // ── Click / Tap handling ─────────────────────────────────────────────────
+  //
+  // Canonical touch-optimized pointer behaviour (right-click is NOT a valid
+  // path on touch devices):
+  //
+  //   1. Tap an **empty cell** while carrying an item → place the carried item
+  //      on that cell.  (cell click handler, cell.dataset.itemId === undefined)
+  //
+  //   2. Tap an **occupied cell** → pick up the item placed on that cell,
+  //      regardless of carry state.  The carried item (if any) is dropped first
+  //      by the state machine (phase check in placeItem/pickUpItem).
+  //      (cell click handler, cell.dataset.itemId present)
+  //
+  //   3. Tap a **floor item** that is currently being carried → drop it back
+  //      onto the floor.  (item click handler, carriedItemId === itemId)
+  //
+  //   4. Tap a **floor item** that is NOT carried → pick it up and enter
+  //      'carrying' phase.  (item click handler, carriedItemId !== itemId)
+  //
+  // Right-click / context-menu is ignored — there are no right-click handlers.
+  //
 
   // Item click handling — detect carrying state
   itemClickHandler = (event: Event): void => {

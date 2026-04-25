@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Drum Pad",
-  "short_name": "Drum Pad",
+  "name": "Beat Pad",
+  "short_name": "Beat Pad",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "theme_color": "#0a0a1a",
   "icons": [
     {
-      "src": "../favicon-game-drum-pad.svg",
+      "src": "../favicon-game-beat-pad.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },

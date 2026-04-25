@@ -199,11 +199,6 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
     id: 'electric-horn',
     url: '/train-sounds/audio/electric-horn.ogg',
     fileName: 'electric-horn.ogg',
-    // BLOCKER: electric-horn.ogg is completely silent (all-zero samples, peak
-    // -inf dB / observed peak -91 dB). No gain value can make this audible.
-    // The source audio must be regenerated — likely the ffmpeg trim/encode
-    // step at startSeconds=0.68 produced a silent clip. Gain kept at 2.9 as
-    // placeholder; the file is effectively inaudible until the audio is fixed.
     gain: 2.9,
     loop: false,
     bundled: true,
@@ -310,10 +305,9 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
     id: 'highspeed-passby',
     url: '/train-sounds/audio/highspeed-passby.ogg',
     fileName: 'highspeed-passby.ogg',
-    // Gain elevated from 3.2 to 7.2: raw file peaks at only -16.4 dB;
-    // at gain 3.2 the post-chain peak was -24.7 dB (below -18 dB threshold).
-    // Gain 7.2 yields post-chain peak ≈ -17.6 dB which meets the audibility threshold.
-    gain: 7.2,
+    // File re-rendered with loudnorm (I=-14, TP=-1, LRA=20) after filters to
+    // normalize the integrated loudness; gain reduced from 7.2 to 3.0.
+    gain: 3.0,
     loop: false,
     bundled: true,
     source: {
@@ -330,7 +324,7 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
       durationSeconds: 1.34,
       mono: true,
       bitrateKbps: 64,
-      filters: ['highpass=f=120', 'lowpass=f=2400', 'volume=0.94'],
+      filters: ['highpass=f=120', 'lowpass=f=2400', 'volume=0.94', 'loudnorm=I=-14:TP=-1:LRA=20'],
       fadeInSeconds: 0.02,
       fadeOutStartSeconds: 1.08,
       fadeOutSeconds: 0.26,
@@ -340,12 +334,9 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
     id: 'coupler-clank',
     url: '/train-sounds/audio/coupler-clank.ogg',
     fileName: 'coupler-clank.ogg',
-    // Gain elevated from 3.1 to 22: raw file peak is only -26.0 dB (very brief
-    // transient clank — peak count of ~2 samples); at gain 3.1 the post-chain
-    // peak was -34.6 dB, far below audibility. Gain 22 yields post-chain peak
-    // ≈ -17.6 dB. Consider normalizing the source audio to reduce this extreme
-    // gain requirement — SNR will be poor at this amplification level.
-    gain: 22,
+    // File re-rendered with loudnorm (I=-14, TP=-1, LRA=20) after filters to
+    // normalize the integrated loudness; gain reduced from 22 to 3.0.
+    gain: 3.0,
     loop: false,
     bundled: true,
     source: {
@@ -362,7 +353,7 @@ export const trainSoundsSampleManifest: Record<TrainSoundsSampleId, TrainSoundsS
       durationSeconds: 0.64,
       mono: true,
       bitrateKbps: 36,
-      filters: ['highpass=f=180', 'lowpass=f=3200', 'volume=0.9'],
+      filters: ['highpass=f=180', 'lowpass=f=3200', 'volume=0.9', 'loudnorm=I=-14:TP=-1:LRA=20'],
       fadeInSeconds: 0.01,
       fadeOutStartSeconds: 0.26,
       fadeOutSeconds: 0.14,

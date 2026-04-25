@@ -318,9 +318,8 @@ interface InputHarness {
   readonly document: MockDocument
   readonly body: MockElement
   readonly menuButton: MockButtonElement
-  readonly prevButton: MockButtonElement
-  readonly nextButton: MockButtonElement
-  readonly closeButton: MockButtonElement
+  readonly allAboardButton: MockButtonElement
+  readonly closeButton: MockElement
   readonly modal: MockElement
   readonly hotspotButtons: readonly MockButtonElement[]
   readonly gamepadButtons: MockGamepadButton[]
@@ -409,11 +408,8 @@ function createInputHarness(modalOpen: boolean = false): InputHarness {
   menuButton.setAttribute('data-settings-open', 'true')
   menuButton.setRect(24, 16)
 
-  const prevButton = createButton(document, 'train-prev-btn')
-  prevButton.setRect(24, 88)
-
-  const nextButton = createButton(document, 'train-next-btn')
-  nextButton.setRect(156, 88)
+  const allAboardButton = createButton(document, 'all-aboard-btn')
+  allAboardButton.setRect(24, 88)
 
   const hotspotOne = createButton(document, 'steam-whistle', ['train-hotspot'])
   hotspotOne.setRect(60, 160)
@@ -421,7 +417,7 @@ function createInputHarness(modalOpen: boolean = false): InputHarness {
   const hotspotTwo = createButton(document, 'steam-bell', ['train-hotspot'])
   hotspotTwo.setRect(156, 160)
 
-  gameScreen.append(menuButton, prevButton, nextButton, hotspotOne, hotspotTwo)
+  gameScreen.append(menuButton, allAboardButton, hotspotOne, hotspotTwo)
 
   const modal = document.createElement('div')
   modal.id = 'settings-modal'
@@ -440,8 +436,7 @@ function createInputHarness(modalOpen: boolean = false): InputHarness {
     document,
     body,
     menuButton,
-    prevButton,
-    nextButton,
+    allAboardButton,
     closeButton,
     modal,
     hotspotButtons: [hotspotOne, hotspotTwo],
@@ -468,47 +463,42 @@ import {
 } from './input.js'
 
 describe('Train Sounds keyboard input', () => {
-  test('ArrowLeft and ArrowRight switch trains from the game screen controls', () => {
+  test('ArrowLeft and ArrowRight switch trains via callbacks from the game screen controls', () => {
     const harness = createInputHarness()
-    const clicks = { previous: 0, next: 0 }
+    const switches = { previous: 0, next: 0 }
 
-    harness.prevButton.addEventListener('click', () => {
-      clicks.previous += 1
+    setupTrainSoundsInput({
+      onPreviousTrain: () => { switches.previous += 1 },
+      onNextTrain: () => { switches.next += 1 },
     })
-    harness.nextButton.addEventListener('click', () => {
-      clicks.next += 1
-    })
-
-    setupTrainSoundsInput()
 
     const leftEvent = harness.document.dispatchKeydown('ArrowLeft')
     const rightEvent = harness.document.dispatchKeydown('ArrowRight')
 
     assert.equal(leftEvent.defaultPrevented, true)
     assert.equal(rightEvent.defaultPrevented, true)
-    assert.equal(clicks.previous, 1)
-    assert.equal(clicks.next, 1)
-    assert.equal(harness.document.activeElement, harness.nextButton)
+    assert.equal(switches.previous, 1)
+    assert.equal(switches.next, 1)
   })
 
   test('modal-safe keyboard handling suppresses train switching while still allowing Escape to close the modal', () => {
     const harness = createInputHarness(true)
-    const clicks = { next: 0, close: 0 }
+    const switches = { next: 0 }
+    const clicks = { close: 0 }
 
-    harness.nextButton.addEventListener('click', () => {
-      clicks.next += 1
-    })
     harness.closeButton.addEventListener('click', () => {
       clicks.close += 1
     })
 
-    setupTrainSoundsInput()
+    setupTrainSoundsInput({
+      onNextTrain: () => { switches.next += 1 },
+    })
 
     const arrowEvent = harness.document.dispatchKeydown('ArrowRight')
     const escapeEvent = harness.document.dispatchKeydown('Escape')
 
     assert.equal(arrowEvent.defaultPrevented, false)
-    assert.equal(clicks.next, 0)
+    assert.equal(switches.next, 0)
     assert.equal(escapeEvent.defaultPrevented, true)
     assert.equal(clicks.close, 1)
   })
@@ -517,10 +507,10 @@ describe('Train Sounds keyboard input', () => {
 describe('Train Sounds gamepad input', () => {
   test('D-pad focus navigation and A activation target the current control', () => {
     const harness = createInputHarness()
-    let nextClicks = 0
+    let hotspotClicks = 0
 
-    harness.nextButton.addEventListener('click', () => {
-      nextClicks += 1
+    harness.hotspotButtons[1].addEventListener('click', () => {
+      hotspotClicks += 1
     })
 
     setupTrainSoundsInput()
@@ -529,9 +519,9 @@ describe('Train Sounds gamepad input', () => {
     setGamepadButton(harness.gamepadButtons, 15, true)
     runAnimationFrame()
 
-    assert.equal(harness.document.activeElement, harness.nextButton)
+    assert.equal(harness.document.activeElement, harness.hotspotButtons[1])
     assert.equal(harness.body.classList.contains('gamepad-active'), true)
-    assert.equal(harness.nextButton.classList.contains('gamepad-focus'), true)
+    assert.equal(harness.hotspotButtons[1].classList.contains('gamepad-focus'), true)
 
     nowMs = 300
     setGamepadButton(harness.gamepadButtons, 15, false)
@@ -541,7 +531,7 @@ describe('Train Sounds gamepad input', () => {
     setGamepadButton(harness.gamepadButtons, 0, true)
     runAnimationFrame()
 
-    assert.equal(nextClicks, 1)
+    assert.equal(hotspotClicks, 1)
   })
 
   test('Start opens the menu and closes an open modal', () => {
@@ -563,7 +553,7 @@ describe('Train Sounds gamepad input', () => {
 
     assert.equal(clicks.menu, 1)
 
-    nowMs = 320
+    nowMs = 300
     setGamepadButton(harness.gamepadButtons, 9, false)
     runAnimationFrame()
 

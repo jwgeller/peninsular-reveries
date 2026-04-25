@@ -172,6 +172,8 @@ export function resetEdgeCue(): void {
 
 // ── Barrier SFX ───────────────────────────────────────────────────────────────
 
+let lastPlaceSoundTime = 0
+
 export function playBarrierPlaceSound(): void {
   if (!getSfxEnabled()) return
 
@@ -179,6 +181,10 @@ export function playBarrierPlaceSound(): void {
     const context = getGameAudioBuses('waterwall').ctx
     const bus = getSfxBusNode()
     const now = context.currentTime
+
+    // Throttle: skip if called within 120ms of last SFX
+    if (now - lastPlaceSoundTime < 0.12) return
+    lastPlaceSoundTime = now
 
     // Soft water-drop plink: pitch slides from 420 Hz down to 220 Hz
     const osc = context.createOscillator()
@@ -196,6 +202,79 @@ export function playBarrierPlaceSound(): void {
 
     osc.start(now)
     osc.stop(now + 0.18)
+  } catch {
+    // Audio is non-critical.
+  }
+}
+
+export function playBarrierSettleSound(): void {
+  if (!getSfxEnabled()) return
+
+  try {
+    const context = getGameAudioBuses('waterwall').ctx
+    const bus = getSfxBusNode()
+    const now = context.currentTime
+
+    // Throttle: skip if called within 120ms of last SFX
+    if (now - lastPlaceSoundTime < 0.12) return
+    lastPlaceSoundTime = now
+
+    // Shorter, quieter settle variant: ~60ms, lower gain 0.015
+    const osc = context.createOscillator()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(320, now)
+    osc.frequency.exponentialRampToValueAtTime(200, now + 0.06)
+
+    const gain = context.createGain()
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.linearRampToValueAtTime(0.015, now + 0.005)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06)
+
+    osc.connect(gain)
+    gain.connect(bus)
+
+    osc.start(now)
+    osc.stop(now + 0.06)
+  } catch {
+    // Audio is non-critical.
+  }
+}
+
+export function playEraseBurstSound(): void {
+  if (!getSfxEnabled()) return
+
+  try {
+    const context = getGameAudioBuses('waterwall').ctx
+    const bus = getSfxBusNode()
+    const now = context.currentTime
+
+    // Whoosh-clear: filtered noise burst, ~200ms, lowpass sweep 3000→400 Hz
+    const bufferSize = Math.ceil(context.sampleRate * 0.2)
+    const buffer = context.createBuffer(1, bufferSize, context.sampleRate)
+    const channel = buffer.getChannelData(0)
+    for (let i = 0; i < bufferSize; i++) {
+      channel[i] = Math.random() * 2 - 1
+    }
+
+    const source = context.createBufferSource()
+    source.buffer = buffer
+
+    const filter = context.createBiquadFilter()
+    filter.type = 'lowpass'
+    filter.frequency.setValueAtTime(3000, now)
+    filter.frequency.exponentialRampToValueAtTime(400, now + 0.2)
+
+    const gain = context.createGain()
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.linearRampToValueAtTime(0.08, now + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2)
+
+    source.connect(filter)
+    filter.connect(gain)
+    gain.connect(bus)
+
+    source.start(now)
+    source.stop(now + 0.2)
   } catch {
     // Audio is non-critical.
   }

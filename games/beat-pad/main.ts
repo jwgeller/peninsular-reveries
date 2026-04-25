@@ -3,21 +3,24 @@ import { getGameAudioBuses } from '../../client/game-audio.js'
 import { setupGameMenu } from '../../client/game-menu.js'
 import { getSfxEnabled } from '../../client/preferences.js'
 
-import { cleanupDrumPadInput, setupDrumPadInput } from './input.js'
+import { announceBankChange, setAccessibilityBank } from './accessibility.js'
+import { cleanupBeatPadInput, setupBeatPadInput } from './input.js'
 import {
   flashPad,
   initRenderer,
+  updateBankDisplay,
   updateLayerIndicator,
   updateModeDisplay,
   updatePlaybackProgress,
   updateRecordButton,
   updateTempoDisplay,
 } from './renderer.js'
-import { PAD_NAMES, ensureDrumPadAudioUnlocked, padIdToSampleId, playDrumPadSample, preloadDrumPadSamples } from './sounds.js'
+import { ensureBeatPadAudioUnlocked, getPadNames, padIdToSampleId, playBeatPadSample, preloadBeatPadSamples } from './sounds.js'
 import {
   canRecord,
   clearLoop,
   createInitialState,
+  cycleBank,
   cycleTempo,
   getEventsInWindow,
   getLoopDurationMs,
@@ -26,7 +29,7 @@ import {
   togglePlayback,
   triggerPad,
 } from './state.js'
-import type { DrumPadState, PadId } from './types.js'
+import type { BeatPadState, PadId } from './types.js'
 
 type ScreenId = 'start-screen' | 'game-screen'
 
@@ -34,7 +37,7 @@ const SCREEN_IDS: ScreenId[] = ['start-screen', 'game-screen']
 const LOOKAHEAD_MS = 25
 
 let audio: ReturnType<typeof getGameAudioBuses> | null = null
-let state: DrumPadState = createInitialState()
+let state: BeatPadState = createInitialState()
 let settingsModal = { open() {}, close() {}, toggle() {} }
 let recordStopTimer: number | null = null
 let rafHandle: number | null = null
@@ -64,7 +67,7 @@ function showScreen(screenId: ScreenId): void {
 
 function ensureAudio(): ReturnType<typeof getGameAudioBuses> {
   if (!audio) {
-    audio = getGameAudioBuses('drum-pad')
+    audio = getGameAudioBuses('beat-pad')
   }
   return audio
 }
@@ -75,8 +78,8 @@ function playPadSound(padId: PadId): void {
   if (buses.ctx.state === 'suspended') {
     void buses.ctx.resume()
   }
-  const sampleId = padIdToSampleId(padId)
-  playDrumPadSample(sampleId)
+  const sampleId = padIdToSampleId(padId, state.activeBank)
+  playBeatPadSample(sampleId)
 }
 
 function refreshUi(): void {
@@ -84,6 +87,8 @@ function refreshUi(): void {
   updateTempoDisplay(state.tempo)
   updateRecordButton(canRecord(state), state.mode === 'recording')
   updateLayerIndicator(state.layers.length)
+  const padNames = getPadNames(state.activeBank)
+  updateBankDisplay(state.activeBank, padNames)
 }
 
 function clearRecordTimer(): void {
@@ -106,7 +111,8 @@ function handlePadHit(padId: PadId): void {
   state = result.state
   playPadSound(padId)
   flashPad(padId)
-  const name = PAD_NAMES[padId]
+  const names = getPadNames(state.activeBank)
+  const name = names[padId]
   if (name) announce(name, 'polite')
 }
 
@@ -170,6 +176,16 @@ function changeTempo(): void {
   }
 }
 
+function toggleBank(): void {
+  state = cycleBank(state)
+  setAccessibilityBank(state.activeBank)
+  const padNames = getPadNames(state.activeBank)
+  updateBankDisplay(state.activeBank, padNames)
+  announceBankChange(state.activeBank)
+  // Preload bank samples if not yet loaded
+  void preloadBeatPadSamples(state.activeBank)
+}
+
 function startPlayback(): void {
   cancelRaf()
   if (state.layers.length === 0) {
@@ -218,23 +234,23 @@ function scheduleEvents(fromPerfMs: number, toPerfMs: number, duration: number):
     const events = getEventsInWindow(state.layers, fromPos, toPos, duration)
     for (const event of events) {
       const eventPerf = cycleStartPerf + event.timeOffset
-      scheduleAt(event.padId, eventPerf)
+      scheduleAt(event.padId, eventPerf, duration)
     }
   }
 }
 
-function scheduleAt(padId: PadId, eventPerfMs: number): void {
+function scheduleAt(padId: PadId, eventPerfMs: number, _loopDuration: number): void {
   const buses = ensureAudio()
   if (buses.ctx.state === 'suspended') {
     void buses.ctx.resume()
   }
   const nowPerf = performance.now()
   const delayMs = Math.max(0, eventPerfMs - nowPerf)
-  const sampleId = padIdToSampleId(padId)
+  const sampleId = padIdToSampleId(padId, state.activeBank)
   window.setTimeout(() => {
     if (state.mode !== 'playing') return
     if (getSfxEnabled()) {
-      playDrumPadSample(sampleId)
+      playBeatPadSample(sampleId)
     }
     flashPad(padId)
   }, delayMs)
@@ -264,6 +280,7 @@ function bindControls(): void {
   byId<HTMLButtonElement>('play-btn')?.addEventListener('click', togglePlay)
   byId<HTMLButtonElement>('clear-btn')?.addEventListener('click', clearAll)
   byId<HTMLButtonElement>('tempo-btn')?.addEventListener('click', changeTempo)
+  byId<HTMLButtonElement>('bank-toggle')?.addEventListener('click', toggleBank)
 }
 
 function bindStartButton(): void {
@@ -273,19 +290,20 @@ function bindStartButton(): void {
 }
 
 function wireInputModule(): void {
-  setupDrumPadInput({
+  setupBeatPadInput({
     onPadTrigger: handlePadHit,
     onRecord: handleRecordButton,
     onPlayStop: togglePlay,
     onClear: clearAll,
     onTempo: changeTempo,
+    onBankToggle: toggleBank,
     onMenu: () => settingsModal.toggle(),
   })
 }
 
 function enterGame(): void {
   ensureAudio()
-  void preloadDrumPadSamples()
+  void preloadBeatPadSamples(state.activeBank)
   showScreen('game-screen')
   refreshUi()
   requestAnimationFrame(() => {
@@ -356,13 +374,13 @@ function init(): void {
   bindRestart()
   bindVisibility()
   wireInputModule()
-  ensureDrumPadAudioUnlocked()
+  ensureBeatPadAudioUnlocked()
   showScreen('start-screen')
   refreshUi()
 }
 
-export function teardownDrumPad(): void {
-  cleanupDrumPadInput()
+export function teardownBeatPad(): void {
+  cleanupBeatPadInput()
   clearRecordTimer()
   cancelRaf()
 }

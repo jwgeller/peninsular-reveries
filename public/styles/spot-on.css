@@ -93,7 +93,8 @@ body.spot-on {
 .spot-on-panel--game {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: 100dvh;
+  min-height: 100vh;
   padding: 0;
 }
 
@@ -105,9 +106,13 @@ body.spot-on {
 
 .room-scene {
   position: relative;
-  overflow: hidden;
-  min-height: 50%;
-  flex: 1 1 auto;
+  overflow: visible;
+  flex: 1 1 0;
+  min-height: 65vh;
+  /* iOS touch protection — prevent callout, selection, and delayed tap */
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: manipulation;
   /* Default custom property values (bedroom), overridden by renderer */
   --spot-on-room-wall: #c5d5e4;
   --spot-on-room-floor: #d4a76a;
@@ -129,6 +134,202 @@ body.spot-on {
   background: linear-gradient(to bottom, transparent, var(--spot-on-room-floor));
   pointer-events: none;
   z-index: 0;
+}
+
+/* ── Theme decorative elements ────────────────────────────────────────────── */
+
+.room-decor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Bedroom: headboard silhouette */
+.room-decor--headboard {
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28%;
+  height: 8%;
+  background: rgba(139, 115, 85, 0.12);
+  border-radius: 30% 30% 0 0;
+  border: 2px solid rgba(139, 115, 85, 0.15);
+  border-bottom: none;
+}
+
+/* Bedroom: window frame */
+.room-decor--window-frame {
+  top: 5%;
+  right: 6%;
+  width: 14%;
+  height: 10%;
+  border: 3px solid rgba(135, 160, 190, 0.25);
+  border-radius: 4px;
+  background: rgba(180, 210, 235, 0.15);
+  box-shadow: inset 0 0 8px rgba(180, 210, 235, 0.2);
+}
+
+.room-decor--window-frame::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background: rgba(135, 160, 190, 0.2);
+  transform: translateX(-50%);
+}
+
+/* Kitchen: counter edge */
+.room-decor--counter-edge {
+  bottom: 38%;
+  left: 8%;
+  width: 84%;
+  height: 3%;
+  background: rgba(139, 115, 85, 0.1);
+  border-top: 2px solid rgba(139, 115, 85, 0.15);
+  border-radius: 2px;
+}
+
+/* Kitchen: stove outline */
+.room-decor--stove-outline {
+  top: 12%;
+  left: 10%;
+  width: 18%;
+  height: 12%;
+  border: 2px solid rgba(139, 115, 85, 0.12);
+  border-radius: 4px;
+  background: rgba(139, 115, 85, 0.05);
+}
+
+.room-decor--stove-outline::before {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: 20%;
+  width: 25%;
+  height: 25%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(139, 115, 85, 0.15);
+}
+
+.room-decor--stove-outline::after {
+  content: '';
+  position: absolute;
+  top: 30%;
+  right: 20%;
+  width: 25%;
+  height: 25%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(139, 115, 85, 0.15);
+}
+
+/* Study: desk lamp shape */
+.room-decor--desk-lamp {
+  top: 3%;
+  right: 12%;
+  width: 8%;
+  height: 10%;
+}
+
+.room-decor--desk-lamp::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 45%;
+  width: 10%;
+  height: 60%;
+  background: rgba(139, 115, 85, 0.15);
+}
+
+.room-decor--desk-lamp::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  width: 80%;
+  height: 35%;
+  background: rgba(139, 115, 85, 0.1);
+  border-radius: 0 0 50% 50%;
+  box-shadow: 3px 3px 6px rgba(255, 210, 120, 0.15);
+}
+
+/* Study: book end */
+.room-decor--book-end {
+  top: 8%;
+  left: 6%;
+  width: 5%;
+  height: 8%;
+  background: rgba(139, 115, 85, 0.12);
+  border: 1px solid rgba(139, 115, 85, 0.1);
+  border-radius: 2px;
+  box-shadow: 2px 0 0 rgba(139, 115, 85, 0.08);
+}
+
+/* Playroom: crayon basket shape */
+.room-decor--crayon-basket {
+  top: 6%;
+  left: 8%;
+  width: 10%;
+  height: 8%;
+  border: 2px solid rgba(200, 170, 80, 0.2);
+  border-top: none;
+  border-radius: 0 0 30% 30%;
+  background: rgba(200, 170, 80, 0.06);
+}
+
+.room-decor--crayon-basket::before {
+  content: '';
+  position: absolute;
+  top: -6%;
+  left: 15%;
+  width: 4px;
+  height: 35%;
+  background: rgba(255, 100, 100, 0.2);
+  border-radius: 2px 2px 0 0;
+  transform: rotate(-5deg);
+}
+
+.room-decor--crayon-basket::after {
+  content: '';
+  position: absolute;
+  top: -7%;
+  left: 45%;
+  width: 4px;
+  height: 38%;
+  background: rgba(100, 180, 255, 0.2);
+  border-radius: 2px 2px 0 0;
+  transform: rotate(3deg);
+}
+
+/* Bathroom: mirror frame */
+.room-decor--mirror-frame {
+  top: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16%;
+  height: 12%;
+  border: 3px solid rgba(180, 200, 210, 0.25);
+  border-radius: 50% 50% 4px 4px;
+  background: rgba(220, 235, 245, 0.1);
+  box-shadow: inset 0 0 12px rgba(220, 235, 245, 0.15);
+}
+
+/* Bathroom: towel bar */
+.room-decor--towel-bar {
+  top: 20%;
+  right: 6%;
+  width: 12%;
+  height: 6%;
+  border: 2px solid rgba(180, 200, 210, 0.2);
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(180, 200, 210, 0.08),
+    rgba(180, 200, 210, 0.08) 3px,
+    transparent 3px,
+    transparent 5px
+  );
 }
 
 /* ── Room items (floor items) ──────────────────────────────────────────────── */
@@ -200,7 +401,7 @@ body.spot-on {
   border-radius: 8px;
   background: rgba(255, 252, 245, 0.15);
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .room-surface__label {
@@ -219,7 +420,96 @@ body.spot-on {
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
   grid-template-rows: repeat(var(--rows), 1fr);
+  gap: 8px;
   min-height: 0;
+}
+
+/* ── Surface type differentiation ──────────────────────────────────────────── */
+
+/* Storage surfaces: shelf-edge lines */
+.room-surface--storage {
+  border-top: 3px solid rgba(139, 115, 85, 0.3);
+  background: linear-gradient(to bottom, rgba(139, 115, 85, 0.08), rgba(255, 252, 245, 0.15));
+}
+
+/* Furniture surfaces: drawer/door lines */
+.room-surface--furniture {
+  border: 2px solid rgba(139, 115, 85, 0.2);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 40%,
+      rgba(139, 115, 85, 0.08) 40%,
+      rgba(139, 115, 85, 0.08) 42%,
+      transparent 42%,
+      transparent 100%
+    ),
+    rgba(255, 252, 245, 0.12);
+}
+
+/* Fixture surfaces: hook shapes */
+.room-surface--fixture {
+  background: rgba(200, 200, 200, 0.1);
+  border-bottom: 2px dashed rgba(139, 115, 85, 0.3);
+  border-radius: 50% 50% 8px 8px;
+}
+
+.room-surface--fixture::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50% 50% 0 0;
+  background: rgba(139, 115, 85, 0.2);
+}
+
+/* Ledge surfaces: thin top edge highlight */
+.room-surface--ledge {
+  border-top: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 -2px 4px rgba(255, 255, 255, 0.15);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 252, 245, 0.1));
+}
+
+/* Container surfaces: ring or bowl outline */
+.room-surface--container {
+  border: 2px dashed rgba(139, 115, 85, 0.2);
+  background: rgba(255, 252, 245, 0.08);
+}
+
+.room-surface--container::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 20%;
+  width: 60%;
+  height: 1px;
+  background: rgba(139, 115, 85, 0.12);
+  border-radius: 50%;
+}
+
+/* Play surfaces: dotted border */
+.room-surface--play {
+  border: 2px dotted rgba(139, 115, 85, 0.25);
+  background: rgba(255, 252, 245, 0.1);
+}
+
+/* Decor surfaces: subtle pattern */
+.room-surface--decor {
+  border: 1px solid rgba(139, 115, 85, 0.1);
+  background:
+    radial-gradient(circle at 30% 40%, rgba(139, 115, 85, 0.05) 2px, transparent 2px),
+    rgba(255, 252, 245, 0.08);
+}
+
+/* Generic surface type: soft inset */
+.room-surface--surface {
+  border: 1px solid rgba(139, 115, 85, 0.15);
+  background: rgba(255, 252, 245, 0.1);
+  box-shadow: inset 0 1px 3px rgba(139, 115, 85, 0.06);
 }
 
 /* ── Room cells ────────────────────────────────────────────────────────────── */
@@ -445,6 +735,7 @@ body.spot-on {
   .room-item,
   .room-cell,
   .room-surface,
+  .room-decor,
   .spot-on-primary-btn,
   .spot-on-new-room-btn,
   .spot-on-menu-btn,
@@ -502,8 +793,41 @@ body.spot-on {
     padding: 1.5rem 1rem;
   }
 
+  .spot-on-panel--game {
+    min-height: 100dvh;
+    min-height: 100vh;
+  }
+
+  .spot-on-header {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .spot-on-title--small {
+    font-size: 1rem;
+  }
+
   .room-scene {
+    min-height: 65vh;
+    flex: 1 1 0;
     margin: 0.15rem 0.1rem;
+  }
+
+  .room-status {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .spot-on-new-room-btn {
+    padding: 0.4rem 1.2rem;
+    margin: 0.25rem auto 0.4rem;
+    font-size: 0.85rem;
+  }
+
+  .spot-on-menu-btn {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    min-height: 38px;
+    min-width: 38px;
   }
 
   .room-item {
@@ -522,16 +846,30 @@ body.spot-on {
     font-size: 1.1rem;
   }
 
+  .room-surface__grid {
+    gap: 8px;
+  }
+
   .room-cell--occupied {
     font-size: 1.35rem;
   }
 
   .room-surface__label {
     font-size: 0.65rem;
+    padding: 1px 3px;
+  }
+
+  .completion-msg {
+    padding: 0.75rem 1.5rem;
+    font-size: clamp(1.2rem, 3.5vw, 1.6rem);
   }
 
   .spot-on-subtitle {
     font-size: 0.95rem;
+  }
+
+  .spot-on-title {
+    font-size: clamp(1.5rem, 4.5vw, 2.2rem);
   }
 }
 
@@ -541,6 +879,8 @@ body.spot-on {
   .spot-on-panel--game {
     flex-direction: row;
     flex-wrap: wrap;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .room-scene {

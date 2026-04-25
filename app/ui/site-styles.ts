@@ -234,7 +234,7 @@ export const tabButtonStyles = {
   padding: '0.5rem 1rem',
   fontSize: '0.9rem',
   fontWeight: 600,
-  color: 'rgba(255, 255, 255, 0.5)',
+  color: 'rgba(255, 255, 255, 0.87)',
   cursor: 'pointer',
   borderRadius: '6px 6px 0 0',
   minWidth: '44px',

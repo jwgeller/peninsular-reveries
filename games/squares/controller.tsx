@@ -22,7 +22,7 @@ import { SQUARES_MODES } from './types.js'
 
 const squaresModalOverlayStyles = {
   zIndex: 100,
-  background: 'rgba(9, 12, 16, 0.78)',
+  background: 'rgba(9, 12, 16, 0.92)',
 }
 
 export async function squaresAction() {

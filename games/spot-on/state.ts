@@ -23,7 +23,7 @@ function shuffleAndPick<T>(rng: () => number, arr: readonly T[], count: number):
     const j = Math.floor(rng() * (i + 1))
     const tmp = copy[i]
     copy[i] = copy[j] as T
-    copy[j] = tmp as T
+    copy[j] = tmp
   }
   return copy.slice(0, Math.min(count, copy.length))
 }
@@ -37,12 +37,12 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
     wallColor: '#c5d5e4',
     floorColor: '#d4a76a',
     surfacePool: [
-      { id: 'bookshelf', label: 'bookshelf', emoji: '📚', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 28, height: 10 },
-      { id: 'bed', label: 'bed', emoji: '🛏️', type: 'furniture', rows: 2, cols: 2, x: 0, y: 0, width: 22, height: 18 },
-      { id: 'nightstand', label: 'nightstand', emoji: '🗄️', type: 'furniture', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'hanger', label: 'hanger', emoji: '👔', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'toy-box', label: 'toy box', emoji: '🧺', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 20, height: 10 },
-      { id: 'dresser', label: 'dresser', emoji: '🗄️', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 18, height: 12 },
+      { id: 'bookshelf', label: 'bookshelf', emoji: '📚', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 44, height: 14 },
+      { id: 'bed', label: 'bed', emoji: '🛏️', type: 'furniture', rows: 2, cols: 2, x: 0, y: 0, width: 36, height: 24 },
+      { id: 'nightstand', label: 'nightstand', emoji: '🗄️', type: 'furniture', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'hanger', label: 'hanger', emoji: '👔', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'toy-box', label: 'toy box', emoji: '🧺', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 30, height: 14 },
+      { id: 'dresser', label: 'dresser', emoji: '🗄️', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 28, height: 14 },
     ],
     itemPool: [
       { id: 'teddy-bear', name: 'teddy bear', emoji: '🧸' },
@@ -52,6 +52,13 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
       { id: 'alarm-clock', name: 'alarm clock', emoji: '🔔' },
       { id: 'hat', name: 'hat', emoji: '🎩' },
       { id: 'slipper', name: 'slipper', emoji: '🩴' },
+      { id: 'phone', name: 'phone', emoji: '📱' },
+      { id: 'lamp', name: 'lamp', emoji: '💡' },
+      { id: 'blanket', name: 'blanket', emoji: '🛋️' },
+      { id: 'comb', name: 'comb', emoji: '♿' },
+      { id: 'diary', name: 'diary', emoji: '📓' },
+      { id: 'sunglasses', name: 'sunglasses', emoji: '🕶️' },
+      { id: 'watch', name: 'watch', emoji: '⌚' },
     ],
   },
   {
@@ -60,12 +67,12 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
     wallColor: '#f5f0e0',
     floorColor: '#e8dcc8',
     surfacePool: [
-      { id: 'hook', label: 'hook', emoji: '🪝', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'rack', label: 'rack', emoji: '🍳', type: 'furniture', rows: 1, cols: 2, x: 0, y: 0, width: 20, height: 10 },
-      { id: 'shelf', label: 'shelf', emoji: '🗄️', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 28, height: 10 },
-      { id: 'counter', label: 'counter', emoji: '📐', type: 'surface', rows: 1, cols: 3, x: 0, y: 0, width: 30, height: 10 },
-      { id: 'bowl', label: 'bowl', emoji: '🥣', type: 'container', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'spice-rack', label: 'spice rack', emoji: '🧂', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 18, height: 10 },
+      { id: 'hook', label: 'hook', emoji: '🪝', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'rack', label: 'rack', emoji: '🍳', type: 'furniture', rows: 1, cols: 2, x: 0, y: 0, width: 30, height: 14 },
+      { id: 'shelf', label: 'shelf', emoji: '🗄️', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 44, height: 14 },
+      { id: 'counter', label: 'counter', emoji: '📐', type: 'furniture', rows: 1, cols: 3, x: 0, y: 0, width: 46, height: 14 },
+      { id: 'bowl', label: 'bowl', emoji: '🥣', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'spice-rack', label: 'spice rack', emoji: '🧂', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 28, height: 14 },
     ],
     itemPool: [
       { id: 'mug', name: 'mug', emoji: '☕' },
@@ -75,6 +82,11 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
       { id: 'bottle', name: 'bottle', emoji: '🧴' },
       { id: 'spoon', name: 'spoon', emoji: '🥄' },
       { id: 'salt', name: 'salt', emoji: '🧂' },
+      { id: 'plate', name: 'plate', emoji: '🍽️' },
+      { id: 'fork', name: 'fork', emoji: '🍴' },
+      { id: 'knife', name: 'knife', emoji: '🔪' },
+      { id: 'oven-mitt', name: 'oven mitt', emoji: '🧤' },
+      { id: 'whisk', name: 'whisk', emoji: '🥄' },
     ],
   },
   {
@@ -83,12 +95,12 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
     wallColor: '#a8c5a0',
     floorColor: '#8b7355',
     surfacePool: [
-      { id: 'desk', label: 'desk', emoji: '📝', type: 'furniture', rows: 1, cols: 3, x: 0, y: 0, width: 32, height: 10 },
-      { id: 'study-shelf', label: 'shelf', emoji: '📚', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 28, height: 10 },
-      { id: 'coaster', label: 'coaster', emoji: '⬜', type: 'decor', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'tray', label: 'tray', emoji: '📬', type: 'container', rows: 1, cols: 2, x: 0, y: 0, width: 20, height: 10 },
-      { id: 'windowsill', label: 'windowsill', emoji: '🪟', type: 'ledge', rows: 1, cols: 3, x: 0, y: 0, width: 30, height: 10 },
-      { id: 'filing-cabinet', label: 'filing cabinet', emoji: '🗄️', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 16, height: 12 },
+      { id: 'desk', label: 'desk', emoji: '📝', type: 'furniture', rows: 1, cols: 3, x: 0, y: 0, width: 48, height: 14 },
+      { id: 'study-shelf', label: 'shelf', emoji: '📚', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 44, height: 14 },
+      { id: 'coaster', label: 'coaster', emoji: '⬜', type: 'ledge', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'tray', label: 'tray', emoji: '📬', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 30, height: 14 },
+      { id: 'windowsill', label: 'windowsill', emoji: '🪟', type: 'ledge', rows: 1, cols: 3, x: 0, y: 0, width: 46, height: 14 },
+      { id: 'filing-cabinet', label: 'filing cabinet', emoji: '🗄️', type: 'furniture', rows: 1, cols: 2, x: 0, y: 0, width: 28, height: 14 },
     ],
     itemPool: [
       { id: 'pen', name: 'pen', emoji: '🖊️' },
@@ -98,6 +110,13 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
       { id: 'plant', name: 'plant', emoji: '🌱' },
       { id: 'stamp', name: 'stamp', emoji: '🪪' },
       { id: 'ruler', name: 'ruler', emoji: '📏' },
+      { id: 'paperclip', name: 'paperclip', emoji: '📎' },
+      { id: 'eraser', name: 'eraser', emoji: '🧽' },
+      { id: 'calculator', name: 'calculator', emoji: '🧮' },
+      { id: 'notebook', name: 'notebook', emoji: '📒' },
+      { id: 'glasses', name: 'glasses', emoji: '👓' },
+      { id: 'scissors', name: 'scissors', emoji: '✂️' },
+      { id: 'stapler', name: 'stapler', emoji: '🔩' },
     ],
   },
   {
@@ -106,13 +125,13 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
     wallColor: '#c8b8e0',
     floorColor: '#e0a0c0',
     surfacePool: [
-      { id: 'toy-shelf', label: 'toy shelf', emoji: '📚', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 28, height: 10 },
-      { id: 'art-table', label: 'art table', emoji: '🎨', type: 'furniture', rows: 1, cols: 2, x: 0, y: 0, width: 22, height: 12 },
-      { id: 'craft-bin', label: 'craft bin', emoji: '🧺', type: 'container', rows: 1, cols: 2, x: 0, y: 0, width: 18, height: 10 },
-      { id: 'puzzle-mat', label: 'puzzle mat', emoji: '🧩', type: 'play', rows: 2, cols: 2, x: 0, y: 0, width: 20, height: 18 },
-      { id: 'chalk-ledge', label: 'chalk ledge', emoji: '🪟', type: 'ledge', rows: 1, cols: 2, x: 0, y: 0, width: 20, height: 10 },
-      { id: 'costume-hook', label: 'costume hook', emoji: '🪝', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'block-box', label: 'block box', emoji: '🧱', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 18, height: 10 },
+      { id: 'toy-shelf', label: 'toy shelf', emoji: '📚', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 44, height: 14 },
+      { id: 'art-table', label: 'art table', emoji: '🎨', type: 'furniture', rows: 1, cols: 2, x: 0, y: 0, width: 34, height: 14 },
+      { id: 'craft-bin', label: 'craft bin', emoji: '🧺', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 28, height: 14 },
+      { id: 'puzzle-mat', label: 'puzzle mat', emoji: '🧩', type: 'furniture', rows: 2, cols: 2, x: 0, y: 0, width: 32, height: 24 },
+      { id: 'chalk-ledge', label: 'chalk ledge', emoji: '🪟', type: 'ledge', rows: 1, cols: 2, x: 0, y: 0, width: 30, height: 14 },
+      { id: 'costume-hook', label: 'costume hook', emoji: '🪝', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'block-box', label: 'block box', emoji: '🧱', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 28, height: 14 },
     ],
     itemPool: [
       { id: 'crayon', name: 'crayon', emoji: '🖍️' },
@@ -123,6 +142,14 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
       { id: 'sticker', name: 'sticker', emoji: '⭐' },
       { id: 'puzzle', name: 'puzzle', emoji: '🧩' },
       { id: 'robot', name: 'robot', emoji: '🤖' },
+      { id: 'doll', name: 'doll', emoji: '🧍' },
+      { id: 'drum', name: 'drum', emoji: '🥁' },
+      { id: 'kite', name: 'kite', emoji: '🪁' },
+      { id: 'marble', name: 'marble', emoji: '🔮' },
+      { id: 'paintbrush', name: 'paintbrush', emoji: '🖌️' },
+      { id: 'yo-yo', name: 'yo-yo', emoji: '🪀' },
+      { id: 'card', name: 'card', emoji: '🃏' },
+      { id: 'train', name: 'train', emoji: '🚂' },
     ],
   },
   {
@@ -131,13 +158,13 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
     wallColor: '#a0d4d4',
     floorColor: '#e8e4e0',
     surfacePool: [
-      { id: 'towel-rack', label: 'towel rack', emoji: '🪝', type: 'fixture', rows: 1, cols: 2, x: 0, y: 0, width: 18, height: 10 },
-      { id: 'sink-ledge', label: 'sink ledge', emoji: '🪟', type: 'ledge', rows: 1, cols: 2, x: 0, y: 0, width: 20, height: 10 },
-      { id: 'bath-caddy', label: 'bath caddy', emoji: '📚', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 18, height: 10 },
-      { id: 'bath-shelf', label: 'shelf', emoji: '🗄️', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 28, height: 10 },
-      { id: 'basket', label: 'basket', emoji: '🧺', type: 'container', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'tile-shelf', label: 'tile shelf', emoji: '⬜', type: 'decor', rows: 1, cols: 1, x: 0, y: 0, width: 12, height: 12 },
-      { id: 'vanity', label: 'vanity', emoji: '🗄️', type: 'furniture', rows: 1, cols: 2, x: 0, y: 0, width: 20, height: 12 },
+      { id: 'towel-rack', label: 'towel rack', emoji: '🪝', type: 'fixture', rows: 1, cols: 2, x: 0, y: 0, width: 28, height: 14 },
+      { id: 'sink-ledge', label: 'sink ledge', emoji: '🪟', type: 'ledge', rows: 1, cols: 2, x: 0, y: 0, width: 30, height: 14 },
+      { id: 'bath-caddy', label: 'bath caddy', emoji: '📚', type: 'storage', rows: 1, cols: 2, x: 0, y: 0, width: 28, height: 14 },
+      { id: 'bath-shelf', label: 'shelf', emoji: '🗄️', type: 'storage', rows: 1, cols: 3, x: 0, y: 0, width: 44, height: 14 },
+      { id: 'basket', label: 'basket', emoji: '🧺', type: 'fixture', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'tile-shelf', label: 'tile shelf', emoji: '⬜', type: 'ledge', rows: 1, cols: 1, x: 0, y: 0, width: 18, height: 14 },
+      { id: 'vanity', label: 'vanity', emoji: '🗄️', type: 'furniture', rows: 1, cols: 2, x: 0, y: 0, width: 30, height: 14 },
     ],
     itemPool: [
       { id: 'soap', name: 'soap', emoji: '🧼' },
@@ -147,6 +174,12 @@ export const ROOM_THEMES: readonly RoomTheme[] = [
       { id: 'sponge', name: 'sponge', emoji: '🧽' },
       { id: 'mirror', name: 'mirror', emoji: '🪞' },
       { id: 'rubber-duck', name: 'rubber duck', emoji: '🦆' },
+      { id: 'toothpaste', name: 'toothpaste', emoji: '🪥' },
+      { id: 'floss', name: 'floss', emoji: '🧵' },
+      { id: 'lotion', name: 'lotion', emoji: '🧴' },
+      { id: 'razor', name: 'razor', emoji: '✂️' },
+      { id: 'candle', name: 'candle', emoji: '🕯️' },
+      { id: 'bath-bomb', name: 'bath bomb', emoji: '🫧' },
     ],
   },
 ]
@@ -177,8 +210,8 @@ function rectsOverlap(a: Rect, b: Rect, gap: number): boolean {
 const SURFACE_GAP = 4
 
 /** Minimum surface dimensions in percent */
-const MIN_SURFACE_WIDTH = 12
-const MIN_SURFACE_HEIGHT = 10
+const MIN_SURFACE_WIDTH = 18
+const MIN_SURFACE_HEIGHT = 14
 
 function positionSurfaces(rng: () => number, templates: SurfaceTemplate[]): SurfaceTemplate[] {
   const placed: Rect[] = []
@@ -191,7 +224,7 @@ function positionSurfaces(rng: () => number, templates: SurfaceTemplate[]): Surf
 
     // Ensure surface fits within scene with padding
     const maxX = 96 - w
-    const maxY = 60 - h
+    const maxY = 68 - h
 
     let x = 0
     let y = 0
@@ -210,23 +243,88 @@ function positionSurfaces(rng: () => number, templates: SurfaceTemplate[]): Surf
   return result
 }
 
+/** Ensure surfaces collectively span at least minSpan% of the available width */
+function ensureWidthSpan(surfaces: SurfaceTemplate[], minSpan: number): SurfaceTemplate[] {
+  if (surfaces.length < 2) return surfaces
+
+  // Find leftmost surface
+  let leftmostIdx = 0
+  for (let i = 1; i < surfaces.length; i++) {
+    if (surfaces[i].x < surfaces[leftmostIdx].x) leftmostIdx = i
+  }
+
+  // Find rightmost surface (by right edge)
+  let rightmostIdx = 0
+  for (let i = 1; i < surfaces.length; i++) {
+    if (surfaces[i].x + surfaces[i].width > surfaces[rightmostIdx].x + surfaces[rightmostIdx].width) {
+      rightmostIdx = i
+    }
+  }
+
+  // Check current span
+  const currentSpan = (surfaces[rightmostIdx].x + surfaces[rightmostIdx].width) - surfaces[leftmostIdx].x
+  if (currentSpan >= minSpan) return surfaces
+
+  // Push leftmost surface to x=4
+  const result = surfaces.map((s, i) =>
+    i === leftmostIdx ? { ...s, x: 4 } : { ...s },
+  )
+
+  // Push rightmost surface so its right edge reaches 4 + minSpan
+  const targetRightEdge = 4 + minSpan
+  const rightSurface = result[rightmostIdx]
+  if (rightSurface.x + rightSurface.width < targetRightEdge) {
+    const targetX = targetRightEdge - rightSurface.width
+    result[rightmostIdx] = { ...rightSurface, x: Math.min(Math.max(4, targetX), 96 - rightSurface.width) }
+  }
+
+  return result
+}
+
 // ── Scatter positions ─────────────────────────────────────────────────────────
 
-/** Generate randomized floor scatter positions for items using a seeded RNG */
+/**
+ * Generate randomized floor scatter positions for items using a seeded RNG.
+ *
+ * Uses bounding-box overlap avoidance: each item button is 44px minimum touch
+ * area (48px rendered) plus an 8px gap. Positions are in percentage of the
+ * scene dimensions, so the minimum centre-to-centre distances are derived
+ * from the reference viewport (390×844 portrait):
+ *   - Horizontal: (44 + 8) / 390 × 100 ≈ 13.3% → **14%**
+ *   - Vertical:   (44 + 8) / 549 × 100 ≈  9.5% → **10%**
+ *
+ * Two items are considered overlapping if their centres are closer than
+ * MIN_DIST_X_PCT horizontally **and** MIN_DIST_Y_PCT vertically.
+ */
 function generateScatterPositionsWithRng(
   rng: () => number,
   count: number,
 ): readonly { x: number; y: number }[] {
+  // Minimum centre-to-centre distances (percentage of scene dimensions).
+  // Accounts for 44px touch target + 8px visual gap at ~390px wide / ~549px tall.
+  const MIN_DIST_X_PCT = 14
+  const MIN_DIST_Y_PCT = 10
+  const FLOOR_X_MIN = 8
+  const FLOOR_X_MAX = 82
+  const FLOOR_Y_MIN = 72
+  const FLOOR_Y_MAX = 92
+  const MAX_ATTEMPTS = 80
+
   const positions: { x: number; y: number }[] = []
-  const MIN_GAP_X = 14
   for (let i = 0; i < count; i++) {
     let x: number
+    let y: number
     let attempts = 0
     do {
-      x = seededRandInt(rng, 8, 82)
+      x = seededRandInt(rng, FLOOR_X_MIN, FLOOR_X_MAX)
+      y = seededRandInt(rng, FLOOR_Y_MIN, FLOOR_Y_MAX)
       attempts++
-    } while (attempts < 20 && positions.some((p) => Math.abs(p.x - x) < MIN_GAP_X))
-    const y = seededRandInt(rng, 72, 86)
+    } while (
+      attempts < MAX_ATTEMPTS &&
+      positions.some(
+        (p) => Math.abs(p.x - x) < MIN_DIST_X_PCT && Math.abs(p.y - y) < MIN_DIST_Y_PCT,
+      )
+    )
     positions.push({ x, y })
   }
   return positions
@@ -283,15 +381,27 @@ export function generateRoom(
   lastGeneratedThemeId = theme.id
 
   // Select 4–6 surfaces from pool
-  const surfaceCount = seededRandInt(rng, 4, 6)
-  const selectedSurfaceTemplates = shuffleAndPick(rng, theme.surfacePool, surfaceCount)
+  let surfaceCount = seededRandInt(rng, 4, 6)
+  let selectedSurfaceTemplates = shuffleAndPick(rng, theme.surfacePool, surfaceCount)
+
+  // Count total cells across all selected surfaces
+  let totalCells = selectedSurfaceTemplates.reduce((sum, s) => sum + s.rows * s.cols, 0)
+
+  // Reduce surface count if item pool cannot fill all cells
+  while (totalCells > theme.itemPool.length && surfaceCount > 1) {
+    surfaceCount--
+    selectedSurfaceTemplates = selectedSurfaceTemplates.slice(0, surfaceCount)
+    totalCells = selectedSurfaceTemplates.reduce((sum, s) => sum + s.rows * s.cols, 0)
+  }
 
   // Position surfaces with overlap avoidance
   const positionedSurfaces = positionSurfaces(rng, selectedSurfaceTemplates)
 
-  // Select 4–6 items from pool
-  const itemCount = seededRandInt(rng, 4, 6)
-  const selectedItems = shuffleAndPick(rng, theme.itemPool, itemCount)
+  // Ensure surfaces span ≥80% of the available width
+  const spanAdjustedSurfaces = ensureWidthSpan(positionedSurfaces, 80)
+
+  // Select exactly totalCells items from pool
+  const selectedItems = shuffleAndPick(rng, theme.itemPool, totalCells)
 
   // Generate a unique room ID
   const roomId = `${theme.id}-${roomSeed.toString(16).padStart(8, '0')}`
@@ -303,7 +413,7 @@ export function generateRoom(
     wallColor: theme.wallColor,
     floorColor: theme.floorColor,
     items: selectedItems,
-    surfaces: positionedSurfaces,
+    surfaces: spanAdjustedSurfaces,
   }
 
   generatedRooms.set(roomId, definition)

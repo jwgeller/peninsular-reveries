@@ -18,7 +18,7 @@ import { trainSoundsInfo } from './info.js'
 
 const trainSoundsModalOverlayStyles = {
   zIndex: 120,
-  background: 'rgba(9, 20, 36, 0.82)',
+  background: 'rgba(9, 20, 36, 0.92)',
 }
 
 export async function trainSoundsAction() {
@@ -94,38 +94,18 @@ export async function trainSoundsAction() {
               </button>}
             />
 
-            <div className="train-selector-bar" role="group" aria-label="Choose a train">
-              <button
-                id="train-prev-btn"
-                type="button"
-                className="train-switch-btn train-switch-btn--prev"
-                aria-label="Previous train"
-              >
-                <span className="train-switch-icon" aria-hidden="true">&lt;</span>
-                <span className="train-switch-label">Prev</span>
-              </button>
-
+            <div className="train-selector-row">
               <div id="train-name" className="train-name" aria-live="polite" aria-atomic="true">Steam Train</div>
 
               <button
-                id="train-next-btn"
+                id="all-aboard-btn"
                 type="button"
-                className="train-switch-btn train-switch-btn--next"
-                aria-label="Next train"
+                className="train-all-aboard-btn"
+                aria-label="All aboard — depart and switch trains"
               >
-                <span className="train-switch-label">Next</span>
-                <span className="train-switch-icon" aria-hidden="true">&gt;</span>
+                All Aboard! 🚂
               </button>
             </div>
-
-            <button
-              id="all-aboard-btn"
-              type="button"
-              className="train-all-aboard-btn"
-              aria-label="All aboard — depart and switch trains"
-            >
-              All Aboard! 🚂
-            </button>
 
             <div id="train-scene" className="train-scene" data-train-preset="steam" data-scene-state="idle">
               <div className="train-scene-sky" aria-hidden="true">
@@ -143,10 +123,10 @@ export async function trainSoundsAction() {
                     <span className="train-headlight"></span>
                     <span className="train-cab"></span>
                   </div>
-                  <span className="train-coupler train-coupler--one"></span>
-                  <div className="train-car train-car--first"></div>
-                  <span className="train-coupler train-coupler--two"></span>
-                  <div className="train-car train-car--second"></div>
+                  <span className="train-coupler"></span>
+                  <div className="train-car"></div>
+                  <span className="train-coupler"></span>
+                  <div className="train-car"></div>
                   <div className="train-track">
                     <span className="train-sleeper"></span>
                     <span className="train-sleeper"></span>

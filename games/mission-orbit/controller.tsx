@@ -16,7 +16,7 @@ import {
 
 const missionOrbitModalOverlayStyles = {
   zIndex: 100,
-  background: 'rgba(4, 10, 18, 0.7)',
+  background: 'rgba(4, 10, 18, 0.92)',
 }
 
 export async function missionOrbitAction() {

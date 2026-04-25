@@ -625,15 +625,15 @@ test.describe('SITE-07: Game smoke tests', () => {
     await expect(page.locator('#music-enabled-toggle')).toBeChecked()
   })
 
-  // Music Pad
-  test('Music Pad — start screen is visible', async ({ page }) => {
-    await page.goto('/music-pad/')
+  // Beat Pad
+  test('Beat Pad — start screen is visible', async ({ page }) => {
+    await page.goto('/beat-pad/')
     await expect(page.locator('#start-screen')).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Music Pad' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Beat Pad' })).toBeVisible()
   })
 
-  test('Music Pad — pad grid renders on start', async ({ page }) => {
-    await page.goto('/music-pad/')
+  test('Beat Pad — pad grid renders on start', async ({ page }) => {
+    await page.goto('/beat-pad/')
     await expect(page.locator('#start-screen')).toBeVisible()
     await page.locator('#start-btn').click()
     await expect(page.locator('#game-screen')).toBeVisible()
@@ -643,9 +643,9 @@ test.describe('SITE-07: Game smoke tests', () => {
     }
   })
 
-  test('Music Pad — controller opens menu', async ({ page }) => {
+  test('Beat Pad — controller opens menu', async ({ page }) => {
     await installMockGamepad(page)
-    await page.goto('/music-pad/')
+    await page.goto('/beat-pad/')
     await page.locator('#start-btn').click()
     await expect(page.locator('#game-screen')).toBeVisible()
     await tapGamepadButton(page, 9)

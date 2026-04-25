@@ -43,8 +43,6 @@ let initialized = false
 let allAboardInProgress = false
 
 let startClickHandler: (() => void) | null = null
-let previousTrainClickHandler: (() => void) | null = null
-let nextTrainClickHandler: (() => void) | null = null
 let allAboardClickHandler: (() => void) | null = null
 let hotspotClickHandler: ((event: Event) => void) | null = null
 let hotspotFocusHandler: ((event: FocusEvent) => void) | null = null
@@ -340,16 +338,6 @@ function bindRuntimeEvents(): void {
   }
   runtimeRefs.startButton.addEventListener('click', startClickHandler)
 
-  previousTrainClickHandler = (): void => {
-    switchTrain('previous', renderer?.prevButton ?? null)
-  }
-  renderer.prevButton.addEventListener('click', previousTrainClickHandler)
-
-  nextTrainClickHandler = (): void => {
-    switchTrain('next', renderer?.nextButton ?? null)
-  }
-  renderer.nextButton.addEventListener('click', nextTrainClickHandler)
-
   allAboardClickHandler = (): void => {
     handleAllAboard()
   }
@@ -416,14 +404,6 @@ function unbindRuntimeEvents(): void {
     runtimeRefs.startButton.removeEventListener('click', startClickHandler)
   }
 
-  if (renderer && previousTrainClickHandler) {
-    renderer.prevButton.removeEventListener('click', previousTrainClickHandler)
-  }
-
-  if (renderer && nextTrainClickHandler) {
-    renderer.nextButton.removeEventListener('click', nextTrainClickHandler)
-  }
-
   if (renderer && allAboardClickHandler) {
     renderer.allAboardButton.removeEventListener('click', allAboardClickHandler)
   }
@@ -445,8 +425,6 @@ function unbindRuntimeEvents(): void {
   }
 
   startClickHandler = null
-  previousTrainClickHandler = null
-  nextTrainClickHandler = null
   allAboardClickHandler = null
   hotspotClickHandler = null
   hotspotFocusHandler = null
@@ -470,8 +448,8 @@ function init(): void {
   bindRuntimeEvents()
   setupTrainSoundsInput({
     onStart: enterGame,
-    onPreviousTrain: () => switchTrain('previous', renderer?.prevButton ?? null),
-    onNextTrain: () => switchTrain('next', renderer?.nextButton ?? null),
+    onPreviousTrain: () => switchTrain('previous', null),
+    onNextTrain: () => switchTrain('next', null),
     onAllAboard: () => handleAllAboard(),
     onToggleMenu: () => settingsModal.toggle(),
   })

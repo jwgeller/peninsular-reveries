@@ -7,7 +7,7 @@ import { GameHeader, GameHeaderPill, GameTabbedModal, InfoSection, SettingsSecti
 
 const chompersModalOverlayStyles = {
   zIndex: 100,
-  background: 'rgba(5, 16, 14, 0.82)',
+  background: 'rgba(5, 16, 14, 0.92)',
 }
 
 export async function chompersAction() {

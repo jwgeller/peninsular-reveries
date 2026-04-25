@@ -5,14 +5,12 @@ interface RendererRefs {
   readonly gameScreen: HTMLElement
   readonly panel: HTMLElement
   readonly header: HTMLElement
-  readonly selectorBar: HTMLElement
+  readonly selectorRow: HTMLElement | null
   readonly allAboardButton: HTMLButtonElement
   readonly scene: HTMLElement
   readonly displayFrame: HTMLElement
   readonly hotspots: HTMLElement
   readonly trainName: HTMLElement
-  readonly prevButton: HTMLButtonElement
-  readonly nextButton: HTMLButtonElement
 }
 
 interface HotspotLayoutRef {
@@ -24,8 +22,6 @@ export interface TrainSoundsRenderer {
   readonly scene: HTMLElement
   readonly hotspots: HTMLElement
   readonly trainName: HTMLElement
-  readonly prevButton: HTMLButtonElement
-  readonly nextButton: HTMLButtonElement
   readonly allAboardButton: HTMLButtonElement
   readonly displayFrame: HTMLElement
   render(state: TrainSoundsState): void
@@ -250,12 +246,13 @@ function syncResponsiveSceneLayout(refs: RendererRefs): void {
 
   const panelStyles = window.getComputedStyle(refs.panel)
   const panelGapPx = readPixels(panelStyles.rowGap || panelStyles.gap)
+  const selectorRowHeight = refs.selectorRow?.getBoundingClientRect().height
+    ?? refs.trainName.getBoundingClientRect().height + refs.allAboardButton.getBoundingClientRect().height
   const availableSceneHeight = Math.floor(
     refs.panel.clientHeight
       - refs.header.getBoundingClientRect().height
-      - refs.selectorBar.getBoundingClientRect().height
-      - refs.allAboardButton.getBoundingClientRect().height
-      - panelGapPx * 3,
+      - selectorRowHeight
+      - panelGapPx * 2,
   )
 
   if (availableSceneHeight <= 0) {
@@ -395,14 +392,12 @@ export function initTrainSoundsRenderer(): TrainSoundsRenderer {
     gameScreen,
     panel: requireSelector<HTMLElement>(gameScreen, '.train-panel--game'),
     header: requireSelector<HTMLElement>(gameScreen, '.train-header'),
-    selectorBar: requireSelector<HTMLElement>(gameScreen, '.train-selector-bar'),
+    selectorRow: gameScreen.querySelector<HTMLElement>('.train-selector-row'),
     allAboardButton,
     scene,
     displayFrame: getOrCreateDisplayFrame(scene, hotspots),
     hotspots,
     trainName: requireElement<HTMLElement>('train-name'),
-    prevButton: requireElement<HTMLButtonElement>('train-prev-btn'),
-    nextButton: requireElement<HTMLButtonElement>('train-next-btn'),
   }
 
   let hotspotButtons = new Map<TrainHotspotId, HTMLButtonElement>()
@@ -442,8 +437,6 @@ export function initTrainSoundsRenderer(): TrainSoundsRenderer {
     syncSceneRandomness(refs.scene, state)
     syncDepartingState(refs.scene, state)
     refs.trainName.textContent = preset.name
-    refs.prevButton.dataset.currentPresetId = preset.id
-    refs.nextButton.dataset.currentPresetId = preset.id
     refs.displayFrame.replaceChildren(createDisplay(preset))
     syncTrainDirection(getDisplayElement(refs.displayFrame), state.trainDirection)
     lastDirection = state.trainDirection
@@ -460,8 +453,6 @@ export function initTrainSoundsRenderer(): TrainSoundsRenderer {
     scene: refs.scene,
     hotspots: refs.hotspots,
     trainName: refs.trainName,
-    prevButton: refs.prevButton,
-    nextButton: refs.nextButton,
     allAboardButton: refs.allAboardButton,
     displayFrame: refs.displayFrame,
     render,

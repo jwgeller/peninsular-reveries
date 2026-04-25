@@ -1,12 +1,18 @@
 import { announce } from '../../client/game-accessibility.js'
-import { PAD_NAMES } from './sounds.js'
-import { TEMPO_LABELS } from './types.js'
-import type { DrumPadMode, PadId, TempoPreset } from './types.js'
+import { getPadNames } from './sounds.js'
+import { TEMPO_LABELS, BANK_LABELS } from './types.js'
+import type { BeatPadMode, PadId, TempoPreset, BeatPadBankId } from './types.js'
 
 const PAD_REPEAT_DEBOUNCE_MS = 200
 
 let lastPadId: PadId | null = null
 let lastPadAnnounceAt = 0
+
+let currentBank: BeatPadBankId = 'kit'
+
+export function setAccessibilityBank(bank: BeatPadBankId): void {
+  currentBank = bank
+}
 
 export function announcePadHit(padId: PadId): void {
   const now = typeof performance !== 'undefined' ? performance.now() : Date.now()
@@ -16,11 +22,12 @@ export function announcePadHit(padId: PadId): void {
   }
   lastPadId = padId
   lastPadAnnounceAt = now
-  const name = PAD_NAMES[padId]
+  const names = getPadNames(currentBank)
+  const name = names[padId]
   if (name) announce(name, 'polite')
 }
 
-export function announceModeChange(mode: DrumPadMode): void {
+export function announceModeChange(mode: BeatPadMode): void {
   switch (mode) {
     case 'recording':
       announce('Recording started', 'assertive')
@@ -48,4 +55,8 @@ export function announceLayerChange(layerCount: number, maxLayers: number): void
     return
   }
   announce(`Layer ${layerCount} of ${maxLayers}`, 'polite')
+}
+
+export function announceBankChange(bank: BeatPadBankId): void {
+  announce(`Bank: ${BANK_LABELS[bank]}`, 'assertive')
 }

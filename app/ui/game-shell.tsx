@@ -59,7 +59,7 @@ const settingsModalBaseStyles = {
   pointerEvents: 'auto',
   padding:
     'max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px))',
-  background: 'rgba(4, 10, 20, 0.72)',
+  background: 'rgba(4, 10, 20, 0.92)',
   '&:not([hidden])': {
     display: 'flex',
   },

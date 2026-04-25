@@ -57,10 +57,10 @@ export const games: GameEntry[] = [
     status: 'live',
   },
   {
-    slug: 'drum-pad',
-    name: 'Drum Pad',
-    description: 'Tap, loop, and layer beats on a neon drum pad.',
-    icon: '🥁',
+    slug: 'beat-pad',
+    name: 'Beat Pad',
+    description: 'Tap, loop, and layer beats and bass on a neon beat pad.',
+    icon: '🎵',
     status: 'live',
   },
   {

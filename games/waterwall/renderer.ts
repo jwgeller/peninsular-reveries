@@ -47,6 +47,8 @@ export interface WaterwallRenderModel {
   readonly theme: WaterwallThemeId
   readonly barrierCount: number
   readonly maxBarriers: number
+  readonly flashCells: Map<string, number>
+  readonly eraseHoldInfo: { row: number; column: number; cellRadius: number } | null
 }
 
 // ── Theme palettes ────────────────────────────────────────────────────────────
@@ -199,7 +201,7 @@ export function renderFrame(
   model: WaterwallRenderModel,
   _timestamp: number,
 ): void {
-  const { grid, cursor, theme } = model
+  const { grid, cursor, theme, flashCells, eraseHoldInfo } = model
 
   // Derive cell size from canvas CSS dimensions divided by grid dimensions
   const canvasWidth = parseFloat(ctx.canvas.style.width) || ctx.canvas.width
@@ -240,6 +242,30 @@ export function renderFrame(
           break
       }
     }
+  }
+
+  // Flash overlay on recently placed barriers
+  const FLASH_DURATION = 150
+  flashCells.forEach((remaining, key) => {
+    const sep = key.indexOf(',')
+    const row = Number(key.slice(0, sep))
+    const col = Number(key.slice(sep + 1))
+    if (row < 0 || row >= grid.rows || col < 0 || col >= grid.columns) return
+    const alpha = Math.max(0, Math.min(1, remaining / FLASH_DURATION))
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`
+    ctx.fillRect(col * cw, row * ch, cw, ch)
+  })
+
+  // Erase hold circle during long-press
+  if (eraseHoldInfo) {
+    const centerX = (eraseHoldInfo.column + 0.5) * cw
+    const centerY = (eraseHoldInfo.row + 0.5) * ch
+    const radiusPx = eraseHoldInfo.cellRadius * Math.min(cw, ch)
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(centerX, centerY, Math.max(radiusPx, 0), 0, Math.PI * 2)
+    ctx.stroke()
   }
 
   // Cursor overlay

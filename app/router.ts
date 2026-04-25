@@ -5,7 +5,7 @@ import { gameInfoAction } from './controllers/game-info.js'
 import { homeAction } from './controllers/home.js'
 import { notFoundAction } from './controllers/not-found.js'
 import { chompersAction } from '../games/chompers/controller.js'
-import { drumPadAction } from '../games/drum-pad/controller.js'
+import { beatPadAction } from '../games/beat-pad/controller.js'
 import { missionOrbitAction } from '../games/mission-orbit/controller.js'
 import { pixelPassportAction } from '../games/pixel-passport/controller.js'
 import { squaresAction } from '../games/squares/controller.js'
@@ -28,7 +28,7 @@ export function createAppRouter() {
   router.get(routes.storyTrailInfo, () => gameInfoAction('story-trail'))
   router.get(routes.squaresInfo, () => gameInfoAction('squares'))
   router.get(routes.waterwallInfo, () => gameInfoAction('waterwall'))
-  router.get(routes.drumPadInfo, () => gameInfoAction('drum-pad'))
+  router.get(routes.beatPadInfo, () => gameInfoAction('beat-pad'))
   router.get(routes.trainSoundsInfo, () => gameInfoAction('train-sounds'))
   router.get(routes.spotOnInfo, () => gameInfoAction('spot-on'))
   router.get(routes.peekabooInfo, () => gameInfoAction('peekaboo'))
@@ -39,7 +39,7 @@ export function createAppRouter() {
   router.get(routes.storyTrail, () => storyTrailAction())
   router.get(routes.squares, () => squaresAction())
   router.get(routes.waterwall, () => waterwallAction())
-  router.get(routes.drumPad, () => drumPadAction())
+  router.get(routes.beatPad, () => beatPadAction())
   router.get(routes.trainSounds, () => trainSoundsAction())
   router.get(routes.spotOn, () => spotOnAction())
   router.get(routes.peekaboo, () => peekabooAction())

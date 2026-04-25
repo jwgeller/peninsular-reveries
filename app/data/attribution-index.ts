@@ -14,8 +14,8 @@ import { trainSoundsAttribution } from '../../games/train-sounds/attributions.js
 import { trainSoundsInfo } from '../../games/train-sounds/info.js'
 import { waterwallAttribution } from '../../games/waterwall/attributions.js'
 import { waterwallInfo } from '../../games/waterwall/info.js'
-import { drumPadAttribution } from '../../games/drum-pad/attributions.js'
-import { drumPadInfo } from '../../games/drum-pad/info.js'
+import { beatPadAttribution } from '../../games/beat-pad/attributions.js'
+import { beatPadInfo } from '../../games/beat-pad/info.js'
 import { spotOnAttribution } from '../../games/spot-on/attributions.js'
 import { spotOnInfo } from '../../games/spot-on/info.js'
 import { peekabooAttribution } from '../../games/peekaboo/attributions.js'
@@ -38,7 +38,7 @@ const gameEntries: readonly { attribution: GameAttribution; info: GameInfo }[] =
   { attribution: storyTrailAttribution, info: storyTrailInfo },
   { attribution: squaresAttribution, info: squaresInfo },
   { attribution: waterwallAttribution, info: waterwallInfo },
-  { attribution: drumPadAttribution, info: drumPadInfo },
+  { attribution: beatPadAttribution, info: beatPadInfo },
   { attribution: trainSoundsAttribution, info: trainSoundsInfo },
   { attribution: spotOnAttribution, info: spotOnInfo },
   { attribution: peekabooAttribution, info: peekabooInfo },

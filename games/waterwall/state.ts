@@ -171,6 +171,52 @@ export function placeBarrier(grid: WaterwallGrid, coordinate: WaterwallCoordinat
   }
 }
 
+export function eraseBurst(grid: WaterwallGrid, coordinate: WaterwallCoordinate, radius: number): WaterwallGrid {
+  const nextCells = cloneCells(grid.cells)
+  const nextOrder = [...grid.barrierOrder]
+  let barriersRemoved = 0
+  let waterRemoved = 0
+
+  const centerRow = coordinate.row
+  const centerCol = coordinate.column
+  const radiusSquared = radius * radius
+
+  const minRow = Math.max(0, Math.floor(centerRow - radius))
+  const maxRow = Math.min(grid.rows - 1, Math.ceil(centerRow + radius))
+  const minCol = Math.max(0, Math.floor(centerCol - radius))
+  const maxCol = Math.min(grid.columns - 1, Math.ceil(centerCol + radius))
+
+  for (let row = minRow; row <= maxRow; row++) {
+    for (let col = minCol; col <= maxCol; col++) {
+      const dr = row - centerRow
+      const dc = col - centerCol
+      if (dr * dr + dc * dc <= radiusSquared) {
+        const cell = nextCells[row][col]
+        if (cell === 'barrier') {
+          nextCells[row][col] = 'empty'
+          barriersRemoved++
+          const idx = nextOrder.findIndex((c) => c.row === row && c.column === col)
+          if (idx !== -1) nextOrder.splice(idx, 1)
+        } else if (cell === 'water') {
+          nextCells[row][col] = 'empty'
+          waterRemoved++
+        }
+      }
+    }
+  }
+
+  if (barriersRemoved === 0 && waterRemoved === 0) {
+    return grid
+  }
+
+  return {
+    ...grid,
+    cells: nextCells,
+    barrierCount: grid.barrierCount - barriersRemoved,
+    barrierOrder: nextOrder,
+  }
+}
+
 export function removeBarrier(grid: WaterwallGrid, coordinate: WaterwallCoordinate): WaterwallGrid {
   const { row, column } = coordinate
 

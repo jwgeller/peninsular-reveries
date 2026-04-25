@@ -117,7 +117,7 @@ body.train-sounds main {
 }
 
 .train-panel--game {
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
 }
 
 .train-header {
@@ -192,7 +192,6 @@ body.train-sounds main {
 
 .train-menu-btn,
 .train-primary-btn,
-.train-switch-btn,
 .train-hotspot,
 .train-sounds .tab-btn,
 .train-sounds .modal-close,
@@ -205,7 +204,6 @@ body.train-sounds main {
 
 .train-menu-btn,
 .train-primary-btn,
-.train-switch-btn,
 .train-sounds .tab-btn,
 .train-sounds .settings-restart-btn,
 .train-sounds .settings-quit-link,
@@ -227,7 +225,6 @@ body.train-sounds main {
 }
 
 .train-menu-btn,
-.train-switch-btn,
 .train-sounds .tab-btn,
 .train-sounds .settings-restart-btn,
 .train-sounds .settings-quit-link,
@@ -241,7 +238,6 @@ body.train-sounds main {
 
 .train-menu-btn:hover,
 .train-primary-btn:hover,
-.train-switch-btn:hover,
 .train-sounds .tab-btn:hover,
 .train-sounds .settings-restart-btn:hover,
 .train-sounds .settings-quit-link:hover,
@@ -252,13 +248,10 @@ body.train-sounds main {
 
 .train-menu-btn:active,
 .train-primary-btn:active,
-.train-switch-btn:active,
 .train-sounds .tab-btn:active,
 .train-sounds .settings-restart-btn:active,
 .train-sounds .settings-quit-link:active,
-.train-sounds .modal-close:active,
-.train-switch-btn[aria-pressed='true'],
-.train-switch-btn.is-active {
+.train-sounds .modal-close:active {
   transform: translateY(2px);
   box-shadow: 0 5px 12px rgba(13, 79, 130, 0.2);
   filter: saturate(1.08);
@@ -266,7 +259,6 @@ body.train-sounds main {
 
 .train-menu-btn:focus-visible,
 .train-primary-btn:focus-visible,
-.train-switch-btn:focus-visible,
 .train-sounds .tab-btn:focus-visible,
 .train-sounds .settings-restart-btn:focus-visible,
 .train-sounds .settings-quit-link:focus-visible,
@@ -284,21 +276,17 @@ body.train-sounds main {
   text-transform: uppercase;
 }
 
-.train-selector-bar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 0.65rem;
+.train-selector-row {
+  display: flex;
   align-items: center;
-  padding: 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.48);
-  border-radius: 1.4rem;
-  background: linear-gradient(180deg, rgba(255, 252, 245, 0.92), rgba(255, 245, 229, 0.82));
-  box-shadow: var(--shadow-soft);
+  justify-content: center;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  padding: 0 clamp(0.5rem, 2vw, 1rem);
 }
 
 .train-name {
-  display: grid;
-  place-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 3.2rem;
   padding: 0.7rem 1rem;
   border: 1px solid rgba(13, 79, 130, 0.14);
@@ -320,22 +308,6 @@ body.train-sounds main {
 #train-scene.is-switching + .train-name,
 #train-scene[data-scene-state='switching'] + .train-name {
   /* Train Sounds has no animations; transient state class is a no-op. */
-}
-
-.train-switch-btn {
-  justify-self: stretch;
-  padding-inline: 0.95rem;
-}
-
-.train-switch-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 1.35rem;
-  height: 1.35rem;
-  border-radius: 50%;
-  background: rgba(13, 79, 130, 0.12);
-  font-family: var(--font-title);
-  font-size: 0.95rem;
 }
 
 .train-scene {
@@ -382,8 +354,7 @@ body.train-sounds main {
 .train-display.is-pressed,
 .train-name.is-switching,
 .train-hotspot.is-pressed,
-.train-hotspot[aria-pressed='true'],
-.train-switch-btn.is-active {
+.train-hotspot[aria-pressed='true'] {
   /* Train Sounds intentionally has no animations; transient state classes are no-ops. */
 }
 
@@ -729,43 +700,6 @@ body.train-sounds main {
   top: 59%;
 }
 
-/* ── Hotspot visible indicators ── */
-
-.train-hotspot::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  pointer-events: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-.train-hotspot:hover::after {
-  border-color: rgba(12, 79, 130, 0.4);
-  box-shadow: 0 0 8px rgba(12, 79, 130, 0.12);
-  transform: translate(-50%, -50%) scale(1.2);
-}
-
-.train-hotspot:active::after,
-.train-hotspot.is-pressed::after {
-  border-color: rgba(12, 79, 130, 0.25);
-  transform: translate(-50%, -50%) scale(0.85);
-}
-
-.train-hotspot:focus-visible::after {
-  border-color: rgba(10, 62, 104, 0.5);
-}
-
-.train-hotspot.is-hidden::after,
-.train-hotspot[hidden]::after {
-  display: none;
-}
-
 .train-hotspot__indicator {
   position: absolute;
   top: 50%;
@@ -922,7 +856,7 @@ body.train-sounds main {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  width: 100%;
+  flex: 0 0 auto;
   min-height: 44px;
   padding: 0.7rem 1.2rem;
   border: 0;
@@ -1028,7 +962,7 @@ body.train-sounds main {
   z-index: 1;
   pointer-events: none;
   opacity: 0.28;
-  background: radial-gradient(ellipse 60% 100% at 50% 100%, transparent 33%, rgba(136, 0, 204, 0.18) 34%, rgba(136, 0, 204, 0.18) 40%, rgba(0, 102, 255, 0.18) 41%, rgba(0, 102, 255, 0.18) 47%, rgba(0, 204, 68, 0.18) 48%, rgba(0, 204, 68, 0.18) 54%, rgba(255, 255, 0, 0.18) 55%, rgba(255, 255, 0, 0.18) 62%, rgba(255, 136, 0, 0.18) 63%, rgba(255, 136, 0, 0.18) 69%, rgba(255, 0, 0, 0.18) 70%, rgba(255, 0, 0, 0.18) 78%, transparent 79%);
+  background: radial-gradient(ellipse 60% 100% at 50% 100%, transparent 33%, rgba(136, 0, 204, 0.3) 34%, rgba(136, 0, 204, 0.3) 40%, rgba(0, 102, 255, 0.3) 41%, rgba(0, 102, 255, 0.3) 47%, rgba(0, 204, 68, 0.3) 48%, rgba(0, 204, 68, 0.3) 54%, rgba(255, 255, 0, 0.3) 55%, rgba(255, 255, 0, 0.3) 62%, rgba(255, 136, 0, 0.3) 63%, rgba(255, 136, 0, 0.3) 69%, rgba(255, 0, 0, 0.3) 70%, rgba(255, 0, 0, 0.3) 78%, transparent 79%);
   border-radius: 50% 50% 0 0;
   filter: blur(2px);
 }
@@ -1193,19 +1127,6 @@ body.train-sounds main {
     font-size: clamp(1.45rem, 7vw, 2rem);
   }
 
-  .train-selector-bar {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-
-  .train-switch-label {
-    display: none;
-  }
-
-  .train-switch-btn {
-    min-width: 3.25rem;
-    padding-inline: 0.85rem;
-  }
-
   .train-name {
     padding-inline: 0.75rem;
     font-size: 0.95rem;
@@ -1213,11 +1134,6 @@ body.train-sounds main {
 
   .train-display {
     height: clamp(8.6rem, 40vw, 12rem);
-  }
-
-  .train-hotspot::after {
-    width: 18px;
-    height: 18px;
   }
 }
 
@@ -1248,14 +1164,22 @@ body.train-sounds main {
   }
 
   .train-primary-btn,
-  .train-menu-btn,
-  .train-switch-btn {
+  .train-menu-btn {
     padding-block: 0.7rem;
+  }
+
+  .train-selector-row {
+    gap: 0.5rem;
+    padding: 0 0.5rem;
   }
 
   .train-name {
     min-height: 2.8rem;
-    font-size: 0.95rem;
+  }
+
+  .train-all-aboard-btn {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.85rem;
   }
 
   .train-scene {
@@ -1282,11 +1206,6 @@ body.train-sounds main {
   .train-track {
     bottom: 0.35rem;
   }
-
-  .train-hotspot::after {
-    width: 16px;
-    height: 16px;
-  }
 }
 
 @media (min-width: 720px) {
@@ -1301,15 +1220,6 @@ body.train-sounds main {
   .train-subtitle {
     max-width: 22rem;
     font-size: clamp(1.15rem, 2vw, 1.5rem);
-  }
-
-  .train-selector-bar {
-    gap: 0.9rem;
-    padding: 0.75rem;
-  }
-
-  .train-switch-btn {
-    min-width: 8.5rem;
   }
 
   .train-name {
@@ -1328,11 +1238,6 @@ body.train-sounds main {
   .train-sounds .settings-content {
     width: min(100%, 37rem);
   }
-
-  .train-hotspot::after {
-    width: 22px;
-    height: 22px;
-  }
 }
 
 @media (min-width: 1100px) and (min-height: 700px) {
@@ -1348,10 +1253,6 @@ body.train-sounds main {
     font-size: clamp(1.3rem, 1.8vw, 1.8rem);
   }
 
-  .train-selector-bar {
-    padding: 0.8rem;
-  }
-
   .train-name {
     min-height: 3.8rem;
   }
@@ -1363,11 +1264,6 @@ body.train-sounds main {
   .train-display {
     width: min(100%, 57rem);
     height: clamp(11rem, 24vw, 18rem);
-  }
-
-  .train-hotspot::after {
-    width: 24px;
-    height: 24px;
   }
 }
 
@@ -1385,14 +1281,6 @@ html[data-reduce-motion='reduce'] .train-sounds .train-entering .train-display {
 html[data-reduce-motion='reduce'] .train-sounds .train-exiting .train-display {
   transition: none !important;
   animation: none !important;
-}
-
-html[data-reduce-motion='reduce'] .train-sounds .train-scene--rainbow::after {
-  display: none !important;
-}
-
-html[data-reduce-motion='reduce'] .train-sounds .train-hotspot::after {
-  transition: none !important;
 }
 
 html[data-reduce-motion='reduce'] .train-sounds .train-hotspot__indicator {
@@ -1423,14 +1311,6 @@ html[data-reduce-motion='reduce'] .train-sounds .train-hotspot.is-pressed .train
   .train-sounds .train-exiting .train-display {
     transition: none !important;
     animation: none !important;
-  }
-
-  .train-sounds .train-scene--rainbow::after {
-    display: none !important;
-  }
-
-  .train-sounds .train-hotspot::after {
-    transition: none !important;
   }
 
   .train-sounds .train-hotspot__indicator {

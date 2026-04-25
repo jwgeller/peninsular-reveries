@@ -9,6 +9,7 @@ import {
   placeBarrier,
   removeBarrier,
   placeBarrierLine,
+  eraseBurst,
   computeWaterDistribution,
   getTitleBarrierCoordinates,
   placeTitleBarriers,
@@ -22,7 +23,9 @@ import {
   playCursorEdgeCue,
   resetEdgeCue,
   playBarrierPlaceSound,
+  playBarrierSettleSound,
   playBarrierRemoveSound,
+  playEraseBurstSound,
 } from './sounds.js'
 import { setupPointerInput, setupKeyboardInput, startGamepadPolling, getEdgeZone } from './input.js'
 import {
@@ -49,6 +52,10 @@ let container: HTMLElement
 let lastPanUpdate = 0
 let audioUnlocked = false
 let dragAnchor: { row: number; column: number } | null = null
+const flashCells: Map<string, number> = new Map()
+let eraseHold: { coordinate: { row: number; column: number }; startTime: number } | null = null
+let pointerDragStarted = false
+let lastTimestamp = 0
 
 // ── Game phase ────────────────────────────────────────────────────────────────
 
@@ -88,13 +95,23 @@ function syncModalState(): void {
   document.body.classList.toggle('modal-open', isSettingsOpen())
 }
 
-function buildRenderModel(): WaterwallRenderModel {
+function buildRenderModel(timestamp: number): WaterwallRenderModel {
+  let eraseHoldInfo: { row: number; column: number; cellRadius: number } | null = null
+
+  if (eraseHold) {
+    const elapsed = timestamp - eraseHold.startTime
+    const cellRadius = Math.min(5, 1 + (Math.max(0, elapsed) / 2000) * 4)
+    eraseHoldInfo = { row: eraseHold.coordinate.row, column: eraseHold.coordinate.column, cellRadius }
+  }
+
   return {
     grid,
     cursor,
     theme: currentTheme,
     barrierCount: grid.barrierCount,
     maxBarriers: grid.maxBarriers,
+    flashCells,
+    eraseHoldInfo,
   }
 }
 
@@ -138,6 +155,7 @@ function handlePlace(): void {
   if (nextGrid !== grid) {
     grid = nextGrid
     playBarrierPlaceSound()
+    flashCells.set(`${cursor.row},${cursor.column}`, 150)
     announceBarrierPlaced()
     updateCanvasLabel(canvas, grid.barrierCount, grid.maxBarriers, currentTheme)
   }
@@ -169,7 +187,10 @@ function handleDragExtend(direction: 'up' | 'down' | 'left' | 'right'): void {
   const result = placeBarrierLine(grid, dragAnchor, { row: cursor.row, column: cursor.column })
   if (result.placed.length > 0) {
     grid = result.grid
-    playBarrierPlaceSound()
+    for (const coord of result.placed) {
+      flashCells.set(`${coord.row},${coord.column}`, 150)
+    }
+    playBarrierSettleSound()
     announceBarrierPlaced()
     updateCanvasLabel(canvas, grid.barrierCount, grid.maxBarriers, currentTheme)
   }
@@ -182,7 +203,14 @@ function handlePointerAction(coordinate: { row: number; column: number }, mode: 
     const nextGrid = placeBarrier(grid, coordinate)
     if (nextGrid !== grid) {
       grid = nextGrid
-      playBarrierPlaceSound()
+      // Use full plink for first placement in a tap/drag, settle for drag-extends
+      if (!pointerDragStarted) {
+        playBarrierPlaceSound()
+        pointerDragStarted = true
+      } else {
+        playBarrierSettleSound()
+      }
+      flashCells.set(`${coordinate.row},${coordinate.column}`, 150)
       announceBarrierPlaced()
       updateCanvasLabel(canvas, grid.barrierCount, grid.maxBarriers, currentTheme)
     }
@@ -334,6 +362,21 @@ function processAction(action: WaterwallAction): void {
       break
     case 'pointer-up':
       dragAnchor = null
+      pointerDragStarted = false
+      break
+    case 'erase-start':
+      eraseHold = { coordinate: action.coordinate, startTime: action.startTime }
+      break
+    case 'erase-burst':
+      if (eraseHold) {
+        const nextGrid = eraseBurst(grid, action.coordinate, action.radius)
+        if (nextGrid !== grid) {
+          grid = nextGrid
+          playEraseBurstSound()
+          updateCanvasLabel(canvas, grid.barrierCount, grid.maxBarriers, currentTheme)
+        }
+        eraseHold = null
+      }
       break
   }
 }
@@ -346,6 +389,19 @@ function unlockAudioOnce(): void {
 }
 
 function gameLoop(timestamp: number): void {
+  const delta = lastTimestamp > 0 ? timestamp - lastTimestamp : 16.67
+  lastTimestamp = timestamp
+
+  // Decay flash timers
+  flashCells.forEach((remaining, key) => {
+    const newRemaining = remaining - delta
+    if (newRemaining <= 0) {
+      flashCells.delete(key)
+    } else {
+      flashCells.set(key, newRemaining)
+    }
+  })
+
   switch (phase) {
     case 'title':
       break
@@ -367,7 +423,7 @@ function gameLoop(timestamp: number): void {
     }
   }
 
-  renderFrame(ctx, buildRenderModel(), timestamp)
+  renderFrame(ctx, buildRenderModel(timestamp), timestamp)
   requestAnimationFrame(gameLoop)
 }
 
@@ -377,6 +433,9 @@ function restart(): void {
   phase = 'title'
   cursor = null
   dragAnchor = null
+  flashCells.clear()
+  eraseHold = null
+  pointerDragStarted = false
 
   const playBtn = byId<HTMLButtonElement>('waterwall-play-btn')
   if (playBtn) {
@@ -483,6 +542,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Resize handling
   const resizeObserver = new ResizeObserver(() => {
     const newDims = handleResize(canvas, ctx, container, config)
+    flashCells.clear()
+    eraseHold = null
     if (phase === 'title') {
       initTitleGrid(newDims.rows, newDims.columns)
     } else {

@@ -8,7 +8,7 @@ import { GameHeader, GameHeaderPill, GameScreen, GameTabbedModal, InfoSection, S
 
 const pixelPassportModalOverlayStyles = {
   zIndex: 100,
-  background: 'rgba(4, 10, 20, 0.72)',
+  background: 'rgba(4, 10, 20, 0.92)',
   backdropFilter: 'blur(8px)',
 }
 

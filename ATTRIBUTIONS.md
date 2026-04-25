@@ -350,28 +350,38 @@
 - Modifications: Not applicable
 - Notes: All sound effects are synthesized at runtime. No bundled audio files ship with the game.
 
-### Drum Pad
+### Beat Pad
 
-- Slug: drum-pad
+- Slug: beat-pad
 - Code license: GPL-3.0
-- Summary: Tap eight color-coded pads to trigger percussion sounds, record loops, and layer up to three parts with adjustable tempo.
+- Summary: Tap eight color-coded pads to trigger percussion or bass sounds, record loops, layer up to three parts, and switch between Kit and Bass banks with adjustable tempo.
 
 #### Entries
 
-##### Drum Pad percussion samples (CC0)
+##### Beat Pad percussion samples (CC0)
 
 - Type: sound effect
-- Used in: Drum Pad pad triggers across all eight color-coded pads
-- Creator: To be determined — Freesound CC0 sourcing pending
+- Used in: Beat Pad kit bank triggers across all eight pads
+- Creator: johnnydekk, xUMR
 - Source: https://freesound.org/
 - License: CC0
 - Modifications: Trimmed, filtered, and normalized via creative-assets workflow
-- Notes: Eight CC0 percussion one-shots (kick, snare, closed hi-hat, open hi-hat, clap, rimshot, tom, cymbal) sourced from Freesound. Freesound IDs and creator attribution to be filled when samples are fetched and verified.
+- Notes: Eight CC0 percussion one-shots (kick, snare, closed hi-hat, open hi-hat, clap, rimshot, tom, cymbal) sourced from Freesound. Kick and tom re-processed to emphasise 40–200 Hz low-end presence.
 
-##### Drum Pad UI sound effects
+##### Beat Pad bass samples (CC0)
 
 - Type: sound effect
-- Used in: Drum Pad UI feedback for record, play, stop, and clear
+- Used in: Beat Pad bass bank triggers across all eight pads
+- Creator: Peninsular Reveries
+- Source: Synthesised via ffmpeg creative-assets workflow
+- License: CC0
+- Modifications: Not applicable
+- Notes: Eight synthesised bass samples (sub-bass hit, bass drone, saw buzz, tonal hit, chord stab, filtered noise sweep, 808, wobble) generated via ffmpeg. Drone and saw buzz samples loop with sustained playback envelope.
+
+##### Beat Pad UI sound effects
+
+- Type: sound effect
+- Used in: Beat Pad UI feedback for record, play, stop, and clear
 - Creator: Peninsular Reveries
 - Source: Generated in-browser with the Web Audio API
 - License: GPL-3.0

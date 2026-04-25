@@ -24,6 +24,10 @@ function getGameArea(): HTMLElement { return gameAreaEl ??= document.getElementB
 
 export { getSceneText, getItemFlash, getHintArea, getInventoryOverlay }
 
+// ── Equip / unequip toggle tracking ───────────────────────────
+let _prevEquippedItemIdForBar: string | null | undefined = undefined
+let _prevEquippedItemIdForOverlay: string | null | undefined = undefined
+
 // ── Screen management ────────────────────────────────────────
 
 export function showScreen(screenId: string): void {
@@ -64,6 +68,17 @@ export function renderInventoryOverlay(story: Story, state: GameState): void {
     ? story.items.find(item => item.id === state.equippedItemId)
     : undefined
 
+  // Detect toggle change for bounce animation
+  let overlayToggledId: string | null = null
+  if (_prevEquippedItemIdForOverlay !== undefined && state.equippedItemId !== _prevEquippedItemIdForOverlay) {
+    if (state.equippedItemId !== null) {
+      overlayToggledId = state.equippedItemId
+    } else if (_prevEquippedItemIdForOverlay !== null) {
+      overlayToggledId = _prevEquippedItemIdForOverlay
+    }
+  }
+  _prevEquippedItemIdForOverlay = state.equippedItemId
+
   let html = '<div class="inventory-overlay-panel">'
   html += '<h2 id="inventory-heading" class="inventory-heading">Your Bag</h2>'
   html += `<p class="inventory-help">${selectedItem ? `Holding ${selectedItem.name}. Tap it again to put it away.` : 'Pick one item to hold.'}</p>`
@@ -76,7 +91,8 @@ export function renderInventoryOverlay(story: Story, state: GameState): void {
       const item = story.items.find(it => it.id === itemId)
       if (item) {
         const isSelected = state.equippedItemId === item.id
-        html += `<button class="inventory-overlay-item${isSelected ? ' is-selected' : ''}" type="button" data-inventory-item-id="${item.id}" aria-pressed="${isSelected ? 'true' : 'false'}"><span class="inv-name">${item.name}</span><span class="inv-desc">${item.description}</span></button>`
+        const toggledAttr = overlayToggledId === item.id ? ' data-just-toggled' : ''
+        html += `<button class="inventory-overlay-item${isSelected ? ' is-selected' : ''}" type="button" data-inventory-item-id="${item.id}" aria-pressed="${isSelected ? 'true' : 'false'}"${toggledAttr}><span class="inv-name">${item.name}</span><span class="inv-desc">${item.description}</span></button>`
       }
     }
     html += '</div>'
@@ -118,6 +134,17 @@ export function updateInventoryBar(story: Story, state: GameState): void {
   const bar = getInventoryBar()
   bar.innerHTML = ''
 
+  // Detect toggle change for bounce animation
+  let barToggledId: string | null = null
+  if (_prevEquippedItemIdForBar !== undefined && state.equippedItemId !== _prevEquippedItemIdForBar) {
+    if (state.equippedItemId !== null) {
+      barToggledId = state.equippedItemId
+    } else if (_prevEquippedItemIdForBar !== null) {
+      barToggledId = _prevEquippedItemIdForBar
+    }
+  }
+  _prevEquippedItemIdForBar = state.equippedItemId
+
   const bagButton = document.createElement('button')
   bagButton.className = 'inventory-bag-btn'
   bagButton.id = 'inventory-btn'
@@ -149,6 +176,9 @@ export function updateInventoryBar(story: Story, state: GameState): void {
         button.setAttribute('aria-pressed', state.equippedItemId === item.id ? 'true' : 'false')
         if (state.equippedItemId === item.id) {
           button.classList.add('is-selected')
+        }
+        if (barToggledId === item.id) {
+          button.dataset['justToggled'] = ''
         }
         bar.appendChild(button)
       }

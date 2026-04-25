@@ -249,6 +249,7 @@ body.gamepad-active .gamepad-start-hint {
 .inventory-overlay-item,
 .inventory-close-btn {
   min-height: 44px;
+  min-width: 44px;
   border-radius: 14px;
   border: 2px solid rgba(58, 46, 31, 0.18);
   font-family: var(--font);
@@ -256,7 +257,7 @@ body.gamepad-active .gamepad-start-hint {
   cursor: pointer;
   touch-action: manipulation;
   box-sizing: border-box;
-  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease, opacity 120ms ease;
 }
 
 .inventory-bag-btn,
@@ -279,9 +280,12 @@ body.gamepad-active .gamepad-start-hint {
 .inventory-item-btn.is-selected,
 .inventory-item-btn[aria-pressed="true"] {
   background: #f7df9c;
-  border-color: #9a6d22;
+  border: 2px solid var(--trail-accent);
   color: #34220a;
-  box-shadow: 0 0 0 3px rgba(212, 168, 83, 0.22);
+  font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(107, 142, 78, 0.35), 0 0 10px 2px rgba(212, 168, 83, 0.35);
+  transform: scale(1.05);
+  opacity: 1;
 }
 
 .inventory-empty-label {
@@ -290,6 +294,25 @@ body.gamepad-active .gamepad-start-hint {
   color: var(--trail-locked);
   font-style: italic;
   padding: 0.2rem 0.1rem;
+}
+
+/* Muted unequipped items — appear dimmed compared to equipped */
+.inventory-item-btn:not(.is-selected):not([aria-pressed="true"]) {
+  opacity: 0.7;
+}
+
+.inventory-overlay-item:not(.is-selected):not([aria-pressed="true"]) {
+  opacity: 0.7;
+}
+
+.inventory-item-btn:not(.is-selected):not([aria-pressed="true"]):hover,
+.inventory-item-btn:not(.is-selected):not([aria-pressed="true"]):focus-visible {
+  opacity: 1;
+}
+
+.inventory-overlay-item:not(.is-selected):not([aria-pressed="true"]):hover,
+.inventory-overlay-item:not(.is-selected):not([aria-pressed="true"]):focus-visible {
+  opacity: 1;
 }
 
 .inventory-bag-btn:hover,
@@ -304,7 +327,33 @@ body.gamepad-active .gamepad-start-hint {
   outline-offset: 2px;
 }
 
-/* ── Completion view ──────────────────────────────────────── */
+/* ── Equip / unequip bounce animation ──────────────────── */
+
+@keyframes equip-bounce-selected {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1.05); }
+}
+
+@keyframes equip-bounce-unselected {
+  0% { transform: scale(1.05); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.inventory-item-btn[data-just-toggled].is-selected,
+.inventory-item-btn[data-just-toggled][aria-pressed="true"],
+.inventory-overlay-item[data-just-toggled].is-selected,
+.inventory-overlay-item[data-just-toggled][aria-pressed="true"] {
+  animation: equip-bounce-selected 150ms ease;
+}
+
+.inventory-item-btn[data-just-toggled]:not(.is-selected):not([aria-pressed="true"]),
+.inventory-overlay-item[data-just-toggled]:not(.is-selected):not([aria-pressed="true"]) {
+  animation: equip-bounce-unselected 150ms ease;
+}
+
+/* ── Completion view ────────────────────────────────────────── */
 
 #completion-view { gap: 1rem; text-align: center; }
 .completion-badge { font-size: 4rem; }
@@ -406,9 +455,12 @@ body.gamepad-active .gamepad-start-hint {
 .inventory-overlay-item.is-selected,
 .inventory-overlay-item[aria-pressed="true"] {
   background: #f7df9c;
-  border-color: #9a6d22;
+  border: 2px solid var(--trail-accent);
   color: #34220a;
-  box-shadow: 0 0 0 3px rgba(212, 168, 83, 0.22);
+  font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(107, 142, 78, 0.35), 0 0 10px 2px rgba(212, 168, 83, 0.35);
+  transform: scale(1.05);
+  opacity: 1;
 }
 
 .inv-name {

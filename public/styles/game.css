@@ -338,15 +338,35 @@ body.gamepad-active .music-toggle-btn:focus {
   border: 2px solid rgba(255, 255, 255, 0.25);
 }
 
+.settings-quit-link {
+  color: var(--game-white);
+  text-decoration: none;
+  text-decoration-thickness: 0;
+  text-decoration-color: transparent;
+  text-underline-offset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .settings-restart-btn:hover,
 .settings-quit-link:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.settings-quit-link:hover {
+  color: var(--game-white);
+  text-decoration: none;
 }
 
 .settings-restart-btn:focus-visible,
 .settings-quit-link:focus-visible {
   outline: 3px solid var(--game-white);
   outline-offset: 2px;
+}
+
+.settings-quit-link:focus-visible {
+  color: var(--game-white);
+  text-decoration: none;
 }
 
 .info-more-link {

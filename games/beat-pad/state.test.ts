@@ -4,6 +4,7 @@ import {
   canRecord,
   clearLoop,
   createInitialState,
+  cycleBank,
   cycleTempo,
   getEventsInWindow,
   getLoopDurationMs,
@@ -14,13 +15,14 @@ import {
 } from './state.js'
 import { LOOP_BARS, MAX_LAYERS, TEMPO_BPM, type LoopEvent } from './types.js'
 
-test('createInitialState returns free mode, medium tempo, empty layers', () => {
+test('createInitialState returns free mode, medium tempo, empty layers, kit bank', () => {
   const state = createInitialState()
   assert.equal(state.mode, 'free')
   assert.equal(state.tempo, 'medium')
   assert.deepEqual(state.layers, [])
   assert.equal(state.activeLayer, 0)
   assert.deepEqual(state.currentEvents, [])
+  assert.equal(state.activeBank, 'kit')
 })
 
 test('getLoopDurationMs returns expected ms for each tempo', () => {
@@ -128,6 +130,25 @@ test('cycleTempo cycles slow -> medium -> fast -> slow', () => {
   assert.equal(state.tempo, 'medium')
 })
 
+test('cycleBank cycles kit -> bass -> kit', () => {
+  const state = createInitialState()
+  assert.equal(state.activeBank, 'kit')
+  const bass = cycleBank(state)
+  assert.equal(bass.activeBank, 'bass')
+  const kit = cycleBank(bass)
+  assert.equal(kit.activeBank, 'kit')
+})
+
+test('cycleBank preserves other state', () => {
+  let state = startRecording(createInitialState(), 0)
+  state = triggerPad(state, 0, 100).state
+  state = stopRecording(state)
+  const bankSwitched = cycleBank(state)
+  assert.equal(bankSwitched.activeBank, 'bass')
+  assert.equal(bankSwitched.mode, 'playing')
+  assert.equal(bankSwitched.layers.length, 1)
+})
+
 test('canRecord is true when layers < MAX_LAYERS and not recording', () => {
   const initial = createInitialState()
   assert.equal(canRecord(initial), true)
@@ -161,7 +182,6 @@ test('getEventsInWindow handles wrap-around windows', () => {
     { padId: 1, timeOffset: 500 },
     { padId: 2, timeOffset: 950 },
   ]
-  // Window crossing the loop boundary: from 900 to 1100 (i.e. 900..1000 then 0..100)
   const events = getEventsInWindow([layer], 900, 1100, 1000)
   const ids = events.map((event) => event.padId).sort()
   assert.deepEqual(ids, [0, 2])

@@ -13,6 +13,8 @@ export type WaterwallAction =
   | { readonly type: 'pointer'; readonly coordinate: WaterwallCoordinate; readonly mode: 'place' | 'remove' }
   | { readonly type: 'pointer-move'; readonly coordinate: WaterwallCoordinate }
   | { readonly type: 'pointer-up' }
+  | { readonly type: 'erase-start'; readonly coordinate: WaterwallCoordinate; readonly startTime: number }
+  | { readonly type: 'erase-burst'; readonly coordinate: WaterwallCoordinate; readonly radius: number }
 
 // ── Pure mapping functions ────────────────────────────────────────────────────
 
@@ -117,20 +119,41 @@ export function setupPointerInput(
   config: WaterwallConfig,
   onAction: (action: WaterwallAction) => void,
   toGrid: (canvas: HTMLCanvasElement, clientX: number, clientY: number, config: WaterwallConfig) => WaterwallCoordinate | null,
-  _getCellType: (coord: WaterwallCoordinate) => WaterwallCellType,
+  getCellType: (coord: WaterwallCoordinate) => WaterwallCellType,
 ): () => void {
   let pointerDown = false
-  let dragMode: 'place' | 'remove' = 'place'
+  let pointerDownTime = 0
+  let pointerDownCoord: WaterwallCoordinate | null = null
+  let eraseHoldActive = false
+  let eraseHoldTimer: ReturnType<typeof setTimeout> | null = null
+  let hasMoved = false
+
+  const ERASE_HOLD_THRESHOLD = 400 // ms
 
   const handlePointerDown = (event: PointerEvent): void => {
     const coord = toGrid(canvas, event.clientX, event.clientY, config)
     if (!coord) return
 
     pointerDown = true
-    // Always place — removing is done via Restart in the menu
-    const mode: 'place' | 'remove' = 'place'
-    dragMode = mode
-    onAction({ type: 'pointer', coordinate: coord, mode })
+    pointerDownTime = performance.now()
+    pointerDownCoord = coord
+    hasMoved = false
+    eraseHoldActive = false
+
+    const cellType = getCellType(coord)
+
+    // Immediate placement on empty cells; water/barrier cells are no-op on short press
+    if (cellType === 'empty') {
+      onAction({ type: 'pointer', coordinate: coord, mode: 'place' })
+    }
+
+    // Start timer for erase hold detection (cancelled if user moves before threshold)
+    eraseHoldTimer = setTimeout(() => {
+      if (pointerDown && !hasMoved) {
+        eraseHoldActive = true
+        onAction({ type: 'erase-start', coordinate: coord, startTime: pointerDownTime + ERASE_HOLD_THRESHOLD })
+      }
+    }, ERASE_HOLD_THRESHOLD)
   }
 
   const handlePointerMove = (event: PointerEvent): void => {
@@ -138,7 +161,29 @@ export function setupPointerInput(
     if (!coord) return
 
     if (pointerDown) {
-      onAction({ type: 'pointer', coordinate: coord, mode: dragMode })
+      // Check if moved to a different cell
+      if (coord.row !== pointerDownCoord?.row || coord.column !== pointerDownCoord?.column) {
+        if (!hasMoved) {
+          hasMoved = true
+          // Cancel erase hold timer — user is dragging, not holding
+          if (eraseHoldTimer) {
+            clearTimeout(eraseHoldTimer)
+            eraseHoldTimer = null
+          }
+          // If erase hold was active (edge case: timer already fired), cancel it
+          if (eraseHoldActive) {
+            eraseHoldActive = false
+          }
+        }
+
+        if (!eraseHoldActive) {
+          // Normal drag placement — only on empty cells (water can't be replaced)
+          const cellType = getCellType(coord)
+          if (cellType === 'empty') {
+            onAction({ type: 'pointer', coordinate: coord, mode: 'place' })
+          }
+        }
+      }
     } else {
       onAction({ type: 'pointer-move', coordinate: coord })
     }
@@ -146,7 +191,19 @@ export function setupPointerInput(
 
   const handlePointerUp = (): void => {
     if (pointerDown) {
+      if (eraseHoldActive && pointerDownCoord) {
+        const holdDuration = performance.now() - pointerDownTime - ERASE_HOLD_THRESHOLD
+        const radius = Math.min(5, 1 + (Math.max(0, holdDuration) / 2000) * 4)
+        onAction({ type: 'erase-burst', coordinate: pointerDownCoord, radius })
+      }
+
       pointerDown = false
+      eraseHoldActive = false
+      pointerDownCoord = null
+      if (eraseHoldTimer) {
+        clearTimeout(eraseHoldTimer)
+        eraseHoldTimer = null
+      }
       onAction({ type: 'pointer-up' })
     }
   }
@@ -167,6 +224,10 @@ export function setupPointerInput(
     canvas.removeEventListener('pointerup', handlePointerUp)
     canvas.removeEventListener('pointerleave', handlePointerUp)
     canvas.removeEventListener('contextmenu', handleContextMenu)
+    if (eraseHoldTimer) {
+      clearTimeout(eraseHoldTimer)
+      eraseHoldTimer = null
+    }
   }
 }
 
