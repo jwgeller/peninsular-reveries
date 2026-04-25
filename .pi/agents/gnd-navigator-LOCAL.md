@@ -38,6 +38,8 @@ When multiple legs are dispatchable simultaneously (status `pending`, `Confirmed
 
 **Sequential fallback.** If pi-subagents' `tasks` mode is not available, fall back to the base sequential dispatch (one leg at a time).
 
+**Extended bootstrap cues.** In addition to the base agent's recognized startup cues (`cue`, `start`, `run`, `dispatch`, `go`, `begin`, `active plan`), also treat the following as bootstrap-only cues (ignore as plan input, resolve the live plan from memory): `dive`, `dive dive dive`, `dive, dive, dive!`, `submerge`, `🤿`.
+
 **Conflict-free batching example (active plan):**
 - Batch 1 contains {LEG-1, LEG-3, LEG-4, LEG-5, LEG-8}, but LEG-1 and LEG-3 both own `public/styles/train-sounds.css`.
 - Conflict-free sub-batches: 1a = {LEG-1, LEG-4, LEG-5, LEG-8}, 1b = {LEG-3} (after LEG-1 lands).
