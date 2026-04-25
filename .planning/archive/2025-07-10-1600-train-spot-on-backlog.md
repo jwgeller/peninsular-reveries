@@ -241,3 +241,45 @@ After all complete: deferred shared edits (`ATTRIBUTIONS.md` sync) → `pnpm bui
 ## Implementation
 Commit: d39ec7d | none (local-only)
 Pushed: 2025-07-10
+
+## Critique
+
+### What Worked
+- LEG-1 car simplification — clean removal of dead types, routes, and CSS modifiers
+- LEG-3 rainbow + track CSS — proper radial-gradient arc, edge-to-edge rails
+- LEG-5 CSS gap fills — missing classes added, reduced-motion overrides included
+- LEG-6 type overhaul — complete spot→surface migration across all 7 owned files, no stale types in production code
+- LEG-7 procedural generation — 5 themes, seeded PRNG, CSS custom properties, theme classes removed
+- LEG-8 drop sound routing — correct sample mapping, attribution, and fetch config
+
+### What Didn't
+- **LEG-2: Double hotspot indicators** — Both `::after` and `.train-hotspot__indicator` are active in CSS. Plan intent chose the `<span>` approach over `::after` for mobile reliability. The `::after` rules should have been removed.
+- **LEG-1 miss: stale controller.tsx** — `train-sounds/controller.tsx` lines 146–149 still reference `train-coupler--one`, `train-car--first`, `train-coupler--two`, `train-car--second`. No matching CSS exists. File was not in LEG-1's owned set and not listed as read-only.
+- **LEG-4: Audibility unverified** — Loudness probe never ran; gains adjusted by manual calculation. `electric-horn.ogg` is silent (all-zero samples), unresolved.
+- **LEG-5: Room scene still squished** — Margin tweak (`0.5rem` → `0.15rem 0.1rem`) insufficient. Room scene doesn't fill viewport at phone portrait.
+- **LEG-6: Grid cells too small to see** — Surfaces and cells are cut off because play area is too small (compounds LEG-5). Cells at 44px minimum are hard to distinguish.
+- **LEG-6: Items don't fill cells** — Rooms generate 4–6 items but surfaces have more total cells. Empty cells look like wasted space. User wants exact item-to-cell count.
+- **LEG-6/7: Rooms don't look like rooms** — Furniture silhouettes removed in LEG-7; surfaces are minimal labeled grids. Missing furniture shapes, art, windows — decorative elements that make rooms feel lived-in.
+- **LEG-8: 4/5 Spot On audio missing** — Only `drop-put-down.ogg` on disk. Pre-existing samples have no `.ogg` files. Game is effectively silent.
+- **Stale `.room-item--placed` selector** — `input.ts` line 24 has `.room-item:not(.room-item--placed)` but the class is never applied. Filter is a no-op.
+- **LEG-3: Rainbow opacity too subtle** — Bands at 0.18 alpha; user wants 0.3.
+- **LEG-3: Rainbow hidden under reduced-motion** — Static gradient hidden via `display: none !important`. Not an animation; questionable to remove for reduced-motion users.
+
+### Chart Gaps
+- **No visual verification in plan** — Layout/design legs had no Playwright screenshot checkpoints or explicit "manual visual check required" markers. Multiple issues (room scene sizing, grid cell visibility) could only be caught visually.
+- **Rooms should feel like rooms** — Chart captured "grid-based placement" as a type/state change but missed the atmospheric requirement: rooms need furniture, art, windows for visual identity.
+- **Item count must fill cells** — Plan specified "4–6 items, 4–6 surfaces" without constraining item count to match total cells.
+
+### User Effectiveness
+- Backlog items were concrete (fix width, add classes, change types) but underlying aesthetic goals ("rooms that look like rooms," "items fill all the spots") weren't surfaced until critique. Earlier charting with prototype screenshots could have drawn these out.
+
+### Blockers
+- `electric-horn.ogg` is all-zero samples — electric train horn produces no sound
+- 4/5 Spot On audio files missing — game is silent except for drop sound
+
+### Corrections for Next Cycle
+- `.pi/skills/gnd-chart/LOCAL.md` — Add mandatory visual checkpoint for layout/design legs (screenshot assertions at 390×844 and 844×390, or explicit "manual visual check required" markers).
+- `.pi/skills/gnd-chart/LOCAL.md` — When charting grid/cell mechanics, constrain item count to equal total cell count.
+- `.pi/skills/gnd-chart/LOCAL.md` — Room generation legs must include room decor (furniture shapes, art, windows) as generated elements.
+- `.pi/skills/gnd-navigate/LOCAL.md` (new) — Review step: grep removed CSS class names across ALL project files, not just owned files.
+

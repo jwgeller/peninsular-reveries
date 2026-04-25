@@ -34,3 +34,30 @@ During Refinement (Phase 5), after all legs are confirmed, perform an overlap an
 **Rationale:** The navigator uses the Dispatch Order to compose `subagent({ tasks: [...] })` calls. If two legs in the same `tasks` array share an owned file, the last diver to write wins and the first diver's changes are silently lost. Explicit sub-batching prevents this. In most game projects, legs from different games never share files, so conflicts are rare — but when they occur (e.g., two CSS-heavy legs on the same game's stylesheet), the cost of sequential dispatch is small compared to the risk of data loss.
 
 **Workshop checkpoint.** If a workshop discussion reveals that two potentially-parallel legs share a file, ask the user: *"LEG-N and LEG-M both own `file.ts`. They'll need to run sequentially. Should I split the file between legs (each leg owns a different section), or is sequential dispatch acceptable?"* Splitting by section is possible when the intent touches clearly separate areas of the file, but it requires the divers to be careful about write scope — sequential is safer.
+
+### Visual Verification for Layout/Design Legs
+
+Any leg that modifies CSS layout, viewport rendering, or game-scene positioning must include a visual verification step in the plan. Code review and lint alone cannot catch squished containers, overlapping elements, or invisible indicators.
+
+**Required checkpoint for layout legs:** During workshop, ask: *"How will we verify this looks right at 390×844 portrait and 844×390 landscape?"* At minimum, the leg's Verification field must include one of:
+1. A Playwright screenshot assertion (`page.screenshot` or similar)
+2. An explicit "manual visual check required" note
+3. A CSS dimension assertion (e.g., `getComputedStyle` check that the element fills ≥50% of viewport)
+
+**Rationale:** Two legs in this project shipped squished play areas and double-indicator bugs that lint could not catch. Visual verification is not optional for layout changes.
+
+### Grid/Cell Mechanics: Item-Cell Parity
+
+When a leg introduces grid-based placement (cells, slots, positions) where items are placed into cells:
+
+1. **Constrain item count to equal total cell count.** Every cell should have a corresponding item, and no item should be left without a cell. Empty cells look like broken UI; leftover items look like dangling affordances.
+2. **During workshop, ask:** *"How many total cells do the surfaces have, and how many items will be in the room? Do they match?"* If they don't match, adjust the room generation parameters.
+3. **State the cell/item parity explicitly in the leg intent.** For example: "Room generation selects 4–6 surfaces with a total of 12–18 cells, and generates exactly 12–18 items (one per cell)."
+
+### Room Decor Generation
+
+When a leg replaces fixed room layouts with procedural generation:
+
+1. **Room decor is not optional.** A room that only has labeled grid cells on a colored rectangle does not feel like a room. Surfaces must be visually dressed — furniture shapes, art, windows, doorways — as generated elements, not just data containers.
+2. **During workshop, ask:** *"What makes this room feel like a [bedroom/kitchen/study] beyond its wall color and placement zones? What visual elements identify the space?"*
+3. **Include decor rendering in the leg intent** — either as CSS pseudo-elements per surface type, inline SVG, or emoji-based decoration elements positioned alongside the grid.
