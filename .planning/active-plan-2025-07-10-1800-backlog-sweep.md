@@ -297,7 +297,20 @@ Clear the full backlog by fixing visual bugs, broken audio, missing assets, and 
   3. Include concrete recommendations for a shared rhythm: target heading scale, subtitle scale, CTA button sizing, header layout, and spacing. These should be implementable values (e.g. `clamp(1.6rem, 5vw, 2.4rem)` for headings) that future legs can apply.
   4. No code changes — audit and report only.
 
-## Dispatch Order
+## Implementation
+Commit: 5fb6686
+Pushed: 2025-07-10
+
+### Post-review corrections
+- LEG-1 deferred: Fixed `games/train-sounds/main.ts` and `games/train-sounds/input.ts` to remove prevButton/nextButton references (8 type errors)
+- LEG-1 deferred: Updated `games/train-sounds/input.test.ts` to remove prev/next button mocks and use callback-based navigation
+- LEG-2 boundary: Accepted re-render of `highspeed-passby.ogg` (tightly coupled to manifest gain change)
+- LEG-10 deferred: Fixed `games/train-sounds/renderer.ts` to measure selector row height instead of both train name + All Aboard individually (panelGapPx * 2 instead of * 3)
+- Lint fixes: `const` for `flashCells` in waterwall/main.ts, removed unused `MissionOrbitSampleProcessingPlan` import in audio-loudness-probe.ts
+- LEG-6 lint: Removed unused `bassNames` variable and `PAD_NAMES` import in beat-pad files
+- LEG-6 deferred: Updated `app/data/attribution-index.ts` for drum-pad → beat-pad rename
+- LEG-9 deferred: Bumped overlay opacity to 0.92 for chompers, mission-orbit, pixel-passport, squares, super-word controllers
+- Synced ATTRIBUTIONS.md with `pnpm sync:attributions`
 Parallel group 1 (no dependencies, no conflicts):
 1. LEG-1 (Train Sounds CSS/HTML) — no dependencies
 2. LEG-2 (Train Sounds audio probe) — no dependencies
