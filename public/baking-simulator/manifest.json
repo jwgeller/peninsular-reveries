@@ -1,14 +1,16 @@
 {
+  "id": "./",
   "name": "Baking Simulator",
   "short_name": "Baking Simulator",
   "description": "Mix, knead, shape, proof, and bake your way to the perfect loaf!",
-  "start_url": "/baking-simulator/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#2c1810",
   "theme_color": "#2c1810",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "../favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

@@ -1,15 +1,17 @@
 {
+  "id": "./",
   "name": "All Aboard",
   "short_name": "All Aboard",
   "description": "Raise your hand to whistle and rotate your arm to drive the steam engine!",
-  "start_url": "/all-aboard/",
+  "start_url": "./",
+  "scope": "./",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#0a1428",
   "theme_color": "#ffd700",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "../favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

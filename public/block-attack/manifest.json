@@ -1,14 +1,16 @@
 {
+  "id": "./",
   "name": "Block Attack",
   "short_name": "Block Attack",
-  "start_url": "/block-attack/",
+  "description": "Smash procedurally generated block towers using your camera! Destroy everything in your path!",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0a0a14",
   "theme_color": "#ff5533",
-  "description": "Smash procedurally generated block towers using your camera! Destroy everything in your path!",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "../favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

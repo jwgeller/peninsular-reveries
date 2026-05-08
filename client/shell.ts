@@ -1,3 +1,11 @@
+// Suppress harmless AbortError from cross-document View Transitions
+// (e.g. "Transition was skipped" when navigating away before a transition finishes)
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason?.name === 'AbortError' && /transition was skipped/i.test(event.reason?.message)) {
+    event.preventDefault()
+  }
+})
+
 // Theme toggle in footer
 const footer = document.querySelector('.site-footer')
 

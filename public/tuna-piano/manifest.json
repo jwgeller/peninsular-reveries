@@ -1,14 +1,16 @@
 {
+  "id": "./",
   "name": "Tuna Piano",
   "short_name": "Tuna Piano",
   "description": "Play a translucent piano with your hands using the camera. Open hand plays a note, closed hand sustains it.",
-  "start_url": "/tuna-piano/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0a1628",
   "theme_color": "#0a1628",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "../favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

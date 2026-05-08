@@ -1,14 +1,16 @@
 {
+  "id": "./",
   "name": "Mudskipper",
   "short_name": "Mudskipper",
   "description": "Jump to make your mudskipper splash in the mud before the screen fills up!",
-  "start_url": "/mudskipper/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#1a120b",
   "theme_color": "#1a120b",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "../favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

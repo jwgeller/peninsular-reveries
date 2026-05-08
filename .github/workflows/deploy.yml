@@ -5,7 +5,6 @@ on:
     branches: [main]
 
 env:
-  NODE_VERSION: 26.1.0
   BUN_VERSION: latest
 
 permissions:
@@ -25,9 +24,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run test:unit
@@ -36,7 +32,7 @@ jobs:
           NODE_ENV: production
           SITE_BASE_PATH: /${{ github.event.repository.name }}
           SITE_ORIGIN: https://${{ github.repository_owner }}.github.io
-      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: dist
 
