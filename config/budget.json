@@ -7,14 +7,5 @@
       { "resourceType": "script", "budget": 150 },
       { "resourceType": "total", "budget": 400 }
     ]
-  },
-  {
-    "path": "/*-immersive/*",
-    "resourceSizes": [
-      { "resourceType": "document", "budget": 56 },
-      { "resourceType": "stylesheet", "budget": 60 },
-      { "resourceType": "script", "budget": 1024 },
-      { "resourceType": "total", "budget": 1150 }
-    ]
   }
 ]

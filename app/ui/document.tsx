@@ -14,8 +14,6 @@ interface DocumentProps {
   includeFooter?: boolean
   includeDefaultStyles?: boolean
   scripts?: string[]
-  /** Import map entries to inject as a `<script type=importmap>`. */
-  importMap?: Record<string, string>
   bodyClass?: string
   viewportFitCover?: boolean
   faviconPath?: string
@@ -36,7 +34,6 @@ export function Document() {
       includeFooter = true,
       includeDefaultStyles = true,
       scripts = [],
-      importMap,
       bodyClass,
       viewportFitCover = false,
       faviconPath = '/favicon.svg',
@@ -92,7 +89,6 @@ export function Document() {
           <meta name="theme-color" content="#1a1a2e" />
           {allStyles.map(href => <link rel="stylesheet" href={href} />)}
           <script innerHTML={`const theme=localStorage.getItem('theme');if(theme)document.documentElement.setAttribute('data-theme',theme);const reduceMotion=localStorage.getItem('reduce-motion');if(reduceMotion==='reduce'||reduceMotion==='no-preference')document.documentElement.setAttribute('data-reduce-motion',reduceMotion);`} />
-          {importMap ? <script type="importmap" innerHTML={JSON.stringify({ imports: Object.fromEntries(Object.entries(importMap).map(([k, v]) => [k, withBasePath(v, siteBasePath)])) })} /> : null}
         </head>
         <body className={bodyClass} mix={includeDefaultStyles ? [] : [css(gameBodyStyles)]}>
           {includeNav ? (

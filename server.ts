@@ -24,7 +24,6 @@ const clientEntryPoints = [
   'client/shell.ts',
   'client/home.ts',
   'client/404.ts',
-  'client/pixi-vendor.ts',
 ]
 
 const gameEntryPoints = [
@@ -49,20 +48,7 @@ const gameEntryPoints = [
   'games/dragons-crunch/main.ts',
 ]
 
-const immersiveEntryPoints = [
-  'games/chompers-immersive/main.ts',
-  'games/beat-pad-immersive/main.ts',
-  'games/mission-orbit-immersive/main.ts',
-  'games/peekaboo-immersive/main.ts',
-  'games/pixel-passport-immersive/main.ts',
-  'games/spot-on-immersive/main.ts',
-  'games/squares-immersive/main.ts',
-  'games/story-trail-immersive/main.ts',
-  'games/super-word-immersive/main.ts',
-  'games/train-sounds-immersive/main.ts',
-  'games/waterwall-immersive/main.ts',
-  // Add new immersive games here as you create them
-]
+
 
 
 const clientEsbuildOptions: esbuild.BuildOptions = {
@@ -85,10 +71,7 @@ const gameEsbuildOptions: esbuild.BuildOptions = {
   minify: !IS_DEV,
 }
 
-const immersiveEsbuildOptions: esbuild.BuildOptions = {
-  ...gameEsbuildOptions,
-  external: ['pixi.js'],
-}
+
 
 if (IS_DEV) {
   // Dev: watch mode — rebuild on changes, live reload SSE
@@ -100,13 +83,8 @@ if (IS_DEV) {
     ...gameEsbuildOptions,
     entryPoints: gameEntryPoints,
   })
-  const immersiveCtx = await esbuild.context({
-    ...immersiveEsbuildOptions,
-    entryPoints: immersiveEntryPoints,
-  })
   await ctx.watch()
   await gameCtx.watch()
-  await immersiveCtx.watch()
   console.log('esbuild watching for changes...')
 } else {
   // Prod: one-time build
@@ -117,10 +95,6 @@ if (IS_DEV) {
   await esbuild.build({
     ...gameEsbuildOptions,
     entryPoints: gameEntryPoints,
-  })
-  await esbuild.build({
-    ...immersiveEsbuildOptions,
-    entryPoints: immersiveEntryPoints,
   })
   console.log('esbuild bundled production JS')
 }
