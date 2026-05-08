@@ -26,7 +26,7 @@ const RUNTIME_STYLES = `
   height: 100%;
   -webkit-touch-callout: none;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
 }
 `
 
@@ -122,7 +122,7 @@ export function initCanvas(container: HTMLElement, config: WaterwallConfig): Ini
   container.classList.add('waterwall-canvas-container')
 
   const canvas = documentRef.createElement('canvas')
-  canvas.style.cssText = '-webkit-touch-callout: none; user-select: none; touch-action: manipulation;'
+  canvas.style.cssText = '-webkit-touch-callout: none; user-select: none; touch-action: none;'
   canvas.setAttribute('role', 'img')
   canvas.setAttribute('aria-label', 'Waterwall game board')
 

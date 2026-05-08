@@ -225,7 +225,7 @@ body.tuna-piano-game main {
 .tp-camera-floor {
   -webkit-touch-callout: none;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 #pixi-stage {

@@ -224,6 +224,9 @@ body.mudskipper-game main {
   border-radius: 0.5rem;
   overflow: hidden;
   background: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: none;
 }
 
 .ms-camera-preview {

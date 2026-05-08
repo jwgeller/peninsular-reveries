@@ -135,6 +135,7 @@ async function enterGame(): Promise<void> {
   app.canvas.style.width = '100%'
   app.canvas.style.height = '100%'
   app.canvas.style.display = 'block'
+  app.canvas.style.touchAction = 'none'
 
   // Spotlight
   for (let i = app.stage.children.length - 1; i >= 0; i--) {
@@ -404,6 +405,7 @@ async function initReplayStage(container: HTMLElement): Promise<MiniReplay | nul
   mini.canvas.style.width = '100%'
   mini.canvas.style.height = '100%'
   mini.canvas.style.display = 'block'
+  mini.canvas.style.touchAction = 'none'
 
   const cat = createAnimal('cat', 0xffb7c5)
   cat.scale.set(2.2)

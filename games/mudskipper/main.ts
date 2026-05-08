@@ -154,6 +154,7 @@ async function enterGame(): Promise<void> {
   app.canvas.style.width = '100%'
   app.canvas.style.height = '100%'
   app.canvas.style.display = 'block'
+  app.canvas.style.touchAction = 'none'
 
   app.stage.removeChildren()
   particleGraphics.length = 0

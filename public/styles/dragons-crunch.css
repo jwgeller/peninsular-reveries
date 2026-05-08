@@ -224,7 +224,7 @@ body.dragons-crunch-game main {
 .dc-floor {
   -webkit-touch-callout: none;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 /* ── Pixi stage ─────────────────────────────────────────────── */

@@ -254,7 +254,7 @@ body.block-attack-game main {
 .ba-floor {
   -webkit-touch-callout: none;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 /* ── Pixi stage ─────────────────────────────────────────────── */

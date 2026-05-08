@@ -225,6 +225,9 @@ body.grow-with-me-game main {
   border-radius: 0.5rem;
   overflow: hidden;
   background: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: none;
 }
 
 .gwm-camera-preview {

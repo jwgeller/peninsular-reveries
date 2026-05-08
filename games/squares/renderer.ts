@@ -67,7 +67,7 @@ const RUNTIME_STYLES = `
   min-height: 44px;
   padding: 0.72rem 1rem;
   font: inherit;
-  touch-action: manipulation;
+  touch-action: none;
   box-shadow: 0 0.2rem 0.6rem rgba(28, 53, 62, 0.08);
 }
 
@@ -115,7 +115,7 @@ const RUNTIME_STYLES = `
   box-shadow:
     inset 0 1px 0 var(--squares-light-edge),
     0 0.35rem 0.85rem rgba(23, 49, 58, 0.1);
-  touch-action: manipulation;
+  touch-action: none;
   -webkit-touch-callout: none;
   user-select: none;
   overflow: hidden;

@@ -90,20 +90,12 @@ export function createSmashZone(): Graphics {
   // Inner ring
   g.circle(0, 0, 25)
   g.fill({ color: 0xff4444, alpha: 0.12 })
+  g.circle(0, 0, 25)
+  g.stroke({ color: 0xff8866, width: 2, alpha: 0.4 })
 
-  // Crosshair lines
-  g.moveTo(-40, 0)
-  g.lineTo(-15, 0)
-  g.stroke({ color: 0xff6644, width: 2, alpha: 0.5 })
-  g.moveTo(15, 0)
-  g.lineTo(40, 0)
-  g.stroke({ color: 0xff6644, width: 2, alpha: 0.5 })
-  g.moveTo(0, -40)
-  g.lineTo(0, -15)
-  g.stroke({ color: 0xff6644, width: 2, alpha: 0.5 })
-  g.moveTo(0, 15)
-  g.lineTo(0, 40)
-  g.stroke({ color: 0xff6644, width: 2, alpha: 0.5 })
+  // Center dot
+  g.circle(0, 0, 5)
+  g.fill({ color: 0xff6644, alpha: 0.5 })
 
   return g
 }

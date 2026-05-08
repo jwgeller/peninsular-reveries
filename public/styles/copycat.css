@@ -224,7 +224,7 @@ body.copycat-game main {
 .dance-floor {
   -webkit-touch-callout: none;
   user-select: none;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 /* ── Pixi stage ─────────────────────────────────────────────── */
