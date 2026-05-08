@@ -1,9 +1,13 @@
 .dev-client/
+_archive/
 dist/
-.playwright-build-check/
 node_modules/
 playwright-report/
 test-results/
+.playwright-build-check/
 .env
-.pi/skills/creative-assets/.sound-staging/
+package-lock.json
+pnpm-lock.yaml
+bun.lockb
 .claude/settings.local.json
+.pi/skills/creative-assets/.sound-staging/

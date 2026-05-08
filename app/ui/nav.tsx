@@ -1,4 +1,4 @@
-import { css } from '@remix-run/component'
+import { css } from '@remix-run/ui'
 import { games } from '../data/game-registry.js'
 import { attributionsPagePath } from '../data/attribution-index.js'
 import { getSiteBasePath } from '../site-config.js'

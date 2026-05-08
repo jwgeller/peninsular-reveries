@@ -1,18 +1,25 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import { Application, Graphics, Text, Container } from 'pixi.js'
-import { requestCamera, startMotionTracking } from '../../client/camera.js'
+import { requestCamera, startMotionTracking, stopMotionTracking } from '../../client/camera.js'
 import type { MotionBody } from '../../client/camera.js'
 import { setupGameMenu } from '../../client/game-menu.js'
-import { sfxTap, sfxSelect, ensureAudioUnlocked } from './sounds.js'
+import { sfxTap, sfxSelect, sfxCorrect, sfxWrong, ensureAudioUnlocked } from './sounds.js'
 import { announceAction } from './accessibility.js'
 
-// ── PixiJS v8 initialization ──────────────────────────────────────────────
-export async function initStage(container: HTMLElement): Promise<Application | null> {
+const C = {
+  bg: 0x101020,
+  on: 0xffcc00,
+  off: 0x222244,
+  hand: 0x44aaff,
+  accent: 0xffcc00,
+  text: 0xffffff,
+}
+
+async function initStage(container: HTMLElement, width: number, height: number): Promise<Application | null> {
   for (const preference of ['webgpu', 'webgl', 'canvas'] as const) {
     try {
       const app = new Application()
-      await app.init({ preference, backgroundAlpha: 0, autoDensity: true, resizeTo: container })
+      await app.init({ preference, width, height, background: C.bg, autoDensity: true })
       container.appendChild(app.canvas)
       return app
     } catch { continue }
@@ -20,18 +27,7 @@ export async function initStage(container: HTMLElement): Promise<Application | n
   return null
 }
 
-// ── Colors ─────────────────────────────────────────────────────────────────
-const SWATCHES = [0x254653, 0xf2ebd6, 0xf59e0b, 0x44aaff, 0xffffff]
-const C = {
-  bg: SWATCHES[0],
-  bgLight: SWATCHES[1],
-  accent: SWATCHES[2],
-  hand: SWATCHES[3],
-  text: SWATCHES[4],
-}
-
 const ALL_SCREENS = ['start-screen', 'game-screen', 'end-screen']
-
 function showScreen(screenId: string): void {
   for (const id of ALL_SCREENS) {
     const el = document.getElementById(id)
@@ -44,155 +40,200 @@ function showScreen(screenId: string): void {
   }
 }
 
-// ── Boot ────────────────────────────────────────────────────────────────────
+const GRID_SIZE = 5
+
+type Board = boolean[][]
+
+function createBoard(): Board {
+  const board: Board = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(false))
+  // Random pattern — solvable by toggling ~8-12 cells
+  for (let i = 0; i < 6; i++) {
+    const r = Math.floor(Math.random() * GRID_SIZE)
+    const c = Math.floor(Math.random() * GRID_SIZE)
+    toggleCell(board, r, c)
+  }
+  // Make sure it's not already solved
+  if (isSolved(board)) {
+    toggleCell(board, 0, 0)
+  }
+  return board
+}
+
+function toggleCell(board: Board, row: number, col: number): void {
+  board[row][col] = !board[row][col]
+  if (row > 0) board[row - 1][col] = !board[row - 1][col]
+  if (row < GRID_SIZE - 1) board[row + 1][col] = !board[row + 1][col]
+  if (col > 0) board[row][col - 1] = !board[row][col - 1]
+  if (col < GRID_SIZE - 1) board[row][col + 1] = !board[row][col + 1]
+}
+
+function isSolved(board: Board): boolean {
+  return board.every(row => row.every(cell => !cell))
+}
+
 async function boot(): Promise<void> {
   const pixiStage = document.getElementById('pixi-stage')!
   const cameraPreview = document.getElementById('camera-preview') as HTMLVideoElement
   const startBtn = document.getElementById('start-btn') as HTMLButtonElement
   const replayBtn = document.getElementById('replay-btn') as HTMLButtonElement
   const cameraPrompt = document.querySelector('.sqi-camera-prompt') as HTMLElement
-    const gameStatus = document.getElementById('game-status')!
-
-  const app = await initStage(pixiStage)
-  if (!app) {
-    cameraPrompt.textContent = 'Unable to initialize the game stage. Please try a different browser.'
-    startBtn.disabled = true
-    return
-  }
+  const gameStatus = document.getElementById('game-status')!
 
   setupGameMenu({ musicTrackPicker: false })
-
   let cameraGranted = false
   let activeBodies: MotionBody[] = []
+  let app: Application | null = null
   let gameRunning = false
-  let score = 0
+  let board: Board = createBoard()
+  let moves = 0
+  let gameLoopCallback: (() => void) | null = null
+  let lastToggleTime = 0
 
   cameraGranted = await requestCamera(cameraPreview)
   if (cameraGranted) {
     startMotionTracking(cameraPreview, (bodies) => { activeBodies = bodies })
-    cameraPrompt.textContent = 'Camera access granted! Point at cells to flip them and their neighbors.'
+    cameraPrompt.textContent = 'Camera access granted! Point at cells to flip them and their neighbors!'
   } else {
-    cameraPrompt.textContent = 'Camera not available. Click or tap to interact.'
+    cameraPrompt.textContent = 'Camera not available. Click cells to flip them.'
   }
 
   startBtn.addEventListener('click', enterGame)
   replayBtn.addEventListener('click', resetToStart)
 
-  const bgGfx = new Graphics()
-  const handGfx = new Graphics()
-  const sceneGfx = new Graphics()
-  const hudContainer = new Container()
-
   async function enterGame(): Promise<void> {
     ensureAudioUnlocked()
     showScreen('game-screen')
     gameRunning = true
-    score = 0
+    board = createBoard()
+    moves = 0
+    lastToggleTime = 0
 
     await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 600)))
+      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 100)))
     })
 
     const rect = pixiStage.getBoundingClientRect()
-    const w = Math.max(1, Math.round(rect.width)) || window.innerWidth
-    const h = Math.max(1, Math.round(rect.height)) || window.innerHeight
-    app.renderer.resize(w, h)
+    const app = await initStage(pixiStage, Math.max(1, Math.round(rect.width)), Math.max(1, Math.round(rect.height)))
+    if (!app) return
 
-    app.stage.removeChildren()
-    app.stage.addChild(bgGfx)
-    app.stage.addChild(sceneGfx)
-    app.stage.addChild(handGfx)
-    app.stage.addChild(hudContainer)
-
-    if (app.ticker.count) app.ticker.remove(gameLoop)
-    app.ticker.add(gameLoop)
-  }
-
-  let lastTapTime = 0
-  let lastSelectTime = 0
-
-  function gameLoop(_ticker: { deltaMS: number }): void {
-    if (!app || !gameRunning) return
-    const sw = app.screen.width
-    const sh = app.screen.height
-    const now = performance.now()
-
-    // Background
-    bgGfx.clear()
-    bgGfx.rect(0, 0, sw, sh).fill({ color: C.bg })
-    // Subtle ground/scene area
-    bgGfx.rect(0, sh * 0.7, sw, sh * 0.3).fill({ color: C.bgLight })
-    bgGfx.moveTo(0, sh * 0.7).lineTo(sw, sh * 0.7).stroke({ color: C.accent, width: 1, alpha: 0.3 })
-
-    // Scene graphics - show interactive zones
-    sceneGfx.clear()
-    const numZones = 5
-    const zoneW = (sw - 20 * (numZones + 1)) / numZones
-    for (let i = 0; i < numZones; i++) {
-      const zx = 20 + i * (zoneW + 20)
-      const zy = sh * 0.45
-      const zh = sh * 0.2
-      sceneGfx.roundRect(zx, zy, zoneW, zh, 8).fill({ color: C.bgLight, alpha: 0.8 })
-      sceneGfx.roundRect(zx, zy, zoneW, zh, 8).stroke({ color: C.accent, alpha: 0.3, width: 1 })
-
-      const label = new Text({ text: ['Zone A', 'Zone B', 'Zone C', 'Zone D', 'Zone E'][i], style: { fill: C.accent, fontSize: 14, fontFamily: 'system-ui' } })
-      label.anchor.set(0.5, 0.5)
-      label.position.set(zx + zoneW / 2, zy + zh / 2)
-      sceneGfx.addChild(label)
-    }
-
-    // Title text
-    const titleText = new Text({ text: 'Squares Immersive', style: { fill: C.accent, fontSize: 24, fontFamily: 'system-ui', fontWeight: 'bold' } })
-      titleText.anchor.set(0.5, 0)
-      sceneGfx.addChild(titleText)
-
-    // Title in HUD handled by hud text
-    // Hand tracking
-    const bodies = cameraGranted ? activeBodies : []
-    handGfx.clear()
-
-    for (const body of bodies) {
-      const hx = (1 - body.normalizedX) * sw
-      const hy = body.normalizedY * sh
-
-      handGfx.circle(hx, hy, 24).fill({ color: C.hand, alpha: 0.15 })
-      handGfx.circle(hx, hy, 10).fill({ color: C.hand, alpha: 0.4 })
-
-      // Detect interaction with zones
-      for (let i = 0; i < numZones; i++) {
-        const zx = 20 + i * (zoneW + 20)
-        const zy = sh * 0.45
-        const zh = sh * 0.2
-        if (hx >= zx && hx <= zx + zoneW && hy >= zy && hy <= zy + zh) {
-          if (body.armsUp && now - lastSelectTime > 800) {
-            sfxSelect()
-            lastSelectTime = now
-            score += 10
-            announceAction('Selected zone ' + (i + 1))
-          } else if (now - lastTapTime > 400) {
-            sfxTap()
-            lastTapTime = now
-          }
-          handGfx.roundRect(zx, zy, zoneW, zh, 8).stroke({ color: C.accent, width: 2 })
+    // Click/tap to toggle cells
+    pixiStage.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (!gameRunning) return
+      const pixiRect = pixiStage.getBoundingClientRect()
+      const tx = e.clientX - pixiRect.left
+      const ty = e.clientY - pixiRect.top
+      const sw = app!.screen.width
+      const sh = app!.screen.height
+      const gridSize = Math.min(sw, sh) * 0.7
+      const offsetX = (sw - gridSize) / 2
+      const offsetY = (sh - gridSize) / 2
+      const cellSize = gridSize / GRID_SIZE
+      const col = Math.floor((tx - offsetX) / cellSize)
+      const row = Math.floor((ty - offsetY) / cellSize)
+      if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
+        toggleCell(board, row, col)
+        moves++
+        sfxTap()
+        if (isSolved(board)) {
+          sfxCorrect()
+          announceAction(`Solved in ${moves} moves!`)
         }
       }
+    })
+
+    if (gameLoopCallback) app.ticker.remove(gameLoopCallback)
+
+    gameLoopCallback = () => {
+      const texts: Text[] = []
+      if (!app) return
+      const sw = app.screen.width
+      const sh = app.screen.height
+      const now = performance.now()
+
+      const gfx = new Graphics()
+      gfx.rect(0, 0, sw, sh).fill({ color: C.bg })
+
+      const gridSize = Math.min(sw, sh) * 0.7
+      const offsetX = (sw - gridSize) / 2
+      const offsetY = (sh - gridSize) / 2
+      const cellSize = gridSize / GRID_SIZE
+
+      // Title
+      const title = new Text({ text: 'Squares Immersive', style: { fill: C.accent, fontSize: 20, fontFamily: 'system-ui', fontWeight: 'bold' } })
+      title.anchor.set(0.5, 0)
+      title.position.set(sw / 2, 20)
+      texts.push(title)
+
+      // Grid
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const cx = offsetX + c * cellSize
+          const cy = offsetY + r * cellSize
+          const isOn = board[r][c]
+          gfx.roundRect(cx + 3, cy + 3, cellSize - 6, cellSize - 6, 6).fill({ color: isOn ? C.on : C.off })
+          gfx.roundRect(cx + 3, cy + 3, cellSize - 6, cellSize - 6, 6).stroke({ color: 0x444466, width: 1 })
+        }
+      }
+
+      // Hand tracking — hover + arms-up to toggle
+      const body = cameraGranted ? activeBodies[0] : null
+      if (body && gameRunning) {
+        const hx = (1 - body.normalizedX) * sw
+        const hy = body.normalizedY * sh
+        const hCol = Math.floor((hx - offsetX) / cellSize)
+        const hRow = Math.floor((hy - offsetY) / cellSize)
+
+        if (hCol >= 0 && hCol < GRID_SIZE && hRow >= 0 && hRow < GRID_SIZE) {
+          const hx2 = offsetX + hCol * cellSize + cellSize / 2
+          const hy2 = offsetY + hRow * cellSize + cellSize / 2
+          gfx.roundRect(offsetX + hCol * cellSize + 1, offsetY + hRow * cellSize + 1, cellSize - 2, cellSize - 2, 6).stroke({ color: C.hand, width: 3 })
+
+          if (body.armsUp && gameRunning && now - lastToggleTime > 600) {
+            toggleCell(board, hRow, hCol)
+            moves++
+            lastToggleTime = now
+            sfxTap()
+            if (isSolved(board)) {
+              sfxCorrect()
+              announceAction(`Solved in ${moves} moves!`)
+            }
+          }
+        }
+        gfx.circle(hx, hy, 24).fill({ color: C.hand, alpha: 0.15 })
+        gfx.circle(hx, hy, 10).fill({ color: C.hand, alpha: 0.4 })
+      }
+
+      // Moves counter
+      const movesText = new Text({ text: `Moves: ${moves}`, style: { fill: C.text, fontSize: 16, fontFamily: 'system-ui' } })
+      movesText.position.set(10, 10)
+      texts.push(movesText)
+
+      if (isSolved(board)) {
+        const winText = new Text({ text: `🎉 Solved in ${moves} moves!`, style: { fill: C.on, fontSize: 22, fontFamily: 'system-ui', fontWeight: 'bold' } })
+        winText.anchor.set(0.5, 0.5)
+        winText.position.set(sw / 2, sh - 50)
+        texts.push(winText)
+      }
+
+      app.stage.removeChildren()
+      app.stage.addChild(gfx)
     }
 
-    // HUD
-    hudContainer.removeChildren()
-    const scoreText = new Text({ text: `Score: ${score}`, style: { fill: C.accent, fontSize: 18, fontFamily: 'system-ui' } })
-    scoreText.position.set(10, 10)
-    hudContainer.addChild(scoreText)
-
-    scoreDisplay.textContent = `${score} pts`
+    app.ticker.add(gameLoopCallback)
   }
 
   function resetToStart(): void {
     gameRunning = false
-    if (app) app.ticker.remove(gameLoop)
+    if (app) {
+      app.ticker.remove(gameLoopCallback!)
+      app.destroy(true, { children: true, texture: true })
+      app = null
+    }
+    stopMotionTracking()
     showScreen('start-screen')
     gameStatus.textContent = 'Ready to play!'
-    score = 0
+    board = createBoard()
+    moves = 0
     if (cameraGranted && cameraPreview) {
       startMotionTracking(cameraPreview, (bodies) => { activeBodies = bodies })
     }

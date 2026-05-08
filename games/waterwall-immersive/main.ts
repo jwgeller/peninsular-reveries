@@ -1,208 +1,169 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import { Application, Graphics, Text, Container } from 'pixi.js'
-import { requestCamera, startMotionTracking } from '../../client/camera.js'
+import { requestCamera, startMotionTracking, stopMotionTracking } from '../../client/camera.js'
 import type { MotionBody } from '../../client/camera.js'
 import { setupGameMenu } from '../../client/game-menu.js'
-import { sfxTap, sfxSelect, ensureAudioUnlocked } from './sounds.js'
+import { sfxTap, sfxSelect, sfxCorrect, sfxWrong, ensureAudioUnlocked } from './sounds.js'
 import { announceAction } from './accessibility.js'
 
-// ── PixiJS v8 initialization ──────────────────────────────────────────────
-export async function initStage(container: HTMLElement): Promise<Application | null> {
+const C = { bg: 0x0a1a2a, water: 0x2266aa, barrier: 0x88cc44, hand: 0x44aaff, accent: 0x44ddff, text: 0xffffff }
+
+async function initStage(container: HTMLElement, width: number, height: number): Promise<Application | null> {
   for (const preference of ['webgpu', 'webgl', 'canvas'] as const) {
-    try {
-      const app = new Application()
-      await app.init({ preference, backgroundAlpha: 0, autoDensity: true, resizeTo: container })
-      container.appendChild(app.canvas)
-      return app
-    } catch { continue }
+    try { const app = new Application(); await app.init({ preference, width, height, background: C.bg, autoDensity: true }); container.appendChild(app.canvas); return app } catch { continue }
   }
   return null
 }
 
-// ── Colors ─────────────────────────────────────────────────────────────────
-const SWATCHES = [0x0a1a2a, 0x1a3a4a, 0x44aaff, 0x88ff88, 0xffffff]
-const C = {
-  bg: SWATCHES[0],
-  bgLight: SWATCHES[1],
-  accent: SWATCHES[2],
-  hand: SWATCHES[3],
-  text: SWATCHES[4],
-}
-
 const ALL_SCREENS = ['start-screen', 'game-screen', 'end-screen']
-
 function showScreen(screenId: string): void {
-  for (const id of ALL_SCREENS) {
-    const el = document.getElementById(id)
-    if (!el) continue
-    const isActive = id === screenId
-    el.hidden = !isActive
-    el.classList.toggle('active', isActive)
-    if (isActive) el.removeAttribute('inert')
-    else el.setAttribute('inert', '')
-  }
+  for (const id of ALL_SCREENS) { const el = document.getElementById(id); if (!el) continue; const isActive = id === screenId; el.hidden = !isActive; el.classList.toggle('active', isActive); if (isActive) el.removeAttribute('inert'); else el.setAttribute('inert', '') }
 }
 
-// ── Boot ────────────────────────────────────────────────────────────────────
+const COLS = 8, ROWS = 6
+
+interface WaterDrop { x: number; y: number; speed: number }
+interface Barrier { col: number; row: number }
+
 async function boot(): Promise<void> {
   const pixiStage = document.getElementById('pixi-stage')!
   const cameraPreview = document.getElementById('camera-preview') as HTMLVideoElement
   const startBtn = document.getElementById('start-btn') as HTMLButtonElement
   const replayBtn = document.getElementById('replay-btn') as HTMLButtonElement
   const cameraPrompt = document.querySelector('.wi-camera-prompt') as HTMLElement
-    const gameStatus = document.getElementById('game-status')!
-
-  const app = await initStage(pixiStage)
-  if (!app) {
-    cameraPrompt.textContent = 'Unable to initialize the game stage. Please try a different browser.'
-    startBtn.disabled = true
-    return
-  }
+  const gameStatus = document.getElementById('game-status')!
 
   setupGameMenu({ musicTrackPicker: false })
-
-  let cameraGranted = false
-  let activeBodies: MotionBody[] = []
-  let gameRunning = false
-  let score = 0
+  let cameraGranted = false, activeBodies: MotionBody[] = []
+  let app: Application | null = null, gameRunning = false, gameLoopCallback: (() => void) | null = null
+  let barriers: Barrier[] = [], waterDrops: WaterDrop[] = [], lastPlaceTime = 0, score = 0
 
   cameraGranted = await requestCamera(cameraPreview)
-  if (cameraGranted) {
-    startMotionTracking(cameraPreview, (bodies) => { activeBodies = bodies })
-    cameraPrompt.textContent = 'Camera access granted! Move your hands to place barriers. Water flows around them!'
-  } else {
-    cameraPrompt.textContent = 'Camera not available. Click or tap to interact.'
-  }
+  if (cameraGranted) { startMotionTracking(cameraPreview, (bodies) => { activeBodies = bodies }); cameraPrompt.textContent = 'Camera access granted! Move your hands to place barriers. Water flows around them!' }
+  else { cameraPrompt.textContent = 'Camera not available. Click cells to place barriers.' }
 
   startBtn.addEventListener('click', enterGame)
   replayBtn.addEventListener('click', resetToStart)
 
-  const bgGfx = new Graphics()
-  const handGfx = new Graphics()
-  const sceneGfx = new Graphics()
-  const hudContainer = new Container()
+  function spawnWater() {
+    if (Math.random() < 0.15) {
+      waterDrops.push({ x: Math.random() * COLS, y: 0, speed: 0.02 + Math.random() * 0.03 })
+    }
+  }
 
-  async function enterGame(): Promise<void> {
-    ensureAudioUnlocked()
-    showScreen('game-screen')
-    gameRunning = true
-    score = 0
+  async function enterGame() {
+    ensureAudioUnlocked(); showScreen('game-screen'); gameRunning = true
+    barriers = []; waterDrops = []; score = 0; lastPlaceTime = 0
+    await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 100))))
+    const rect = pixiStage.getBoundingClientRect()
+    app = await initStage(pixiStage, Math.max(1, Math.round(rect.width)), Math.max(1, Math.round(rect.height)))
+    if (!app) return
 
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 600)))
+    pixiStage.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (!app || !gameRunning) return
+      const pr = pixiStage.getBoundingClientRect()
+      const tx = e.clientX - pr.left, ty = e.clientY - pr.top
+      const sw = app!.screen.width, sh = app!.screen.height
+      const gridX = (sw - Math.min(sw, sh) * 0.9) / 2
+      const gridY = sh * 0.15
+      const cellSize = Math.min(sw, sh) * 0.9 / COLS
+      const col = Math.floor((tx - gridX) / cellSize)
+      const row = Math.floor((ty - gridY) / cellSize)
+      toggleBarrier(col, row)
     })
 
-    const rect = pixiStage.getBoundingClientRect()
-    const w = Math.max(1, Math.round(rect.width)) || window.innerWidth
-    const h = Math.max(1, Math.round(rect.height)) || window.innerHeight
-    app.renderer.resize(w, h)
+    if (gameLoopCallback) app.ticker.remove(gameLoopCallback)
+    gameLoopCallback = () => {
+      const texts: Text[] = []
+      if (!app || !gameRunning) return
+      const sw = app.screen.width, sh = app.screen.height, now = performance.now()
+      spawnWater()
 
-    app.stage.removeChildren()
-    app.stage.addChild(bgGfx)
-    app.stage.addChild(sceneGfx)
-    app.stage.addChild(handGfx)
-    app.stage.addChild(hudContainer)
+      // Move water drops
+      waterDrops.forEach(drop => {
+        drop.y += drop.speed
+        // Check if blocked by barrier
+        const col = Math.floor(drop.x)
+        const row = Math.floor(drop.y)
+        if (barriers.some(b => b.col === col && b.row === row)) {
+          drop.x += (Math.random() < 0.5 ? 1 : -1) * 0.1 // deflect
+        }
+      })
+      waterDrops = waterDrops.filter(d => d.y < ROWS && d.x > -1 && d.x < COLS + 1)
 
-    if (app.ticker.count) app.ticker.remove(gameLoop)
-    app.ticker.add(gameLoop)
-  }
+      const gfx = new Graphics()
+      gfx.rect(0, 0, sw, sh).fill({ color: C.bg })
 
-  let lastTapTime = 0
-  let lastSelectTime = 0
+      const gridW = Math.min(sw, sh) * 0.9
+      const cellSize = gridW / COLS
+      const gridX = (sw - gridW) / 2
+      const gridY = sh * 0.15
 
-  function gameLoop(_ticker: { deltaMS: number }): void {
-    if (!app || !gameRunning) return
-    const sw = app.screen.width
-    const sh = app.screen.height
-    const now = performance.now()
-
-    // Background
-    bgGfx.clear()
-    bgGfx.rect(0, 0, sw, sh).fill({ color: C.bg })
-    // Subtle ground/scene area
-    bgGfx.rect(0, sh * 0.7, sw, sh * 0.3).fill({ color: C.bgLight })
-    bgGfx.moveTo(0, sh * 0.7).lineTo(sw, sh * 0.7).stroke({ color: C.accent, width: 1, alpha: 0.3 })
-
-    // Scene graphics - show interactive zones
-    sceneGfx.clear()
-    const numZones = 5
-    const zoneW = (sw - 20 * (numZones + 1)) / numZones
-    for (let i = 0; i < numZones; i++) {
-      const zx = 20 + i * (zoneW + 20)
-      const zy = sh * 0.45
-      const zh = sh * 0.2
-      sceneGfx.roundRect(zx, zy, zoneW, zh, 8).fill({ color: C.bgLight, alpha: 0.8 })
-      sceneGfx.roundRect(zx, zy, zoneW, zh, 8).stroke({ color: C.accent, alpha: 0.3, width: 1 })
-
-      const label = new Text({ text: ['Zone A', 'Zone B', 'Zone C', 'Zone D', 'Zone E'][i], style: { fill: C.accent, fontSize: 14, fontFamily: 'system-ui' } })
-      label.anchor.set(0.5, 0.5)
-      label.position.set(zx + zoneW / 2, zy + zh / 2)
-      sceneGfx.addChild(label)
-    }
-
-    // Title text
-    const titleText = new Text({ text: 'Waterwall Immersive', style: { fill: C.accent, fontSize: 24, fontFamily: 'system-ui', fontWeight: 'bold' } })
-      titleText.anchor.set(0.5, 0)
-      sceneGfx.addChild(titleText)
-
-    // Title in HUD handled by hud text
-    // Hand tracking
-    const bodies = cameraGranted ? activeBodies : []
-    handGfx.clear()
-
-    for (const body of bodies) {
-      const hx = (1 - body.normalizedX) * sw
-      const hy = body.normalizedY * sh
-
-      handGfx.circle(hx, hy, 24).fill({ color: C.hand, alpha: 0.15 })
-      handGfx.circle(hx, hy, 10).fill({ color: C.hand, alpha: 0.4 })
-
-      // Detect interaction with zones
-      for (let i = 0; i < numZones; i++) {
-        const zx = 20 + i * (zoneW + 20)
-        const zy = sh * 0.45
-        const zh = sh * 0.2
-        if (hx >= zx && hx <= zx + zoneW && hy >= zy && hy <= zy + zh) {
-          if (body.armsUp && now - lastSelectTime > 800) {
-            sfxSelect()
-            lastSelectTime = now
-            score += 10
-            announceAction('Selected zone ' + (i + 1))
-          } else if (now - lastTapTime > 400) {
-            sfxTap()
-            lastTapTime = now
-          }
-          handGfx.roundRect(zx, zy, zoneW, zh, 8).stroke({ color: C.accent, width: 2 })
+      // Grid cells
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cx = gridX + c * cellSize, cy = gridY + r * cellSize
+          const isBarrier = barriers.some(b => b.col === c && b.row === r)
+          gfx.rect(cx + 1, cy + 1, cellSize - 2, cellSize - 2).fill({ color: isBarrier ? C.barrier : 0x112233, alpha: 0.7 })
+          gfx.rect(cx + 1, cy + 1, cellSize - 2, cellSize - 2).stroke({ color: 0x223344, width: 1 })
         }
       }
+
+      // Water drops
+      for (const drop of waterDrops) {
+        const dx = gridX + drop.x * cellSize, dy = gridY + drop.y * cellSize
+        gfx.circle(dx, dy, 3).fill({ color: C.water, alpha: 0.7 })
+      }
+
+      // Title
+      const title = new Text({ text: 'Waterwall Immersive', style: { fill: C.accent, fontSize: 20, fontFamily: 'system-ui', fontWeight: 'bold' } })
+      title.anchor.set(0.5, 0); title.position.set(sw / 2, 10); texts.push(title)
+
+      // Barrier count
+      const countText = new Text({ text: `Barriers: ${barriers.length}`, style: { fill: C.text, fontSize: 14, fontFamily: 'system-ui' } })
+      countText.position.set(10, sh - 30); texts.push(countText)
+
+      // Hand tracking
+      const body = cameraGranted ? activeBodies[0] : null
+      if (body && gameRunning) {
+        const hx = (1 - body.normalizedX) * sw, hy = body.normalizedY * sh
+        const hCol = Math.floor((hx - gridX) / cellSize)
+        const hRow = Math.floor((hy - gridY) / cellSize)
+
+        if (hCol >= 0 && hCol < COLS && hRow >= 0 && hRow < ROWS) {
+          const hx2 = gridX + hCol * cellSize, hy2 = gridY + hRow * cellSize
+          gfx.rect(hx2, hy2, cellSize, cellSize).stroke({ color: C.hand, width: 2 })
+
+          if (body.armsUp && now - lastPlaceTime > 400) {
+            toggleBarrier(hCol, hRow)
+            lastPlaceTime = now
+          }
+        }
+
+        gfx.circle(hx, hy, 24).fill({ color: C.hand, alpha: 0.15 })
+        gfx.circle(hx, hy, 10).fill({ color: C.hand, alpha: 0.4 })
+      }
+
+      app.stage.removeChildren()
+      app.stage.addChild(gfx)
+      for (const t of texts) app.stage.addChild(t)
     }
-
-    // HUD
-    hudContainer.removeChildren()
-    const scoreText = new Text({ text: `Score: ${score}`, style: { fill: C.accent, fontSize: 18, fontFamily: 'system-ui' } })
-    scoreText.position.set(10, 10)
-    hudContainer.addChild(scoreText)
-
-    scoreDisplay.textContent = `${score} pts`
+    app.ticker.add(gameLoopCallback)
   }
 
-  function resetToStart(): void {
+  function toggleBarrier(col: number, row: number) {
+    if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return
+    const idx = barriers.findIndex(b => b.col === col && b.row === row)
+    if (idx >= 0) { barriers.splice(idx, 1); sfxTap() } else { barriers.push({ col, row }); sfxSelect() }
+  }
+
+  function resetToStart() {
     gameRunning = false
-    if (app) app.ticker.remove(gameLoop)
-    showScreen('start-screen')
-    gameStatus.textContent = 'Ready to play!'
-    score = 0
-    if (cameraGranted && cameraPreview) {
-      startMotionTracking(cameraPreview, (bodies) => { activeBodies = bodies })
-    }
+    if (app) { app.ticker.remove(gameLoopCallback!); app.destroy(true, { children: true, texture: true }); app = null }
+    stopMotionTracking(); showScreen('start-screen'); gameStatus.textContent = 'Ready to play!'
+    if (cameraGranted && cameraPreview) startMotionTracking(cameraPreview, (bodies) => { activeBodies = bodies })
   }
-
   document.addEventListener('restart', () => resetToStart())
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot)
-} else {
-  boot()
-}
+if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot) } else { boot() }

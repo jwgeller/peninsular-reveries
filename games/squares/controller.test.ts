@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 test('Squares controller renders the full page shell and required UI hooks', async () => {
-  ;(globalThis as typeof globalThis & { React?: unknown }).React = await import('@remix-run/component')
+  ;(globalThis as typeof globalThis & { React?: unknown }).React = await import('@remix-run/ui')
   const { squaresAction } = await import('./controller.js')
   const response = await squaresAction()
   const html = await response.text()

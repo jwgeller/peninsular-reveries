@@ -1,1 +1,1 @@
-export { initStage } from './main.js'
+// Renderer is handled inline by pixi.js in main.ts

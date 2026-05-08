@@ -1,5 +1,5 @@
-import * as React from '@remix-run/component'
-import { renderToString } from '@remix-run/component/server'
+import * as React from '@remix-run/ui'
+import { renderToString } from '@remix-run/ui/server'
 import { getSiteBasePath } from '../../app/site-config.js'
 import { withBasePath } from '../../app/site-paths.js'
 import { Document } from '../../app/ui/document.js'

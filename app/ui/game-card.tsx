@@ -1,4 +1,4 @@
-import { css } from '@remix-run/component'
+import { css } from '@remix-run/ui'
 
 interface GameCardProps {
   slug: string

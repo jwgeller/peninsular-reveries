@@ -22,7 +22,7 @@ test('build script writes the expected static output', () => {
   const outputDir = mkdtempSync(join(tmpdir(), 'peninsular-reveries-build-'))
 
   try {
-    const result = execSync('pnpm build', {
+    const result = execSync('bun run build', {
       encoding: 'utf-8',
       env: {
         ...process.env,

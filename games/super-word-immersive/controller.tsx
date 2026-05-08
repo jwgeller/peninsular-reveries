@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import * as React from '@remix-run/component'
-import { renderToString } from '@remix-run/component/server'
+import * as React from '@remix-run/ui'
+import { renderToString } from '@remix-run/ui/server'
 import { getSiteBasePath } from '../../app/site-config.js'
 import { withBasePath } from '../../app/site-paths.js'
 import { Document } from '../../app/ui/document.js'
@@ -24,7 +24,8 @@ export async function superwordimmersiveAction() {
       includeFooter={false}
       includeDefaultStyles={false}
       stylesheets={['/styles/super-word-immersive.css']}
-      scripts={['/client/super-word-immersive/main.js?v=__BUILD_SHA__']}
+      scripts={['/client/pixi-vendor.js?v=__BUILD_SHA__', '/client/super-word-immersive/main.js?v=__BUILD_SHA__']}
+      importMap={{ 'pixi.js': '/client/pixi-vendor.js?v=__BUILD_SHA__' }}
       bodyClass="super-word-immersive-game"
       viewportFitCover
       faviconPath="/favicon.svg"

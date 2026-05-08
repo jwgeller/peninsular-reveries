@@ -1,4 +1,4 @@
-import { renderToString } from '@remix-run/component/server'
+import { renderToString } from '@remix-run/ui/server'
 import { getGameAttribution } from '../../app/data/attribution-index.js'
 import { getSiteBasePath } from '../../app/site-config.js'
 import { withBasePath } from '../../app/site-paths.js'

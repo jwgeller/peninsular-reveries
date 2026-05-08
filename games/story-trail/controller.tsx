@@ -1,4 +1,4 @@
-import { renderToString } from '@remix-run/component/server'
+import { renderToString } from '@remix-run/ui/server'
 import { Document } from '../../app/ui/document.js'
 import { GameHeader, GameScreen, GameTabbedModal, InfoSection, SettingsSection, SettingsToggle, SrOnly } from '../../app/ui/game-shell.js'
 import { getSiteBasePath } from '../../app/site-config.js'

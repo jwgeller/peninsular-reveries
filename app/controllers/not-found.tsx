@@ -1,5 +1,5 @@
-import { css } from '@remix-run/component'
-import { renderToString } from '@remix-run/component/server'
+import { css } from '@remix-run/ui'
+import { renderToString } from '@remix-run/ui/server'
 import { getSiteBasePath } from '../site-config.js'
 import { withBasePath } from '../site-paths.js'
 import { Document } from '../ui/document.js'

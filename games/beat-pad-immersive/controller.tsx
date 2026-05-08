@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import * as React from '@remix-run/component'
-import { renderToString } from '@remix-run/component/server'
+import * as React from '@remix-run/ui'
+import { renderToString } from '@remix-run/ui/server'
 import { getSiteBasePath } from '../../app/site-config.js'
 import { withBasePath } from '../../app/site-paths.js'
 import { Document } from '../../app/ui/document.js'
@@ -25,7 +25,8 @@ export async function beatPadImmersiveAction() {
       includeFooter={false}
       includeDefaultStyles={false}
       stylesheets={['/styles/beat-pad-immersive.css']}
-      scripts={['/client/beat-pad-immersive/main.js?v=__BUILD_SHA__']}
+      scripts={['/client/pixi-vendor.js?v=__BUILD_SHA__', '/client/beat-pad-immersive/main.js?v=__BUILD_SHA__']}
+      importMap={{ 'pixi.js': '/client/pixi-vendor.js?v=__BUILD_SHA__' }}
       bodyClass="beat-pad-immersive-game"
       viewportFitCover
       faviconPath="/favicon.svg"

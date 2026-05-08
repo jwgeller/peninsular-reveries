@@ -1,25 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import { Application, Container, Graphics, Text } from 'pixi.js'
 import { requestCamera, startMotionTracking, stopMotionTracking } from '../../client/camera.js'
 import type { MotionBody } from '../../client/camera.js'
 import { setupGameMenu } from '../../client/game-menu.js'
-import { sfxCorrect, sfxWrong, sfxGameOver, ensureAudioUnlocked } from './sounds.js'
+import { sfxCorrect, sfxWrong, sfxGameOver, sfxChomp, ensureAudioUnlocked } from './sounds.js'
 import { announceCorrect, announceWrong, announceGameOver, announceRound } from './accessibility.js'
 import { createInitialState, selectAnswer, resolveChomp, advanceRound, type Area, type GameState } from './state.js'
-
-// ── PixiJS v8 initialization ──────────────────────────────────────────────
-export async function initStage(container: HTMLElement): Promise<Application | null> {
-  for (const preference of ['webgpu', 'webgl', 'canvas'] as const) {
-    try {
-      const app = new Application()
-      await app.init({ preference, backgroundAlpha: 0, autoDensity: true, resizeTo: container })
-      container.appendChild(app.canvas)
-      return app
-    } catch { continue }
-  }
-  return null
-}
 
 // ── Colors ─────────────────────────────────────────────────────────────────
 const C = {
@@ -30,32 +16,46 @@ const C = {
   fruit: 0x44ff88,
   wrong: 0xff4444,
   hand: 0x44aaff,
-  particle: 0xffff88,
   hippo: 0x8ca0b8,
   hippoDark: 0x5a6a7a,
   text: 0xffffff,
-  textShadow: 0x000000,
+}
+
+// ── Screen management ──────────────────────────────────────────────────────
+const ALL_SCREENS = ['start-screen', 'game-screen', 'end-screen']
+
+function showScreen(screenId: string): void {
+  for (const id of ALL_SCREENS) {
+    const el = document.getElementById(id)
+    if (!el) continue
+    const isActive = id === screenId
+    el.hidden = !isActive
+    el.classList.toggle('active', isActive)
+    if (isActive) el.removeAttribute('inert')
+    else el.setAttribute('inert', '')
+  }
+}
+
+// ── PixiJS v8 initialization (called when container is visible) ──────────
+async function initStage(container: HTMLElement, width: number, height: number): Promise<Application | null> {
+  for (const preference of ['webgpu', 'webgl', 'canvas'] as const) {
+    try {
+      const app = new Application()
+      await app.init({
+        preference,
+        width,
+        height,
+        background: C.bg,
+        autoDensity: true,
+      })
+      container.appendChild(app.canvas)
+      return app
+    } catch { continue }
+  }
+  return null
 }
 
 // ── Drawing helpers ────────────────────────────────────────────────────────
-function drawBackground(g: Graphics, w: number, h: number): void {
-  g.clear()
-  g.rect(0, 0, w, h).fill({ color: C.bg })
-  // Bottom ground
-  g.rect(0, h * 0.75, w, h * 0.25).fill({ color: C.bgLight })
-  // Ground line
-  g.moveTo(0, h * 0.75).lineTo(w, h * 0.75).stroke({ color: 0x2a3a4a, width: 2 })
-}
-
-function drawHandZone(g: Graphics, body: MotionBody, w: number, h: number): void {
-  const px = (1 - body.normalizedX) * w
-  const py = body.normalizedY * h
-  const radius = Math.max(body.spreadX, body.spreadY) * Math.min(w, h) * 0.4
-  g.clear()
-  g.circle(px, py, Math.max(8, radius)).fill({ color: C.hand, alpha: 0.15 })
-  g.circle(px, py, 12).fill({ color: C.hand, alpha: 0.4 })
-}
-
 function drawHippo(g: Graphics, x: number, y: number, mouthOpen: number): void {
   g.clear()
   // Body
@@ -83,6 +83,15 @@ function drawFruit(g: Graphics, x: number, y: number, emoji: string, scale: numb
   g.circle(x, y, 18 * scale).fill({ color: C.fruit, alpha: 0.6 })
 }
 
+function drawHandCursor(g: Graphics, body: MotionBody, w: number, h: number): void {
+  const px = (1 - body.normalizedX) * w
+  const py = body.normalizedY * h
+  const radius = Math.max(body.spreadX, body.spreadY) * Math.min(w, h) * 0.4
+  g.clear()
+  g.circle(px, py, Math.max(8, radius)).fill({ color: C.hand, alpha: 0.15 })
+  g.circle(px, py, 12).fill({ color: C.hand, alpha: 0.4 })
+}
+
 function drawHUD(hudContainer: Container, state: GameState): void {
   hudContainer.removeChildren()
   const scoreText = new Text({ text: `Score: ${state.score}`, style: { fill: C.score, fontSize: 20, fontFamily: 'system-ui' } })
@@ -97,21 +106,12 @@ function drawHUD(hudContainer: Container, state: GameState): void {
   const roundText = new Text({ text: `Round ${state.round}/${state.totalRounds}`, style: { fill: C.text, fontSize: 16, fontFamily: 'system-ui' } })
   roundText.position.set(10, 62)
   hudContainer.addChild(roundText)
-}
 
-// ── Game constants ─────────────────────────────────────────────────────────
-const ALL_SCREENS = ['start-screen', 'game-screen', 'end-screen']
-
-function showScreen(screenId: string): void {
-  for (const id of ALL_SCREENS) {
-    const el = document.getElementById(id)
-    if (!el) continue
-    const isActive = id === screenId
-    el.hidden = !isActive
-    el.classList.toggle('active', isActive)
-    if (isActive) el.removeAttribute('inert')
-    else el.setAttribute('inert', '')
-  }
+  // Problem prompt
+  const promptText = new Text({ text: state.currentProblem.prompt, style: { fill: C.text, fontSize: 22, fontFamily: 'system-ui', fontWeight: 'bold' } })
+  promptText.anchor.set(0.5, 0)
+  promptText.position.set(hudContainer.parent ? (hudContainer.parent.width / 2) : 200, 10)
+  hudContainer.addChild(promptText)
 }
 
 // ── Boot ────────────────────────────────────────────────────────────────────
@@ -121,36 +121,35 @@ async function boot(): Promise<void> {
   const startBtn = document.getElementById('start-btn') as HTMLButtonElement
   const replayBtn = document.getElementById('replay-btn') as HTMLButtonElement
   const cameraPrompt = document.querySelector('.ci-camera-prompt') as HTMLElement
-    const gameStatus = document.getElementById('game-status')!
+  const gameStatus = document.getElementById('game-status')!
 
-  const app = await initStage(pixiStage)
-  if (!app) {
-    cameraPrompt.textContent = 'Unable to initialize the game stage. Please try a different browser.'
-    startBtn.disabled = true
-    return
-  }
+  // Don't init PixiJS yet — container is hidden. We'll init on game start.
 
   setupGameMenu({ musicTrackPicker: false })
 
   let cameraGranted = false
   let activeBodies: MotionBody[] = []
+  let app: Application | null = null
+  let gameState: GameState
+  let gameLoopCallback: (() => void) | null = null
 
   cameraGranted = await requestCamera(cameraPreview)
   if (cameraGranted) {
     startMotionTracking(cameraPreview, (bodies) => { activeBodies = bodies })
-    cameraPrompt.textContent = 'Camera access granted! Move your hand to select the correct answer!'
+    cameraPrompt.textContent = 'Camera access granted! Move your hand to point at a fruit. Raise your hand to select!'
   } else {
     cameraPrompt.textContent = 'Camera not available. Use mouse or touch to play.'
   }
 
-  let gameState: GameState
-  let gameLoopCallback: ((ticker: { deltaMS: number }) => void) | null = null
+  let lastMouthOpen = 0
+  let selectCooldown = 0
   let bgGfx = new Graphics()
   let handGfx = new Graphics()
   let hippoGfx = new Graphics()
   let fruitGraphics: Graphics[] = []
   let hudContainer = new Container()
-  let lastMouthOpen = 0
+  let pointerX = 0
+  let pointerY = 0
 
   startBtn.addEventListener('click', enterGame)
   replayBtn.addEventListener('click', resetToStart)
@@ -159,19 +158,23 @@ async function boot(): Promise<void> {
     ensureAudioUnlocked()
     showScreen('game-screen')
 
+    // Wait for layout to settle after showing screen
     await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 600)))
+      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 100)))
     })
 
     const rect = pixiStage.getBoundingClientRect()
-    const w = Math.max(1, Math.round(rect.width)) || window.innerWidth
-    const h = Math.max(1, Math.round(rect.height)) || window.innerHeight
-    app.renderer.resize(w, h)
+    const w = Math.max(1, Math.round(rect.width))
+    const h = Math.max(1, Math.round(rect.height))
+
+    // Init PixiJS now that container is visible
+    app = await initStage(pixiStage, w, h)
+    if (!app) return
 
     const area: Area = 'matching'
     gameState = createInitialState(area, 1, Date.now())
 
-    app.stage.removeChildren()
+    // Setup display objects
     bgGfx = new Graphics()
     handGfx = new Graphics()
     hippoGfx = new Graphics()
@@ -190,32 +193,53 @@ async function boot(): Promise<void> {
 
     if (gameLoopCallback) app.ticker.remove(gameLoopCallback)
 
-    // Mouse/touch fallback for targeting fruits
-    // Pointer position (mouse/touch fallback)
+    // Mouse/touch fallback
     const onPointerMove = (e: PointerEvent) => {
       const pixiRect = pixiStage.getBoundingClientRect()
       pointerX = e.clientX - pixiRect.left
       pointerY = e.clientY - pixiRect.top
     }
+    const onPointerTap = (e: PointerEvent) => {
+      const pixiRect = pixiStage.getBoundingClientRect()
+      const tapX = e.clientX - pixiRect.left
+      const tapY = e.clientY - pixiRect.top
+      const sw = app!.screen.width
+      const sh = app!.screen.height
+      if (gameState.phase === 'playing') {
+        for (let i = 0; i < gameState.sceneItems.length; i++) {
+          const item = gameState.sceneItems[i]
+          const fx = sw * 0.35 + i * (sw * 0.12)
+          const fy = sh * 0.4 + Math.sin(performance.now() * 0.003 + i) * sh * 0.02
+          if (Math.hypot(tapX - fx, tapY - fy) < 40) {
+            onSelectAnswer(item.id)
+            break
+          }
+        }
+      }
+    }
     pixiStage.addEventListener('pointermove', onPointerMove)
+    pixiStage.addEventListener('pointerdown', onPointerTap)
 
-    gameLoopCallback = (_ticker) => {
+    gameLoopCallback = () => {
       if (!app) return
-      // const _dt = ticker.deltaMS
       const sw = app.screen.width
       const sh = app.screen.height
+      const now = performance.now()
 
-      drawBackground(bgGfx, sw, sh)
+      // Background
+      bgGfx.clear()
+      bgGfx.rect(0, 0, sw, sh).fill({ color: C.bg })
+      bgGfx.rect(0, sh * 0.75, sw, sh * 0.25).fill({ color: C.bgLight })
+      bgGfx.moveTo(0, sh * 0.75).lineTo(sw, sh * 0.75).stroke({ color: 0x2a3a4a, width: 2 })
 
       // Hippo
       const hippoX = sw * 0.2
-      const hippoY = sh * 0.55 + Math.sin(performance.now() * 0.003) * 4
-      const mouthTarget = gameState.phase === 'playing' ? Math.sin(performance.now() * 0.005) * 0.3 + 0.2 : 0
+      const hippoY = sh * 0.55 + Math.sin(now * 0.003) * 4
+      const mouthTarget = gameState.phase === 'playing' ? Math.sin(now * 0.005) * 0.3 + 0.2 : 0
       lastMouthOpen += (mouthTarget - lastMouthOpen) * 0.1
       drawHippo(hippoGfx, hippoX, hippoY, lastMouthOpen)
 
-      // Frutis
-      // Make sure we have the right number of graphics objects
+      // Fruits
       while (fruitGraphics.length < gameState.sceneItems.length) {
         const fg = new Graphics()
         fruitGraphics.push(fg)
@@ -225,28 +249,25 @@ async function boot(): Promise<void> {
         const fg = fruitGraphics.pop()
         if (fg && fg.parent) fg.parent.removeChild(fg)
       }
-
       for (let i = 0; i < gameState.sceneItems.length; i++) {
         const item = gameState.sceneItems[i]
         const fx = sw * 0.35 + i * (sw * 0.12)
-        const fy = sh * 0.4 + Math.sin(performance.now() * 0.003 + i) * sh * 0.02
+        const fy = sh * 0.4 + Math.sin(now * 0.003 + i) * sh * 0.02
         drawFruit(fruitGraphics[i], fx, fy, item.emoji, 1)
       }
 
       // Hand tracking overlay
       const primaryBody = cameraGranted ? activeBodies[0] : null
       if (primaryBody) {
-        drawHandZone(handGfx, primaryBody, sw, sh)
+        drawHandCursor(handGfx, primaryBody, sw, sh)
 
-        // Check if hand overlaps any fruit for selection
         const hx = (1 - primaryBody.normalizedX) * sw
         const hy = primaryBody.normalizedY * sh
-        const holdTime = primaryBody.armsUp ? 500 : 0 // Use armsUp to trigger selection hold
-        if (holdTime > 0 && gameState.phase === 'playing') {
+        if (primaryBody.armsUp && gameState.phase === 'playing') {
           for (let i = 0; i < gameState.sceneItems.length; i++) {
             const item = gameState.sceneItems[i]
             const fx = sw * 0.35 + i * (sw * 0.12)
-            const fy = sh * 0.4 + Math.sin(performance.now() * 0.003 + i) * sh * 0.02
+            const fy = sh * 0.4 + Math.sin(now * 0.003 + i) * sh * 0.02
             const dist = Math.hypot(hx - fx, hy - fy)
             if (dist < 40) {
               onSelectAnswer(item.id)
@@ -258,22 +279,27 @@ async function boot(): Promise<void> {
         handGfx.clear()
       }
 
+      // Decrement cooldown
+      if (selectCooldown > 0) selectCooldown -= 16
+
       drawHUD(hudContainer, gameState)
     }
 
     app.ticker.add(gameLoopCallback)
   }
 
-  let selectCooldown = 0
   function onSelectAnswer(itemId: string): void {
     if (gameState.phase !== 'playing') return
     if (selectCooldown > 0) return
     selectCooldown = 800
 
     gameState = selectAnswer(gameState, itemId)
+    const selectedItem = gameState.sceneItems.find((i) => i.id === itemId)
+    if (!selectedItem) return
+
     gameState = resolveChomp(gameState)
 
-    if (!gameState.sceneItems.find((i) => i.id === itemId)) return
+    sfxChomp()
 
     if (selectedItem.isCorrect) {
       sfxCorrect()
@@ -315,6 +341,11 @@ async function boot(): Promise<void> {
     if (gameLoopCallback && app) {
       app.ticker.remove(gameLoopCallback)
       gameLoopCallback = null
+    }
+    // Destroy old PixiJS app
+    if (app) {
+      app.destroy(true, { children: true, texture: true })
+      app = null
     }
     showScreen('start-screen')
     gameStatus.textContent = 'Ready to play!'

@@ -1,5 +1,5 @@
-import { css } from '@remix-run/component'
-import { renderToString } from '@remix-run/component/server'
+import { css } from '@remix-run/ui'
+import { renderToString } from '@remix-run/ui/server'
 import { attributionsPagePath, gameAttributions, repositoryCodeLicense } from '../data/attribution-index.js'
 import { Document } from '../ui/document.js'
 import { getSiteBasePath } from '../site-config.js'

@@ -4,6 +4,20 @@ import { cpSync, readFileSync, readdirSync, rmSync, mkdirSync, writeFileSync, st
 import { join, dirname } from 'node:path'
 import { createAppRouter } from './app/router.js'
 
+const IMMERSIVE_GAMES = [
+  'chompers-immersive',
+  'beat-pad-immersive',
+  'mission-orbit-immersive',
+  'peekaboo-immersive',
+  'pixel-passport-immersive',
+  'spot-on-immersive',
+  'squares-immersive',
+  'story-trail-immersive',
+  'super-word-immersive',
+  'train-sounds-immersive',
+  'waterwall-immersive',
+]
+
 const outputDir = process.env.BUILD_OUTPUT_DIR || 'dist'
 
 // ── Clean output ──────────────────────────────────────────
@@ -104,7 +118,23 @@ for (const file of readdirSync(stylesheetDir)) {
   writeFileSync(filePath, result.code)
 }
 
-// ── Bundle client code ───────────────────────────────────
+// ── Bundle shared PixiJS vendor chunk ──────────────────────
+// Immersive games all need PixiJS (~500KB). By building it as a
+// shared chunk, we avoid duplicating it 11 times (~5.5MB → ~500KB).
+await esbuild.build({
+  entryPoints: [
+    'client/pixi-vendor.ts',
+  ],
+  bundle: true,
+  outdir: join(outputDir, 'client'),
+  format: 'esm',
+  target: 'es2022',
+  minify: true,
+  sourcemap: true,
+  splitting: false,
+})
+
+// ── Bundle client shell/home/404 ───────────────────────────────
 await esbuild.build({
   entryPoints: [
     'client/shell.ts',
@@ -119,7 +149,7 @@ await esbuild.build({
   sourcemap: true,
 })
 
-// ── Bundle game code ─────────────────────────────────────
+// ── Bundle game code (non-immersive) ──────────────────────────────
 await esbuild.build({
   entryPoints: [
     'games/mission-orbit/main.ts',
@@ -141,19 +171,23 @@ await esbuild.build({
     'games/baking-simulator/main.ts',
     'games/all-aboard/main.ts',
     'games/block-attack/main.ts',
-    'games/chompers-immersive/main.ts',
-    'games/beat-pad-immersive/main.ts',
-    'games/mission-orbit-immersive/main.ts',
-    'games/peekaboo-immersive/main.ts',
-    'games/pixel-passport-immersive/main.ts',
-    'games/spot-on-immersive/main.ts',
-    'games/squares-immersive/main.ts',
-    'games/story-trail-immersive/main.ts',
-    'games/super-word-immersive/main.ts',
-    'games/train-sounds-immersive/main.ts',
-    'games/waterwall-immersive/main.ts',
   ],
   bundle: true,
+  outbase: 'games',
+  outdir: join(outputDir, 'client'),
+  format: 'esm',
+  target: 'es2022',
+  minify: true,
+  sourcemap: true,
+})
+
+// ── Bundle immersive game code (PixiJS externalized) ───────────────────
+// PixiJS is loaded via a shared vendor chunk (pixi-vendor.js) and an
+// import map. This cuts deployed JS from ~5.5MB to ~540KB.
+await esbuild.build({
+  entryPoints: IMMERSIVE_GAMES.map(g => `games/${g}/main.ts`),
+  bundle: true,
+  external: ['pixi.js'],
   outbase: 'games',
   outdir: join(outputDir, 'client'),
   format: 'esm',
@@ -267,17 +301,28 @@ for (const htmlFile of readdirSync(outputDir, { recursive: true }) as string[]) 
 
 // ── Performance budget ───────────────────────────────────
 const budgetConfig = JSON.parse(readFileSync('config/budget.json', 'utf-8')) as Array<{
+  path: string
   resourceSizes?: Array<{
     resourceType: 'document' | 'stylesheet' | 'script' | 'total'
     budget: number
   }>
 }>
 
-const resourceBudgetBytes = new Map(
-  (budgetConfig[0]?.resourceSizes ?? []).map(({ resourceType, budget }) => [resourceType, budget * 1024]),
-)
+/** Find the best-matching budget tier for a page name (e.g. "chompers-immersive" matches "/*-immersive/*") */
+function findBudgetTier(pageName: string) {
+  let bestMatch = budgetConfig[0] // default: first tier ("/*")
+  for (const tier of budgetConfig) {
+    const pattern = tier.path
+    if (pattern === '/*') continue // skip catch-all, it's the default
+    // Convert glob-like pattern: "/*-immersive/*" → check if pageName ends with "-immersive"
+    if (pattern.includes('-immersive') && pageName.endsWith('-immersive')) {
+      bestMatch = tier
+      break
+    }
+  }
+  return bestMatch
+}
 
-const BUDGET_BYTES = resourceBudgetBytes.get('total') ?? 200 * 1024
 const strictBudgetEnforcement = process.env.STRICT_BUILD_BUDGETS === '1'
 const pages: Record<string, string[]> = {
   homepage: ['index.html', 'styles/main.css', 'client/shell.js', 'client/home.js'],
@@ -301,17 +346,17 @@ const pages: Record<string, string[]> = {
   'baking-simulator': ['baking-simulator/index.html', 'styles/baking-simulator.css', 'client/shell.js', 'client/baking-simulator/main.js'],
   'all-aboard': ['all-aboard/index.html', 'styles/all-aboard.css', 'client/shell.js', 'client/all-aboard/main.js'],
   'block-attack': ['block-attack/index.html', 'styles/block-attack.css', 'client/shell.js', 'client/block-attack/main.js'],
-  'chompers-immersive': ['chompers-immersive/index.html', 'styles/chompers-immersive.css', 'client/shell.js', 'client/chompers-immersive/main.js'],
-  'beat-pad-immersive': ['beat-pad-immersive/index.html', 'styles/beat-pad-immersive.css', 'client/shell.js', 'client/beat-pad-immersive/main.js'],
-  'mission-orbit-immersive': ['mission-orbit-immersive/index.html', 'styles/mission-orbit-immersive.css', 'client/shell.js', 'client/mission-orbit-immersive/main.js'],
-  'peekaboo-immersive': ['peekaboo-immersive/index.html', 'styles/peekaboo-immersive.css', 'client/shell.js', 'client/peekaboo-immersive/main.js'],
-  'pixel-passport-immersive': ['pixel-passport-immersive/index.html', 'styles/pixel-passport-immersive.css', 'client/shell.js', 'client/pixel-passport-immersive/main.js'],
-  'spot-on-immersive': ['spot-on-immersive/index.html', 'styles/spot-on-immersive.css', 'client/shell.js', 'client/spot-on-immersive/main.js'],
-  'squares-immersive': ['squares-immersive/index.html', 'styles/squares-immersive.css', 'client/shell.js', 'client/squares-immersive/main.js'],
-  'story-trail-immersive': ['story-trail-immersive/index.html', 'styles/story-trail-immersive.css', 'client/shell.js', 'client/story-trail-immersive/main.js'],
-  'super-word-immersive': ['super-word-immersive/index.html', 'styles/super-word-immersive.css', 'client/shell.js', 'client/super-word-immersive/main.js'],
-  'train-sounds-immersive': ['train-sounds-immersive/index.html', 'styles/train-sounds-immersive.css', 'client/shell.js', 'client/train-sounds-immersive/main.js'],
-  'waterwall-immersive': ['waterwall-immersive/index.html', 'styles/waterwall-immersive.css', 'client/shell.js', 'client/waterwall-immersive/main.js'],
+  'chompers-immersive': ['chompers-immersive/index.html', 'styles/chompers-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/chompers-immersive/main.js'],
+  'beat-pad-immersive': ['beat-pad-immersive/index.html', 'styles/beat-pad-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/beat-pad-immersive/main.js'],
+  'mission-orbit-immersive': ['mission-orbit-immersive/index.html', 'styles/mission-orbit-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/mission-orbit-immersive/main.js'],
+  'peekaboo-immersive': ['peekaboo-immersive/index.html', 'styles/peekaboo-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/peekaboo-immersive/main.js'],
+  'pixel-passport-immersive': ['pixel-passport-immersive/index.html', 'styles/pixel-passport-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/pixel-passport-immersive/main.js'],
+  'spot-on-immersive': ['spot-on-immersive/index.html', 'styles/spot-on-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/spot-on-immersive/main.js'],
+  'squares-immersive': ['squares-immersive/index.html', 'styles/squares-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/squares-immersive/main.js'],
+  'story-trail-immersive': ['story-trail-immersive/index.html', 'styles/story-trail-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/story-trail-immersive/main.js'],
+  'super-word-immersive': ['super-word-immersive/index.html', 'styles/super-word-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/super-word-immersive/main.js'],
+  'train-sounds-immersive': ['train-sounds-immersive/index.html', 'styles/train-sounds-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/train-sounds-immersive/main.js'],
+  'waterwall-immersive': ['waterwall-immersive/index.html', 'styles/waterwall-immersive.css', 'client/shell.js', 'client/pixi-vendor.js', 'client/waterwall-immersive/main.js'],
   '404': ['404.html', 'styles/main.css', 'client/shell.js', 'client/404.js'],
 }
 
@@ -324,6 +369,12 @@ function resourceTypeForFile(path: string): 'document' | 'stylesheet' | 'script'
 
 let budgetWarningCount = 0
 for (const [page, files] of Object.entries(pages)) {
+  const tier = findBudgetTier(page)
+  const tierbudgetBytes = new Map(
+    (tier?.resourceSizes ?? []).map(({ resourceType, budget }) => [resourceType, budget * 1024]),
+  )
+  const pageBudgetBytes = tierbudgetBytes.get('total') ?? 200 * 1024
+
   const resourceTotals = {
     document: 0,
     stylesheet: 0,
@@ -343,9 +394,9 @@ for (const [page, files] of Object.entries(pages)) {
 
   const totalBytes = resourceTotals.total
   const totalKB = (totalBytes / 1024).toFixed(1)
-  const budgetKB = (BUDGET_BYTES / 1024).toFixed(0)
+  const budgetKB = (pageBudgetBytes / 1024).toFixed(0)
 
-  for (const [resourceType, budgetBytes] of resourceBudgetBytes.entries()) {
+  for (const [resourceType, budgetBytes] of tierbudgetBytes.entries()) {
     if (resourceType === 'total') continue
 
     const actualBytes = resourceTotals[resourceType]
@@ -357,7 +408,7 @@ for (const [page, files] of Object.entries(pages)) {
     budgetWarningCount += 1
   }
 
-  if (totalBytes > BUDGET_BYTES) {
+  if (totalBytes > pageBudgetBytes) {
     console.warn(`⚠ ${page}: ${totalKB}KB exceeds ${budgetKB}KB budget`)
     budgetWarningCount += 1
   } else {

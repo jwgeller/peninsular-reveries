@@ -1,0 +1,6 @@
+dist/
+.dev-client/
+node_modules/
+public/sw.js
+public/*/sw.js
+*.min.js

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import * as React from '@remix-run/component'
-import { renderToString } from '@remix-run/component/server'
+import * as React from '@remix-run/ui'
+import { renderToString } from '@remix-run/ui/server'
 import { getSiteBasePath } from '../../app/site-config.js'
 import { withBasePath } from '../../app/site-paths.js'
 import { Document } from '../../app/ui/document.js'
@@ -24,7 +24,8 @@ export async function pixelpassportimmersiveAction() {
       includeFooter={false}
       includeDefaultStyles={false}
       stylesheets={['/styles/pixel-passport-immersive.css']}
-      scripts={['/client/pixel-passport-immersive/main.js?v=__BUILD_SHA__']}
+      scripts={['/client/pixi-vendor.js?v=__BUILD_SHA__', '/client/pixel-passport-immersive/main.js?v=__BUILD_SHA__']}
+      importMap={{ 'pixi.js': '/client/pixi-vendor.js?v=__BUILD_SHA__' }}
       bodyClass="pixel-passport-immersive-game"
       viewportFitCover
       faviconPath="/favicon.svg"
