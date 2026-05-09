@@ -135,10 +135,24 @@ export const games: GameEntry[] = [
     status: 'live',
   },
   {
-    slug: 'block-attack',
-    name: 'Block Attack',
+    slug: 'breakers',
+    name: 'Breakers',
     description: 'Smash procedurally generated block towers using your camera! Destroy everything in your path like a tiny chaos agent.',
     icon: '💥',
+    status: 'live',
+  },
+  {
+    slug: 'snowball-fight',
+    name: 'Snowball Fight',
+    description: 'Throw snowballs at snowmen using your mouse or camera motion capture! Winter showdown with charging, dodging, and snowball physics.',
+    icon: '❄️',
+    status: 'live',
+  },
+  {
+    slug: 'first-flight',
+    name: 'First Flight',
+    description: 'Soar through the sky in your own airplane! Use your camera to steer — stretch your arms out to fly, tilt to bank, and fly through rings for points.',
+    icon: '✈️',
     status: 'live',
   },
 ]

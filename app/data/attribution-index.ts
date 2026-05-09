@@ -34,8 +34,8 @@ import { bakingSimulatorAttribution } from '../../games/baking-simulator/attribu
 import { bakingSimulatorInfo } from '../../games/baking-simulator/info.js'
 import { allAboardAttribution } from '../../games/all-aboard/attributions.js'
 import { allAboardInfo } from '../../games/all-aboard/info.js'
-import { blockAttackAttribution } from '../../games/block-attack/attributions.js'
-import { blockAttackInfo } from '../../games/block-attack/info.js'
+import { breakersAttribution } from '../../games/breakers/attributions.js'
+import { breakersInfo } from '../../games/breakers/info.js'
 import type { GameAttribution, GameInfo } from './attribution-types.js'
 import { attributionsPagePath, repositoryCodeLicense } from './attribution-types.js'
 
@@ -65,7 +65,7 @@ const gameEntries: readonly { attribution: GameAttribution; info: GameInfo }[] =
   { attribution: growWithMeAttribution, info: growWithMeInfo },
   { attribution: bakingSimulatorAttribution, info: bakingSimulatorInfo },
   { attribution: allAboardAttribution, info: allAboardInfo },
-  { attribution: blockAttackAttribution, info: blockAttackInfo },
+  { attribution: breakersAttribution, info: breakersInfo },
 ]
 
 export const gameAttributions: readonly GameAttributionWithInfo[] = gameEntries.map(

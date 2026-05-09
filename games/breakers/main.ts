@@ -188,7 +188,7 @@ async function enterGame(): Promise<void> {
   startActionMusic()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(window as any).__blockAttackDebug = { app, canvas: app.canvas, screen: { w, h }, buildSha: 'dev', rendererType: app.renderer.type }
+  ;(window as any).__breakersDebug = { app, canvas: app.canvas, screen: { w, h }, buildSha: 'dev', rendererType: app.renderer.type }
 
   if (gameLoopCallback) app.ticker.remove(gameLoopCallback)
 
@@ -243,7 +243,7 @@ async function enterGame(): Promise<void> {
         app.stage.addChild(smashZone)
       }
       const body = bodiesToUse[0]
-      const mx = (1 - body.normalizedX) * app.screen.width
+      const mx = body.normalizedX * app.screen.width
       const my = body.normalizedY * app.screen.height
       smashZone.x = mx
       smashZone.y = my
@@ -339,7 +339,7 @@ async function enterGame(): Promise<void> {
       // Show combo flash
       if (bodiesToUse.length > 0 && bodiesToUse[0]) {
         const bp = bodiesToUse[0]
-        const flashX = (1 - bp.normalizedX) * app.screen.width
+        const flashX = bp.normalizedX * app.screen.width
         const flashY = bp.normalizedY * app.screen.height
         if (comboFlash && comboFlash.parent) {
           comboFlash.parent.removeChild(comboFlash)

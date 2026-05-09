@@ -40,7 +40,9 @@ export const routes = route({
   bakingSimulatorInfo: '/baking-simulator/info/',
   allAboard: '/all-aboard/',
   allAboardInfo: '/all-aboard/info/',
-  blockAttack: '/block-attack/',
-  blockAttackInfo: '/block-attack/info/',
+  breakers: '/breakers/',
+  breakersInfo: '/breakers/info/',
+  snowballFight: '/snowball-fight/',
+  firstFlight: '/first-flight/',
   notFound: '/404.html',
 })

@@ -15,42 +15,42 @@ import {
   SrOnly,
 } from '../../app/ui/game-shell.js'
 
-import { blockAttackAttribution } from './attributions.js'
-import { blockAttackInfo } from './info.js'
+import { breakersAttribution } from './attributions.js'
+import { breakersInfo } from './info.js'
 
 const modalOverlayStyles = {
   zIndex: 100,
   background: 'rgba(6, 6, 18, 0.92)',
 }
 
-export async function blockAttackAction() {
+export async function breakersAction() {
   const homePath = withBasePath('/', getSiteBasePath())
 
   const html = await renderToString(
     <Document
-      title="Block Attack"
+      title="Breakers"
       description="Smash procedurally generated block towers using your camera. Destroy everything in your path!"
-      path="/block-attack/"
+      path="/breakers/"
       includeNav={false}
       includeFooter={false}
       includeDefaultStyles={false}
-      stylesheets={['/styles/block-attack.css']}
-      scripts={['/client/block-attack/main.js?v=__BUILD_SHA__']}
-      bodyClass="block-attack-game"
+      stylesheets={['/styles/breakers.css']}
+      scripts={['/client/breakers/main.js?v=__BUILD_SHA__']}
+      bodyClass="breakers-game"
       viewportFitCover
       faviconPath="/favicon.svg"
-      manifestPath="/block-attack/manifest.json"
-      serviceWorkerPath="/block-attack/sw.js"
-      serviceWorkerScope="/block-attack/"
+      manifestPath="/breakers/manifest.json"
+      serviceWorkerPath="/breakers/sw.js"
+      serviceWorkerScope="/breakers/"
     >
       <div className="scene-track">
-        <GameScreen id="start-screen" className="active" labelledBy="block-attack-title" padded>
+        <GameScreen id="start-screen" className="active" labelledBy="breakers-title" padded>
           <div className="ba-screen-panel ba-start-panel">
             <GameHeader
-              headingId="block-attack-title"
+              headingId="breakers-title"
               className="ba-header"
               leftContent={<>
-                <h1 id="block-attack-title" className="ba-title">Block Attack</h1>
+                <h1 id="breakers-title" className="ba-title">Breakers</h1>
               </>}
               rightContent={<button
                 type="button"
@@ -87,10 +87,10 @@ export async function blockAttackAction() {
           </div>
         </GameScreen>
 
-        <GameScreen id="game-screen" labelledBy="block-attack-game-heading">
+        <GameScreen id="game-screen" labelledBy="breakers-game-heading">
           <div className="ba-screen-panel ba-game-panel">
             <GameHeader
-              headingId="block-attack-game-heading"
+              headingId="breakers-game-heading"
               className="ba-header"
               leftContent={<>
                 <button id="hud-restart-btn" type="button" className="ba-icon-btn" aria-label="Restart" title="Restart">↻</button>
@@ -110,13 +110,13 @@ export async function blockAttackAction() {
           </div>
         </GameScreen>
 
-        <GameScreen id="end-screen" labelledBy="block-attack-end-heading" padded>
+        <GameScreen id="end-screen" labelledBy="breakers-end-heading" padded>
           <div className="ba-screen-panel ba-end-panel">
             <GameHeader
-              headingId="block-attack-end-heading"
+              headingId="breakers-end-heading"
               className="ba-header"
               leftContent={<>
-                <h2 id="block-attack-end-heading" className="ba-title">Block Attack</h2>
+                <h2 id="breakers-end-heading" className="ba-title">Breakers</h2>
               </>}
               rightContent={<button
                 type="button"
@@ -177,11 +177,11 @@ export async function blockAttackAction() {
             </SettingsSection>
           </>}
           infoContent={<>
-            <InfoSection title="About Block Attack">
-              <p>{blockAttackInfo.summary}</p>
+            <InfoSection title="About Breakers">
+              <p>{breakersInfo.summary}</p>
             </InfoSection>
             <InfoSection title="Credits">
-              {blockAttackAttribution.entries.map((entry) => <InfoAttribution attribution={{
+              {breakersAttribution.entries.map((entry) => <InfoAttribution attribution={{
                 title: entry.title,
                 author: entry.creator,
                 license: entry.license,
@@ -198,7 +198,7 @@ export async function blockAttackAction() {
 
       <noscript>
         <div className="noscript-message noscript-message-ba">
-          <p>Block Attack needs JavaScript and camera access to track your moves. Turn JavaScript on and reload to play.</p>
+          <p>Breakers needs JavaScript and camera access to track your moves. Turn JavaScript on and reload to play.</p>
         </div>
       </noscript>
     </Document>,

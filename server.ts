@@ -44,7 +44,7 @@ const gameEntryPoints = [
   'games/grow-with-me/main.ts',
   'games/baking-simulator/main.ts',
   'games/all-aboard/main.ts',
-  'games/block-attack/main.ts',
+  'games/breakers/main.ts',
   'games/dragons-crunch/main.ts',
 ]
 

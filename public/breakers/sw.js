@@ -1,8 +1,8 @@
-const CACHE_NAME = 'block-attack-dev'
+const CACHE_NAME = 'breakers-dev'
 const CACHE_URLS = [
-  '/block-attack/',
-  '/styles/block-attack.css',
-  '/client/block-attack/main.js',
+  '/breakers/',
+  '/styles/breakers.css',
+  '/client/breakers/main.js',
 ]
 
 self.addEventListener('install', (event) => {

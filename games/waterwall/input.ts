@@ -142,8 +142,8 @@ export function setupPointerInput(
 
     const cellType = getCellType(coord)
 
-    // Immediate placement on empty cells; water/barrier cells are no-op on short press
-    if (cellType === 'empty') {
+    // Placement on empty or water cells (barriers displace water); barrier cells are no-op on short press
+    if (cellType === 'empty' || cellType === 'water') {
       onAction({ type: 'pointer', coordinate: coord, mode: 'place' })
     }
 
@@ -177,9 +177,9 @@ export function setupPointerInput(
         }
 
         if (!eraseHoldActive) {
-          // Normal drag placement — only on empty cells (water can't be replaced)
+          // Drag placement on empty or water cells (water gets displaced by barrier)
           const cellType = getCellType(coord)
-          if (cellType === 'empty') {
+          if (cellType === 'empty' || cellType === 'water') {
             onAction({ type: 'pointer', coordinate: coord, mode: 'place' })
           }
         }

@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>❄️ Snowball Fight — Mocap Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a1628;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
+        }
+        #game-wrapper {
+            position: relative;
+            width: 1280px;
+            height: 720px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #game-canvas-area canvas {
+            display: block;
+            border-radius: 12px;
+        }
+        /* Camera Feed */
+        #cam-container {
+            position: absolute;
+            bottom: 15px; right: 15px;
+            width: 220px; height: 165px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.35);
+            background: #000;
+            z-index: 100;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+            display: none;
+        }
+        #cam-container.visible { display: block; }
+        #camera-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #camera-canvas {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform: scaleX(-1);
+            pointer-events: none;
+        }
+        #cam-label {
+            position: absolute; top: 6px; left: 8px;
+            background: rgba(0,0,0,0.55); color: #4CAF50;
+            font-size: 10px; padding: 3px 8px; border-radius: 4px;
+            font-weight: 900; letter-spacing: 1px; z-index: 2;
+        }
+        /* HUD */
+        #hud {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; z-index: 50;
+            display: none;
+        }
+        #hud.visible { display: block; }
+        .hud-bar {
+            position: absolute; border-radius: 14px; overflow: hidden;
+            background: rgba(0,0,0,0.45); border: 2px solid rgba(255,255,255,0.15);
+        }
+        .hud-bar-fill { height: 100%; border-radius: 14px; transition: width 0.25s ease; }
+        .hud-bar-label {
+            position: absolute; top: 0; left: 10px; right: 10px;
+            line-height: 26px; color: #fff; font-size: 12px;
+            font-weight: 900; text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            display: flex; justify-content: space-between;
+        }
+        #health-bar { top: 12px; left: 12px; width: 220px; height: 26px; }
+        #health-fill { background: linear-gradient(90deg, #EF5350, #FF8A80); width: 100%; }
+        #charge-bar { top: 44px; left: 12px; width: 180px; height: 22px; }
+        #charge-fill { background: linear-gradient(90deg, #4FC3F7, #29B6F6); width: 0%; }
+        #score-display {
+            position: absolute; top: 10px; right: 15px;
+            font-family: 'Fredoka One', cursive; font-size: 28px;
+            color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        }
+        #snow-display {
+            position: absolute; top: 42px; right: 15px;
+            font-size: 15px; color: rgba(255,255,255,0.85);
+            font-weight: 700;
+        }
+        #level-display {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            font-family: 'Fredoka One', cursive; font-size: 20px;
+            color: #FFD54F; text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        }
+        /* Mocap Indicator */
+        #mocap-indicator {
+            position: absolute; bottom: 15px; left: 12px;
+            display: none; align-items: center; gap: 8px;
+            background: rgba(0,0,0,0.5); padding: 6px 14px;
+            border-radius: 20px; z-index: 100;
+        }
+        #mocap-indicator.visible { display: flex; }
+        #mocap-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #555; transition: all 0.3s;
+        }
+        #mocap-dot.active { background: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+        #mocap-text { color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 900; letter-spacing: 0.5px; }
+        #gesture-display {
+            position: absolute; bottom: 48px; left: 12px;
+            font-size: 13px; color: rgba(255,255,255,0.6);
+            font-weight: 700; z-index: 100; display: none;
+        }
+        #gesture-display.visible { display: block; }
+        /* Overlays */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 200; border-radius: 12px; backdrop-filter: blur(10px);
+        }
+        .overlay.hidden { display: none; }
+        #menu-overlay { background: rgba(10,22,40,0.88); }
+        #gameover-overlay { background: rgba(40,10,10,0.88); }
+        .menu-title {
+            font-family: 'Fredoka One', cursive; font-size: 60px;
+            color: #fff; margin-bottom: 8px;
+            text-shadow: 0 4px 24px rgba(100,180,255,0.4), 0 0 80px rgba(100,180,255,0.15);
+        }
+        .menu-subtitle { font-size: 17px; color: rgba(255,255,255,0.6); margin-bottom: 36px; }
+        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .menu-btn {
+            font-family: 'Fredoka One', cursive; font-size: 18px;
+            padding: 12px 32px; border: none; border-radius: 50px;
+            cursor: pointer; transition: all 0.2s; color: #fff;
+        }
+        .menu-btn:hover { transform: scale(1.06); box-shadow: 0 6px 28px rgba(0,0,0,0.35); }
+        .menu-btn:active { transform: scale(0.97); }
+        .btn-play { background: linear-gradient(135deg, #4FC3F7, #0277BD); }
+        .btn-mocap { background: linear-gradient(135deg, #81C784, #2E7D32); }
+        .btn-restart { background: linear-gradient(135deg, #4FC3F7, #0277BD); }
+        .btn-menu { background: linear-gradient(135deg, #FF8A65, #D84315); }
+        .menu-info {
+            margin-top: 28px; color: rgba(255,255,255,0.4); font-size: 13px;
+            text-align: center; line-height: 1.8;
+        }
+        .go-title {
+            font-family: 'Fredoka One', cursive; font-size: 52px;
+            color: #EF5350; margin-bottom: 12px;
+            text-shadow: 0 4px 20px rgba(255,50,50,0.3);
+        }
+        .go-score {
+            font-family: 'Fredoka One', cursive; font-size: 32px;
+            color: #FFD54F; margin-bottom: 6px;
+        }
+        .go-level { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px; }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div id="game-canvas-area"></div>
+        <div id="cam-container">
+            <div id="cam-label">● MOCAP</div>
+            <video id="camera-feed" autoplay playsinline muted></video>
+            <canvas id="camera-canvas"></canvas>
+        </div>
+        <div id="hud">
+            <div id="health-bar" class="hud-bar">
+                <div id="health-fill" class="hud-bar-fill"></div>
+                <div class="hud-bar-label"><span>❤️ Health</span><span id="health-val">100</span></div>
+            </div>
+            <div id="charge-bar" class="hud-bar">
+                <div id="charge-fill" class="hud-bar-fill"></div>
+                <div class="hud-bar-label"><span>💥 Power</span><span id="charge-val">0%</span></div>
+            </div>
+            <div id="score-display">❄️ 0</div>
+            <div id="snow-display">⛄ × 20</div>
+            <div id="level-display">Level 1</div>
+        </div>
+        <div id="mocap-indicator">
+            <div id="mocap-dot"></div>
+            <span id="mocap-text">MOCAP OFF</span>
+        </div>
+        <div id="gesture-display">Gesture: —</div>
+        <div id="menu-overlay" class="overlay">
+            <div class="menu-title">❄️ Snowball Fight!</div>
+            <div class="menu-subtitle">Winter Showdown — Motion Capture Edition</div>
+            <div class="btn-row">
+                <button class="menu-btn btn-play" id="btn-play">🎮 Play Game</button>
+                <button class="menu-btn btn-mocap" id="btn-mocap">📷 Enable Mocap</button>
+            </div>
+            <div class="menu-info">
+                🖱️ Mouse: Aim → Click &amp; Hold to Charge → Release to Throw<br>
+                📷 Mocap: Move Hand to Aim → Fist to Charge → Open Hand to Throw<br>
+                ⌨️ W/S or ↑/↓: Move up/down &nbsp;|&nbsp; Space: Quick throw<br>
+                ❄️ Defeat all snowmen to advance! Pick up ❄️ piles for ammo!
+            </div>
+        </div>
+        <div id="gameover-overlay" class="overlay hidden">
+            <div class="go-title">🥶 Game Over!</div>
+            <div class="go-score" id="final-score">Score: 0</div>
+            <div class="go-level" id="final-level">Reached Level 1</div>
+            <div class="btn-row">
+                <button class="menu-btn btn-restart" id="btn-restart">🔄 Play Again</button>
+                <button class="menu-btn btn-menu" id="btn-backmenu">🏠 Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@8/dist/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.js" crossorigin="anonymous"></script>
+
+<script>
+(async function () {
+    // ======================== CONSTANTS ========================
+    const W = 1280, H = 720;
+    const GROUND_Y = 580;
+    const GRAVITY = 520;
+    const PLAYER_X = 140;
+    const MAX_SNOW = 30;
+    const SNOW_REGEN_TIME = 2.5;
+    const CHARGE_RATE = 100;
+    const MAX_CHARGE = 100;
+    const MIN_THROW_SPEED = 280;
+    const MAX_THROW_SPEED = 650;
+    const INVINCIBILITY_TIME = 1.0; // seconds of invincibility after hit
+
+    // Hand connections fallback (if MediaPipe doesn't expose HAND_CONNECTIONS)
+    const HAND_CONNECTIONS_FALLBACK = [
+        [0,1],[1,2],[2,3],[3,4],
+        [0,5],[5,6],[6,7],[7,8],
+        [5,9],[9,10],[10,11],[11,12],
+        [9,13],[13,14],[14,15],[15,16],
+        [13,17],[17,18],[18,19],[19,20],
+        [0,17]
+    ];
+
+    // ======================== STATE ========================
+    let gameState = 'menu';
+    let score = 0, level = 1, health = 100, maxHealth = 100;
+    let snowCount = 20, chargePower = 0, isCharging = false;
+    let aimX = W / 2, aimY = H / 2;
+    let playerY = GROUND_Y - 50;
+    let playerTargetY = playerY;
+    let snowRegenTimer = 0;
+    let shakeAmount = 0;
+    let invincibleTimer = 0;
+    let levelTransition = 0;
+    let waitingForNextLevel = false;
+    let opponents = [], snowballs = [], particles = [], trails = [];
+    let snowPiles = [];
+    let keys = {};
+    let spaceWasDown = false;
+
+    // ======================== MOcap STATE ========================
+    let mocapEnabled = false, handDetected = false;
+    let handPos = { x: 0.5, y: 0.5 };
+    let isFistGesture = false, wasFistGesture = false;
+    let smoothedHand = null;
+
+    // ======================== PIXI APP ========================
+    const app = new PIXI.Application();
+    await app.init({
+        width: W, height: H,
+        background: '#87CEEB',
+        antialias: true,
+        resolution: Math.min(window.devicePixelRatio || 1, 2),
+        autoDensity: true,
+    });
+    document.getElementById('game-canvas-area').appendChild(app.canvas);
+
+    const world = new PIXI.Container();
+    app.stage.addChild(world);
+
+    const bgLayer = new PIXI.Container();
+    const gameLayer = new PIXI.Container();
+    const fxLayer = new PIXI.Container();
+    const uiLayer = new PIXI.Container();
+    world.addChild(bgLayer);
+    world.addChild(gameLayer);
+    world.addChild(fxLayer);
+    world.addChild(uiLayer);
+
+    // ======================== HELPERS ========================
+    function lerp(a, b, t) { return a + (b - a) * Math.min(t, 1); }
+    function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    function makeGradientTexture(w, h, stops) {
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        stops.forEach(s => g.addColorStop(s[0], s[1]));
+        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        return PIXI.Texture.from(c);
+    }
+
+    // ======================== BACKGROUND ========================
+    function buildBackground() {
+        bgLayer.removeChildren();
+
+        const skyTex = makeGradientTexture(2, H, [
+            [0, '#4A90D9'], [0.35, '#7EC8E3'], [0.65, '#B5DFF5'], [1, '#D6EAF8']
+        ]);
+        const sky = new PIXI.Sprite(skyTex);
+        sky.width = W; sky.height = H;
+        bgLayer.addChild(sky);
+
+        // Clouds
+        for (let i = 0; i < 5; i++) {
+            const cloud = new PIXI.Graphics();
+            const cx = rand(50, W - 50), cy = rand(60, 180);
+            for (let j = 0; j < 4; j++) {
+                cloud.circle(cx + rand(-40, 40), cy + rand(-10, 10), rand(20, 45))
+                    .fill({ color: 0xFFFFFF, alpha: rand(0.15, 0.3) });
+            }
+            bgLayer.addChild(cloud);
+        }
+
+        // Far mountains
+        const mtnFar = new PIXI.Graphics();
+        mtnFar.moveTo(0, 420);
+        const fp = [0,420, 120,340, 260,380, 400,310, 540,370, 680,300, 850,350, 1000,280, 1150,340, 1280,360, 1280,420];
+        for (let i = 0; i < fp.length; i += 2) mtnFar.lineTo(fp[i], fp[i+1]);
+        mtnFar.closePath().fill({ color: 0x8EAEC4, alpha: 0.6 });
+        bgLayer.addChild(mtnFar);
+
+        // Near mountains
+        const mtnNear = new PIXI.Graphics();
+        mtnNear.moveTo(0, 460);
+        const np = [0,460, 180,390, 350,430, 520,380, 700,420, 900,370, 1050,410, 1200,390, 1280,430, 1280,460];
+        for (let i = 0; i < np.length; i += 2) mtnNear.lineTo(np[i], np[i+1]);
+        mtnNear.closePath().fill({ color: 0xA8C4D8, alpha: 0.7 });
+        bgLayer.addChild(mtnNear);
+
+        // Pine trees
+        for (let i = 0; i < 16; i++) {
+            const tx = rand(20, W - 20);
+            const ty = rand(430, 490);
+            const ts = rand(0.5, 1.1);
+            bgLayer.addChild(createPineTree(ts, tx, ty));
+        }
+
+        // Snowy ground
+        const ground = new PIXI.Graphics();
+        ground.moveTo(0, GROUND_Y);
+        for (let x = 0; x <= W; x += 30) {
+            ground.lineTo(x, GROUND_Y + Math.sin(x * 0.025) * 8 + Math.sin(x * 0.06) * 3);
+        }
+        ground.lineTo(W, H).lineTo(0, H).closePath().fill({ color: 0xF0F8FF });
+        bgLayer.addChild(ground);
+
+        // Ground blue shadow
+        const gShadow = new PIXI.Graphics();
+        gShadow.moveTo(0, GROUND_Y + 8);
+        for (let x = 0; x <= W; x += 30) {
+            gShadow.lineTo(x, GROUND_Y + 10 + Math.sin(x * 0.025) * 8);
+        }
+        gShadow.lineTo(W, GROUND_Y + 40).lineTo(0, GROUND_Y + 40).closePath().fill({ color: 0xD6E8F5, alpha: 0.4 });
+        bgLayer.addChild(gShadow);
+    }
+
+    function createPineTree(scale, x, y) {
+        const c = new PIXI.Container();
+        c.position.set(x, y);
+        const trunk = new PIXI.Graphics();
+        trunk.rect(-3 * scale, 0, 6 * scale, 18 * scale).fill(0x6D4C30);
+        c.addChild(trunk);
+        for (let i = 0; i < 3; i++) {
+            const lw = (22 - i * 5) * scale;
+            const lh = 18 * scale;
+            const ly = -(8 + i * 15) * scale;
+            const leaf = new PIXI.Graphics();
+            leaf.moveTo(0, ly - lh).lineTo(-lw, ly).lineTo(lw, ly).closePath().fill(0x2D6A3A);
+            const snow = new PIXI.Graphics();
+            snow.moveTo(0, ly - lh).lineTo(-lw * 0.5, ly - lh * 0.35).lineTo(lw * 0.5, ly - lh * 0.35).closePath().fill({ color: 0xFFFFFF, alpha: 0.85 });
+            c.addChild(leaf);
+            c.addChild(snow);
+        }
+        return c;
+    }
+
+    // ======================== SNOWFLAKES ========================
+    const snowflakeContainer = new PIXI.Container();
+    bgLayer.addChild(snowflakeContainer);
+    const snowflakes = [];
+
+    function initSnowflakes(count) {
+        snowflakes.length = 0;
+        snowflakeContainer.removeChildren();
+        for (let i = 0; i < count; i++) {
+            const r = rand(1, 3.5);
+            const g = new PIXI.Graphics();
+            g.circle(0, 0, r).fill({ color: 0xFFFFFF, alpha: rand(0.25, 0.7) });
+            snowflakeContainer.addChild(g);
+            snowflakes.push({
+                g, x: rand(0, W), y: rand(0, H),
+                vx: rand(-12, 12), vy: rand(25, 65),
+                wobble: rand(0, Math.PI * 2), wobbleSpeed: rand(1, 3),
+            });
+        }
+    }
+
+    function updateSnowflakes(dt) {
+        for (const f of snowflakes) {
+            f.wobble += f.wobbleSpeed * dt;
+            f.x += (f.vx + Math.sin(f.wobble) * 12) * dt;
+            f.y += f.vy * dt;
+            if (f.y > H + 10) { f.y = -10; f.x = rand(0, W); }
+            if (f.x < -10) f.x = W + 10;
+            if (f.x > W + 10) f.x = -10;
+            f.g.position.set(f.x, f.y);
+        }
+    }
+
+    // ======================== SNOW PILES (pickups) ========================
+    function spawnSnowPile() {
+        const x = rand(60, W - 60);
+        const y = GROUND_Y + Math.sin(x * 0.025) * 8;
+        const container = new PIXI.Container();
+        container.position.set(x, y - 5);
+
+        const gfx = new PIXI.Graphics();
+        gfx.circle(0, 0, 14).fill({ color: 0xFFFFFF, alpha: 0.9 });
+        gfx.circle(0, -3, 10).fill({ color: 0xE8F5FD, alpha: 0.5 });
+        gfx.circle(-5, -8, 2).fill({ color: 0xBBDEFB, alpha: 0.6 });
+        gfx.circle(6, -6, 1.5).fill({ color: 0xBBDEFB, alpha: 0.6 });
+        gfx.circle(0, -11, 1).fill({ color: 0xBBDEFB, alpha: 0.7 });
+        container.addChild(gfx);
+
+        // Arrow indicator
+        const label = new PIXI.Graphics();
+        label.moveTo(-3, -22).lineTo(0, -28).lineTo(3, -22).closePath().fill({ color: 0x4FC3F7, alpha: 0.8 });
+        container.addChild(label);
+
+        gameLayer.addChild(container);
+
+        snowPiles.push({ gfx: container, x, y: y - 5, collected: false, bobPhase: rand(0, Math.PI * 2) });
+    }
+
+    function updateSnowPiles(dt) {
+        for (let i = snowPiles.length - 1; i >= 0; i--) {
+            const p = snowPiles[i];
+            if (p.collected) continue;
+            p.bobPhase += dt * 2;
+            p.gfx.y = p.y + Math.sin(p.bobPhase) * 3;
+
+            // Check player pickup
+            if (Math.hypot(p.x - PLAYER_X, p.y - playerY) < 40) {
+                p.collected = true;
+                snowCount = Math.min(snowCount + 5, MAX_SNOW);
+                spawnImpact(p.x, p.y, 6, 0xBBDEFB);
+                gameLayer.removeChild(p.gfx);
+                p.gfx.destroy();
+                snowPiles.splice(i, 1);
+            }
+        }
+    }
+
+    let snowPileTimer = 0;
+
+    // ======================== PLAYER ========================
+    const playerContainer = new PIXI.Container();
+    gameLayer.addChild(playerContainer);
+    let playerGfx, playerHeldBall;
+
+    function buildPlayer() {
+        playerContainer.removeChildren();
+        playerContainer.position.set(PLAYER_X, playerY);
+
+        const shadow = new PIXI.Graphics();
+        shadow.ellipse(0, 46, 22, 6).fill({ color: 0x000000, alpha: 0.12 });
+        playerContainer.addChild(shadow);
+
+        playerGfx = new PIXI.Container();
+
+        const body = new PIXI.Graphics();
+        body.roundRect(-14, -5, 28, 38, 6).fill(0x1565C0).stroke({ color: 0x0D47A1, width: 1 });
+        playerGfx.addChild(body);
+
+        const belt = new PIXI.Graphics();
+        belt.roundRect(-14, 18, 28, 5, 2).fill(0x37474F);
+        playerGfx.addChild(belt);
+
+        const legs = new PIXI.Graphics();
+        legs.roundRect(-11, 33, 9, 16, 3).fill(0x263238);
+        legs.roundRect(2, 33, 9, 16, 3).fill(0x263238);
+        legs.roundRect(-12, 44, 11, 5, 2).fill(0x5D4037);
+        legs.roundRect(1, 44, 11, 5, 2).fill(0x5D4037);
+        playerGfx.addChild(legs);
+
+        const head = new PIXI.Graphics();
+        head.circle(0, -18, 13).fill(0xFFCCBC).stroke({ color: 0xE8B89D, width: 1 });
+        playerGfx.addChild(head);
+
+        const eyes = new PIXI.Graphics();
+        eyes.circle(-4, -19, 2).fill(0x1A1A1A);
+        eyes.circle(4, -19, 2).fill(0x1A1A1A);
+        eyes.arc(0, -14, 4, 0.2, Math.PI - 0.2).stroke({ color: 0xBF7352, width: 1.5, cap: 'round' });
+        playerGfx.addChild(eyes);
+
+        const hat = new PIXI.Graphics();
+        hat.roundRect(-14, -35, 28, 10, 3).fill(0xC62828);
+        hat.circle(0, -37, 7).fill(0xC62828);
+        hat.roundRect(-16, -27, 32, 5, 2).fill(0xB71C1C);
+        hat.circle(0, -43, 4).fill(0xFFFFFF);
+        playerGfx.addChild(hat);
+
+        const scarf = new PIXI.Graphics();
+        scarf.roundRect(-11, -6, 22, 5, 2).fill(0xFF6F00);
+        scarf.roundRect(8, -4, 6, 14, 2).fill(0xE65100);
+        playerGfx.addChild(scarf);
+
+        // Throwing arm (right) - use Container so we can attach held ball
+        const armR = new PIXI.Container();
+        armR.position.set(14, 0); // shoulder position
+        const armRgfx = new PIXI.Graphics();
+        armRgfx.roundRect(-4, 0, 8, 24, 3).fill(0x1565C0);
+        armRgfx.circle(0, 26, 5).fill(0xFFCCBC); // hand
+        armR.addChild(armRgfx);
+        // Snowball held in hand (visible when charging)
+        playerHeldBall = new PIXI.Graphics();
+        playerHeldBall.circle(0, 0, 6).fill(0xFFFFFF);
+        playerHeldBall.circle(-2, -2, 2).fill({ color: 0xE3F2FD, alpha: 0.5 });
+        playerHeldBall.position.set(0, 28);
+        playerHeldBall.visible = false;
+        armR.addChild(playerHeldBall);
+        playerGfx.addChild(armR);
+        playerGfx._armR = armR;
+
+        // Left arm
+        const armL = new PIXI.Graphics();
+        armL.roundRect(-4, 0, 8, 18, 3).fill(0x1565C0);
+        armL.circle(0, 20, 4).fill(0xFFCCBC);
+        armL.position.set(-14, 0);
+        playerGfx.addChild(armL);
+
+        playerContainer.addChild(playerGfx);
+
+        // Invincibility flash overlay
+        const flash = new PIXI.Graphics();
+        flash.circle(0, 12, 30).fill({ color: 0xFFFFFF, alpha: 0 });
+        playerContainer.addChild(flash);
+        playerContainer._flash = flash;
+    }
+
+    // ======================== SNOWMAN OPPONENTS ========================
+    function createSnowman(x, y, hp) {
+        const container = new PIXI.Container();
+        container.position.set(x, y);
+
+        const shadow = new PIXI.Graphics();
+        shadow.ellipse(0, 44, 24, 6).fill({ color: 0x000000, alpha: 0.1 });
+        container.addChild(shadow);
+
+        const body = new PIXI.Container();
+
+        const bot = new PIXI.Graphics();
+        bot.circle(0, 22, 20).fill(0xFAFAFA).stroke({ color: 0xD0D0D0, width: 1 });
+        body.addChild(bot);
+
+        const mid = new PIXI.Graphics();
+        mid.circle(0, -2, 15).fill(0xFAFAFA).stroke({ color: 0xD0D0D0, width: 1 });
+        body.addChild(mid);
+
+        const top = new PIXI.Graphics();
+        top.circle(0, -22, 12).fill(0xFAFAFA).stroke({ color: 0xD0D0D0, width: 1 });
+        body.addChild(top);
+
+        const eyeGfx = new PIXI.Graphics();
+        eyeGfx.circle(-4, -25, 2.5).fill(0x212121);
+        eyeGfx.circle(4, -25, 2.5).fill(0x212121);
+        body.addChild(eyeGfx);
+
+        const nose = new PIXI.Graphics();
+        nose.moveTo(0, -22).lineTo(14, -20).lineTo(0, -18).closePath().fill(0xFF8F00);
+        body.addChild(nose);
+
+        const mouth = new PIXI.Graphics();
+        [-4, -1.5, 1, 3.5].forEach(dx => mouth.circle(dx, -16, 1.2).fill(0x212121));
+        body.addChild(mouth);
+
+        const arms = new PIXI.Graphics();
+        arms.moveTo(-15, 2).lineTo(-36, -14).stroke({ color: 0x5D4037, width: 3, cap: 'round' });
+        arms.moveTo(-33, -10).lineTo(-28, -18).stroke({ color: 0x5D4037, width: 2, cap: 'round' });
+        arms.moveTo(15, 2).lineTo(36, -14).stroke({ color: 0x5D4037, width: 3, cap: 'round' });
+        arms.moveTo(33, -10).lineTo(28, -18).stroke({ color: 0x5D4037, width: 2, cap: 'round' });
+        body.addChild(arms);
+
+        const hatGfx = new PIXI.Graphics();
+        hatGfx.rect(-9, -40, 18, 13).fill(0x212121);
+        hatGfx.roundRect(-13, -29, 26, 4, 1).fill(0x313131);
+        hatGfx.rect(-8, -40, 16, 3).fill(0xC62828);
+        body.addChild(hatGfx);
+
+        // Buttons
+        const buttons = new PIXI.Graphics();
+        buttons.circle(0, 4, 2).fill(0x424242);
+        buttons.circle(0, -2, 2).fill(0x424242);
+        body.addChild(buttons);
+
+        // HP bar
+        const hpBar = new PIXI.Container();
+        hpBar.position.set(0, -52);
+        const hpBg = new PIXI.Graphics();
+        hpBg.roundRect(-16, 0, 32, 6, 3).fill({ color: 0x000000, alpha: 0.35 });
+        hpBar.addChild(hpBg);
+        const hpFill = new PIXI.Graphics();
+        hpBar._fill = hpFill;
+        hpBar.addChild(hpFill);
+        body.addChild(hpBar);
+
+        // Hit flash overlay
+        const flashOverlay = new PIXI.Graphics();
+        flashOverlay.circle(0, 5, 28).fill({ color: 0xFF8A80, alpha: 0 });
+        body.addChild(flashOverlay);
+
+        container.addChild(body);
+        container._body = body;
+        container._hpBar = hpBar;
+        container._hpFill = hpFill;
+        container._flashOverlay = flashOverlay;
+
+        return {
+            container, x, y,
+            health: hp, maxHealth: hp,
+            speed: rand(30, 55) + level * 7,
+            direction: Math.random() < 0.5 ? 1 : -1,
+            throwTimer: rand(2, 4),
+            throwInterval: Math.max(1.2, 3.5 - level * 0.25),
+            flashTimer: 0,
+            dead: false,
+            hitRadius: 22,
+            idlePhase: rand(0, Math.PI * 2),
+        };
+    }
+
+    function updateSnowmanHP(sm) {
+        const fill = sm.container._hpFill;
+        fill.clear();
+        const pct = Math.max(0, sm.health / sm.maxHealth);
+        const w = 30 * pct;
+        const color = pct > 0.5 ? 0x4CAF50 : pct > 0.25 ? 0xFF9800 : 0xEF5350;
+        fill.roundRect(-15, 1, w, 4, 2).fill(color);
+        sm.container._hpBar.visible = sm.health < sm.maxHealth;
+    }
+
+    // ======================== CROSSHAIR ========================
+    let crosshair;
+    function buildCrosshair() {
+        crosshair = new PIXI.Container();
+        const g = new PIXI.Graphics();
+        g.circle(0, 0, 16).stroke({ color: 0xFFFFFF, width: 2, alpha: 0.7 });
+        g.moveTo(-24, 0).lineTo(-10, 0).stroke({ color: 0xFFFFFF, width: 2, alpha: 0.8 });
+        g.moveTo(10, 0).lineTo(24, 0).stroke({ color: 0xFFFFFF, width: 2, alpha: 0.8 });
+        g.moveTo(0, -24).lineTo(0, -10).stroke({ color: 0xFFFFFF, width: 2, alpha: 0.8 });
+        g.moveTo(0, 10).lineTo(0, 24).stroke({ color: 0xFFFFFF, width: 2, alpha: 0.8 });
+        g.circle(0, 0, 3).fill({ color: 0xFF5252, alpha: 0.9 });
+        crosshair.addChild(g);
+        crosshair._gfx = g;
+        uiLayer.addChild(crosshair);
+    }
+
+    // ======================== SNOWBALL GRAPHICS ========================
+    function createSnowballGfx() {
+        const c = new PIXI.Container();
+        const g = new PIXI.Graphics();
+        g.circle(2, 2, 7).fill({ color: 0x90A4AE, alpha: 0.25 });
+        g.circle(0, 0, 7).fill(0xFFFFFF);
+        g.circle(-2, -2, 2.5).fill({ color: 0xE3F2FD, alpha: 0.4 });
+        c.addChild(g);
+        return c;
+    }
+
+    // ======================== EFFECTS ========================
+    function spawnImpact(x, y, count, color) {
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2 + rand(-0.3, 0.3);
+            const speed = rand(80, 220);
+            const r = rand(2, 5);
+            const g = new PIXI.Graphics();
+            g.circle(0, 0, r).fill({ color: color || 0xFFFFFF, alpha: rand(0.6, 1) });
+            fxLayer.addChild(g);
+            particles.push({
+                g, x, y,
+                vx: Math.cos(angle) * speed + rand(-20, 20),
+                vy: Math.sin(angle) * speed - rand(50, 100),
+                alpha: 1, decay: rand(1.5, 3),
+                gravity: true,
+            });
+        }
+    }
+
+    function spawnTrail(x, y) {
+        const r = rand(1.5, 3);
+        const g = new PIXI.Graphics();
+        g.circle(0, 0, r).fill({ color: 0xFFFFFF, alpha: 0.45 });
+        fxLayer.addChild(g);
+        trails.push({ g, x, y, alpha: 0.45, decay: rand(3, 5) });
+    }
+
+    function spawnScorePopup(x, y, text) {
+        const t = new PIXI.Text({
+            text,
+            style: { fontFamily: 'Fredoka One', fontSize: 22, fill: 0xFFD54F,
+                     dropShadow: { alpha: 0.4, blur: 4, offset: { x: 1, y: 2 } } }
+        });
+        t.anchor.set(0.5);
+        t.position.set(x, y);
+        fxLayer.addChild(t);
+        particles.push({
+            g: t, x, y, vx: 0, vy: -60,
+            alpha: 1, decay: 1.2, gravity: false,
+        });
+    }
+
+    function updateParticles(dt) {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            if (p.gravity) p.vy += 300 * dt;
+            p.alpha -= p.decay * dt;
+            p.g.position.set(p.x, p.y);
+            p.g.alpha = Math.max(0, p.alpha);
+            if (p.alpha <= 0) {
+                p.g.parent && p.g.parent.removeChild(p.g);
+                p.g.destroy();
+                particles.splice(i, 1);
+            }
+        }
+        for (let i = trails.length - 1; i >= 0; i--) {
+            const t = trails[i];
+            t.alpha -= t.decay * dt;
+            t.g.position.set(t.x, t.y);
+            t.g.alpha = Math.max(0, t.alpha);
+            if (t.alpha <= 0) {
+                fxLayer.removeChild(t.g);
+                t.g.destroy();
+                trails.splice(i, 1);
+            }
+        }
+    }
+
+    // ======================== LEVEL TEXT ========================
+    let levelText = null;
+    function showLevelText(lvl) {
+        if (levelText) { uiLayer.removeChild(levelText); levelText.destroy(); levelText = null; }
+        levelText = new PIXI.Text({
+            text: lvl === 1 ? '❄️ Level 1 — Ready!' : `❄️ Level ${lvl}`,
+            style: {
+                fontFamily: 'Fredoka One', fontSize: 44, fill: 0xFFFFFF,
+                dropShadow: { alpha: 0.5, blur: 8, color: 0x000000, offset: { x: 2, y: 4 } }
+            }
+        });
+        levelText.anchor.set(0.5);
+        levelText.position.set(W / 2, H / 2 - 40);
+        levelText.alpha = 0;
+        uiLayer.addChild(levelText);
+        levelTransition = 2.5;
+    }
+
+    // ======================== THROW SNOWBALL ========================
+    function throwSnowball(fromX, fromY, toX, toY, fromPlayer) {
+        if (fromPlayer && snowCount <= 0) return;
+        if (fromPlayer) snowCount--;
+
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const len = Math.hypot(dx, dy);
+        if (len < 1) return;
+
+        let speed;
+        if (fromPlayer) {
+            const pct = chargePower / MAX_CHARGE;
+            speed = MIN_THROW_SPEED + (MAX_THROW_SPEED - MIN_THROW_SPEED) * pct;
+        } else {
+            speed = rand(180, 300) + level * 12;
+        }
+
+        const vx = (dx / len) * speed;
+        const vy = (dy / len) * speed - rand(30, 80);
+
+        const gfx = createSnowballGfx();
+        gfx.position.set(fromX, fromY);
+        gameLayer.addChild(gfx);
+
+        snowballs.push({ gfx, x: fromX, y: fromY, vx, vy, fromPlayer, radius: 7, age: 0 });
+
+        if (fromPlayer) {
+            chargePower = 0;
+            isCharging = false;
+        }
+    }
+
+    // ======================== SPAWN OPPONENTS ========================
+    function spawnOpponents() {
+        opponents.forEach(o => { if (o.container.parent) gameLayer.removeChild(o.container); o.container.destroy({ children: true }); });
+        opponents = [];
+        const count = Math.min(2 + level, 6);
+        const spacing = Math.min((W - 500) / (count + 1), 150);
+        for (let i = 0; i < count; i++) {
+            const x = 420 + spacing * (i + 1) + rand(-20, 20);
+            const y = rand(GROUND_Y - 100, GROUND_Y - 30);
+            const hp = 2 + Math.floor(level / 2);
+            const sm = createSnowman(x, y, hp);
+            opponents.push(sm);
+            updateSnowmanHP(sm);
+            gameLayer.addChild(sm.container);
+        }
+        waitingForNextLevel = false;
+    }
+
+    // ======================== GAME RESET ========================
+    function resetGame() {
+        score = 0; level = 1; health = 100;
+        snowCount = 20; chargePower = 0; isCharging = false;
+        snowRegenTimer = 0; shakeAmount = 0; invincibleTimer = 0;
+        playerY = GROUND_Y - 50; playerTargetY = playerY;
+        waitingForNextLevel = false;
+
+        snowballs.forEach(s => { if (s.gfx.parent) gameLayer.removeChild(s.gfx); s.gfx.destroy(); });
+        snowballs = [];
+        particles.forEach(p => { if (p.g.parent) p.g.parent.removeChild(p.g); p.g.destroy(); });
+        particles = [];
+        trails.forEach(t => { if (t.g.parent) fxLayer.removeChild(t.g); t.g.destroy(); });
+        trails = [];
+        snowPiles.forEach(p => { if (p.gfx.parent) gameLayer.removeChild(p.gfx); p.gfx.destroy(); });
+        snowPiles = [];
+        snowPileTimer = 0;
+
+        buildPlayer();
+        spawnOpponents();
+        showLevelText(level);
+        updateHUD();
+    }
+
+    // ======================== HUD UPDATE ========================
+    function updateHUD() {
+        document.getElementById('health-fill').style.width = `${Math.max(0, (health / maxHealth) * 100)}%`;
+        document.getElementById('health-val').textContent = Math.max(0, Math.round(health));
+        document.getElementById('charge-fill').style.width = `${(chargePower / MAX_CHARGE) * 100}%`;
+        document.getElementById('charge-val').textContent = `${Math.round(chargePower)}%`;
+        document.getElementById('score-display').textContent = `❄️ ${score}`;
+        document.getElementById('snow-display').textContent = `⛄ × ${snowCount}`;
+        document.getElementById('level-display').textContent = `Level ${level}`;
+    }
+
+    // ======================== MOcap SYSTEM ========================
+    let mpHands, mpCamera;
+    const videoEl = document.getElementById('camera-feed');
+    const camCanvas = document.getElementById('camera-canvas');
+    const camCtx = camCanvas.getContext('2d');
+
+    async function enableMocap() {
+        if (mocapEnabled) return;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480, facingMode: 'user' }
+            });
+            videoEl.srcObject = stream;
+            await videoEl.play();
+            camCanvas.width = 640;
+            camCanvas.height = 480;
+            document.getElementById('cam-container').classList.add('visible');
+            document.getElementById('mocap-indicator').classList.add('visible');
+            document.getElementById('gesture-display').classList.add('visible');
+
+            mpHands = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+            mpHands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.6,
+                minTrackingConfidence: 0.5,
+            });
+            mpHands.onResults(onHandResults);
+
+            mpCamera = new Camera(videoEl, {
+                onFrame: async () => { await mpHands.send({ image: videoEl }); },
+                width: 640, height: 480,
+            });
+            mpCamera.start();
+            mocapEnabled = true;
+            document.getElementById('mocap-dot').classList.add('active');
+            document.getElementById('mocap-text').textContent = 'MOCAP ON';
+        } catch (e) {
+            console.error('Mocap init failed:', e);
+            alert('Could not start camera. Please allow camera access and try again.');
+        }
+    }
+
+    function onHandResults(results) {
+        camCtx.clearRect(0, 0, camCanvas.width, camCanvas.height);
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const lm = results.multiHandLandmarks[0];
+            handDetected = true;
+            document.getElementById('mocap-dot').classList.add('active');
+
+            // Draw connections
+            const connections = (typeof Hands !== 'undefined' && Hands.HAND_CONNECTIONS)
+                ? Hands.HAND_CONNECTIONS : HAND_CONNECTIONS_FALLBACK;
+            camCtx.strokeStyle = '#4CAF50';
+            camCtx.lineWidth = 2;
+            for (const [start, end] of connections) {
+                camCtx.beginPath();
+                camCtx.moveTo(lm[start].x * camCanvas.width, lm[start].y * camCanvas.height);
+                camCtx.lineTo(lm[end].x * camCanvas.width, lm[end].y * camCanvas.height);
+                camCtx.stroke();
+            }
+
+            // Draw landmarks
+            camCtx.fillStyle = '#FF5252';
+            for (const pt of lm) {
+                camCtx.beginPath();
+                camCtx.arc(pt.x * camCanvas.width, pt.y * camCanvas.height, 3, 0, Math.PI * 2);
+                camCtx.fill();
+            }
+
+            // Palm center
+            const palmX = (lm[0].x + lm[9].x) / 2;
+            const palmY = (lm[0].y + lm[9].y) / 2;
+            handPos.x = 1 - palmX; // mirror for natural mapping
+            handPos.y = palmY;
+
+            // Smooth
+            if (!smoothedHand) smoothedHand = { x: handPos.x, y: handPos.y };
+            smoothedHand.x = lerp(smoothedHand.x, handPos.x, 0.3);
+            smoothedHand.y = lerp(smoothedHand.y, handPos.y, 0.3);
+
+            aimX = smoothedHand.x * W;
+            aimY = smoothedHand.y * H;
+
+            // Fist detection
+            const palmSize = Math.hypot(lm[0].x - lm[9].x, lm[0].y - lm[9].y);
+            const thresh = Math.max(palmSize * 0.6, 0.055);
+            const tips = [8, 12, 16, 20];
+            const mcps = [5, 9, 13, 17];
+            let curledCount = 0;
+            for (let i = 0; i < 4; i++) {
+                const d = Math.hypot(lm[tips[i]].x - lm[mcps[i]].x, lm[tips[i]].y - lm[mcps[i]].y);
+                if (d < thresh) curledCount++;
+            }
+
+            wasFistGesture = isFistGesture;
+            isFistGesture = curledCount >= 3;
+
+            // Fist → Open transition = throw
+            if (wasFistGesture && !isFistGesture) {
+                if (gameState === 'playing') {
+                    if (chargePower > 8) {
+                        throwSnowball(PLAYER_X + 20, playerY - 10, aimX, aimY, true);
+                    }
+                    isCharging = false;
+                    chargePower = 0;
+                }
+            }
+            if (isFistGesture && gameState === 'playing') {
+                isCharging = true;
+            }
+
+            const gestureStr = isFistGesture ? '✊ Fist (Charging)' : '🖐 Open';
+            document.getElementById('gesture-display').textContent = `Gesture: ${gestureStr}`;
+        } else {
+            handDetected = false;
+            document.getElementById('mocap-dot').classList.remove('active');
+            document.getElementById('gesture-display').textContent = 'Gesture: No hand';
+        }
+    }
+
+    // ======================== MOUSE INPUT ========================
+    let mouseDown = false;
+
+    app.canvas.addEventListener('mousemove', (e) => {
+        const rect = app.canvas.getBoundingClientRect();
+        const scaleX = W / rect.width;
+        const scaleY = H / rect.height;
+        aimX = (e.clientX - rect.left) * scaleX;
+        aimY = (e.clientY - rect.top) * scaleY;
+        if (!mocapEnabled || !handDetected) {
+            playerTargetY = clamp(aimY, GROUND_Y - 140, GROUND_Y - 20);
+        }
+    });
+
+    app.canvas.addEventListener('mousedown', (e) => {
+        if (e.button === 0 && gameState === 'playing') {
+            mouseDown = true;
+            isCharging = true;
+        }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+        if (e.button === 0 && gameState === 'playing' && mouseDown) {
+            mouseDown = false;
+            if (chargePower > 8) {
+                throwSnowball(PLAYER_X + 20, playerY - 10, aimX, aimY, true);
+            }
+            isCharging = false;
+            chargePower = 0;
+        }
+    });
+
+    // Keyboard
+    window.addEventListener('keydown', (e) => {
+        keys[e.key] = true;
+        if (e.key === ' ') e.preventDefault(); // prevent page scroll
+    });
+    window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+    // ======================== BUTTON HANDLERS ========================
+    document.getElementById('btn-play').addEventListener('click', () => {
+        document.getElementById('menu-overlay').classList.add('hidden');
+        document.getElementById('hud').classList.add('visible');
+        gameState = 'playing';
+        resetGame();
+    });
+    document.getElementById('btn-mocap').addEventListener('click', () => enableMocap());
+    document.getElementById('btn-restart').addEventListener('click', () => {
+        document.getElementById('gameover-overlay').classList.add('hidden');
+        document.getElementById('hud').classList.add('visible');
+        gameState = 'playing';
+        resetGame();
+    });
+    document.getElementById('btn-backmenu').addEventListener('click', () => {
+        document.getElementById('gameover-overlay').classList.add('hidden');
+        document.getElementById('menu-overlay').classList.remove('hidden');
+        document.getElementById('hud').classList.remove('visible');
+        gameState = 'menu';
+    });
+
+    // ======================== MAIN UPDATE ========================
+    function update(dt) {
+        if (gameState !== 'playing') return;
+
+        // Keyboard movement
+        const moveSpeed = 220;
+        if (keys['w'] || keys['W'] || keys['ArrowUp']) playerTargetY -= moveSpeed * dt;
+        if (keys['s'] || keys['S'] || keys['ArrowDown']) playerTargetY += moveSpeed * dt;
+        playerTargetY = clamp(playerTargetY, GROUND_Y - 140, GROUND_Y - 20);
+
+        // Mocap: player Y follows hand
+        if (mocapEnabled && handDetected) {
+            playerTargetY = clamp(aimY, GROUND_Y - 140, GROUND_Y - 20);
+        }
+
+        // Smooth player position
+        playerY = lerp(playerY, playerTargetY, 10 * dt);
+        playerContainer.position.set(PLAYER_X, playerY);
+
+        // Invincibility timer
+        if (invincibleTimer > 0) {
+            invincibleTimer -= dt;
+            // Flash player
+            const flashAlpha = Math.sin(invincibleTimer * 16) > 0 ? 0.35 : 0;
+            if (playerContainer._flash) {
+                playerContainer._flash.clear();
+                playerContainer._flash.circle(0, 12, 30).fill({ color: 0xFFFFFF, alpha: flashAlpha });
+            }
+        } else {
+            if (playerContainer._flash) {
+                playerContainer._flash.clear();
+                playerContainer._flash.circle(0, 12, 30).fill({ color: 0xFFFFFF, alpha: 0 });
+            }
+        }
+
+        // Charging
+        if (isCharging) {
+            chargePower = Math.min(chargePower + CHARGE_RATE * dt, MAX_CHARGE);
+        }
+
+        // Snowball held visual (now a child of armR, scales with charge)
+        if (playerHeldBall) {
+            playerHeldBall.visible = isCharging && snowCount > 0;
+            if (playerHeldBall.visible) {
+                const scale = 0.5 + (chargePower / MAX_CHARGE) * 0.8;
+                playerHeldBall.scale.set(scale);
+            } else {
+                playerHeldBall.scale.set(0.5);
+            }
+        }
+
+        // Snow regen
+        snowRegenTimer += dt;
+        if (snowRegenTimer >= SNOW_REGEN_TIME && snowCount < MAX_SNOW) {
+            snowCount++;
+            snowRegenTimer = 0;
+        }
+
+        // Keyboard space = quick throw
+        const spaceDown = keys[' '];
+        if (spaceDown && !spaceWasDown && snowCount > 0 && !isCharging) {
+            isCharging = true;
+            chargePower = MAX_CHARGE * 0.5;
+        }
+        if (!spaceDown && spaceWasDown && isCharging && chargePower > 8 && !mouseDown && !(mocapEnabled && isFistGesture)) {
+            throwSnowball(PLAYER_X + 20, playerY - 10, aimX, aimY, true);
+            isCharging = false;
+            chargePower = 0;
+        }
+        spaceWasDown = !!spaceDown;
+
+        // Arm rotation toward aim
+        if (playerGfx && playerGfx._armR) {
+            const dx = aimX - (PLAYER_X + 14);
+            const dy = aimY - playerY;
+            const angle = Math.atan2(dy, dx);
+            // Arm default points down (PI/2), so rotation = angle - PI/2
+            playerGfx._armR.rotation = clamp(angle - Math.PI * 0.5, -2.2, 0.3);
+        }
+
+        // Crosshair
+        crosshair.position.set(aimX, aimY);
+        crosshair._gfx.alpha = 0.7 + Math.sin(performance.now() * 0.005) * 0.25;
+
+        // Update snowballs
+        for (let i = snowballs.length - 1; i >= 0; i--) {
+            const sb = snowballs[i];
+            if (!sb.gfx.parent) { snowballs.splice(i, 1); continue; }
+            sb.x += sb.vx * dt;
+            sb.y += sb.vy * dt;
+            sb.vy += GRAVITY * dt;
+            sb.age += dt;
+            sb.gfx.position.set(sb.x, sb.y);
+            sb.gfx.rotation += 5 * dt;
+
+            if (Math.random() < 0.35) spawnTrail(sb.x, sb.y);
+
+            // Off screen
+            if (sb.x < -50 || sb.x > W + 50 || sb.y > H + 50 || sb.y < -200) {
+                gameLayer.removeChild(sb.gfx); sb.gfx.destroy();
+                snowballs.splice(i, 1);
+                continue;
+            }
+
+            // Hit opponent (player snowball)
+            if (sb.fromPlayer) {
+                let hit = false;
+                for (const sm of opponents) {
+                    if (sm.dead || !sb.gfx.parent) continue;
+                    if (Math.hypot(sb.x - sm.x, sb.y - sm.y) < sm.hitRadius + sb.radius) {
+                        sm.health--;
+                        sm.flashTimer = 0.2;
+                        updateSnowmanHP(sm);
+                        spawnImpact(sb.x, sb.y, 10, 0xFFFFFF);
+                        gameLayer.removeChild(sb.gfx); sb.gfx.destroy();
+                        score += 50;
+                        spawnScorePopup(sb.x, sb.y - 20, '+50');
+                        hit = true;
+                        if (sm.health <= 0) {
+                            sm.dead = true;
+                            score += 200;
+                            spawnImpact(sm.x, sm.y - 10, 22, 0xFAFAFA);
+                            spawnScorePopup(sm.x, sm.y - 40, '+200 💥');
+                            if (sm.container.parent) gameLayer.removeChild(sm.container);
+                        }
+                        snowballs.splice(i, 1);
+                        break;
+                    }
+                }
+                if (hit) continue;
+            }
+
+            // Hit player (opponent snowball)
+            if (!sb.fromPlayer && invincibleTimer <= 0) {
+                if (Math.hypot(sb.x - PLAYER_X, sb.y - playerY) < 26) {
+                    health -= 10 + level * 2;
+                    invincibleTimer = INVINCIBILITY_TIME;
+                    shakeAmount = 14;
+                    spawnImpact(sb.x, sb.y, 10, 0x90CAF9);
+                    if (sb.gfx.parent) gameLayer.removeChild(sb.gfx);
+                    sb.gfx.destroy();
+                    snowballs.splice(i, 1);
+
+                    if (health <= 0) {
+                        health = 0;
+                        gameState = 'gameover';
+                        document.getElementById('final-score').textContent = `Score: ${score}`;
+                        document.getElementById('final-level').textContent = `Reached Level ${level}`;
+                        document.getElementById('gameover-overlay').classList.remove('hidden');
+                        document.getElementById('hud').classList.remove('visible');
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // Update opponents
+        for (const sm of opponents) {
+            if (sm.dead) continue;
+            sm.y += sm.direction * sm.speed * dt;
+            if (sm.y < GROUND_Y - 140) { sm.y = GROUND_Y - 140; sm.direction = 1; }
+            if (sm.y > GROUND_Y - 15) { sm.y = GROUND_Y - 15; sm.direction = -1; }
+            sm.container.position.set(sm.x, sm.y);
+
+            // Subtle idle bob
+            sm.idlePhase += dt * 2;
+            sm.container._body.position.y = Math.sin(sm.idlePhase) * 2;
+
+            // Flash overlay
+            if (sm.flashTimer > 0) {
+                sm.flashTimer -= dt;
+                const a = sm.flashTimer / 0.2;
+                sm.container._flashOverlay.clear();
+                sm.container._flashOverlay.circle(0, 5, 28).fill({ color: 0xFF8A80, alpha: a * 0.4 });
+            } else {
+                sm.container._flashOverlay.clear();
+                sm.container._flashOverlay.circle(0, 5, 28).fill({ color: 0xFF8A80, alpha: 0 });
+            }
+
+            // Throw snowball
+            sm.throwTimer -= dt;
+            if (sm.throwTimer <= 0) {
+                sm.throwTimer = sm.throwInterval + rand(-0.4, 0.4);
+                const targetX = PLAYER_X + rand(-25, 35);
+                const targetY = playerY + rand(-35, 35);
+                throwSnowball(sm.x - 22, sm.y - 12, targetX, targetY, false);
+            }
+        }
+
+        // Remove dead opponents
+        opponents = opponents.filter(sm => !sm.dead);
+
+        // Level complete check
+        if (opponents.length === 0 && !waitingForNextLevel && gameState === 'playing') {
+            waitingForNextLevel = true;
+            level++;
+            health = Math.min(health + 25, maxHealth);
+            snowCount = Math.min(snowCount + 10, MAX_SNOW);
+            showLevelText(level);
+            setTimeout(() => {
+                if (gameState === 'playing') {
+                    spawnOpponents();
+                    // Spawn snow piles for the new level
+                    for (let i = 0; i < Math.min(level, 4); i++) {
+                        spawnSnowPile();
+                    }
+                }
+            }, 1000);
+        }
+
+        // Snow pile spawning
+        snowPileTimer += dt;
+        if (snowPileTimer > 8 && snowPiles.length < 3) {
+            snowPileTimer = 0;
+            spawnSnowPile();
+        }
+        updateSnowPiles(dt);
+
+        // Level text animation
+        if (levelText) {
+            if (levelTransition > 0) {
+                levelTransition -= dt;
+                levelText.alpha = Math.min(1, levelText.alpha + dt * 4);
+                const pulse = 1 + Math.sin(levelTransition * 4) * 0.08;
+                levelText.scale.set(pulse);
+                if (levelTransition <= 0) {
+                    levelText.scale.set(1);
+                }
+            } else {
+                // Fade out
+                levelText.alpha -= dt * 0.5;
+                if (levelText.alpha <= 0) {
+                    uiLayer.removeChild(levelText);
+                    levelText.destroy();
+                    levelText = null;
+                }
+            }
+        }
+
+        // Screen shake
+        if (shakeAmount > 0) {
+            shakeAmount *= Math.pow(0.05, dt); // exponential decay
+            if (shakeAmount < 0.3) shakeAmount = 0;
+        }
+        world.position.set(
+            (Math.random() - 0.5) * shakeAmount * 2,
+            (Math.random() - 0.5) * shakeAmount * 2
+        );
+
+        updateParticles(dt);
+        updateHUD();
+    }
+
+    // ======================== INIT & GAME LOOP ========================
+    buildBackground();
+    buildCrosshair();
+    buildPlayer();
+    initSnowflakes(120);
+    spawnOpponents();
+    showLevelText(level);
+    updateHUD();
+
+    // Responsive scaling
+    const gameWrapper = document.getElementById('game-wrapper');
+    function resize() {
+        const scaleX = window.innerWidth / W;
+        const scaleY = window.innerHeight / H;
+        const scale = Math.min(scaleX, scaleY, 1);
+        gameWrapper.style.transform = `scale(${scale})`;
+        gameWrapper.style.transformOrigin = 'top left';
+        gameWrapper.style.position = 'absolute';
+        gameWrapper.style.left = `${(window.innerWidth - W * scale) / 2}px`;
+        gameWrapper.style.top = `${(window.innerHeight - H * scale) / 2}px`;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    app.ticker.add((ticker) => {
+        const dt = Math.min(ticker.deltaMS / 1000, 0.05);
+        updateSnowflakes(dt);
+        update(dt);
+    });
+
+    window.enableMocap = enableMocap;
+})();
+</script>
+</body>
+</html>

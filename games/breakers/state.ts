@@ -168,7 +168,7 @@ export function updateGame(
   const now = performance.now()
 
   const bodyPositions = bodies.map((b) => ({
-    x: (1 - b.normalizedX) * stageWidth,
+    x: b.normalizedX * stageWidth,
     y: b.normalizedY * stageHeight,
     spreadX: b.spreadX * stageWidth,
     spreadY: b.spreadY * stageHeight,

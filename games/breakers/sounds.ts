@@ -5,14 +5,14 @@ let globalMuted = false
 
 function getCtx(): AudioContext | null {
   try {
-    return getGameAudioBuses('block-attack').ctx
+    return getGameAudioBuses('breakers').ctx
   } catch {
     return null
   }
 }
 
 function getSfxBusNode(): GainNode {
-  return getGameAudioBuses('block-attack').sfx
+  return getGameAudioBuses('breakers').sfx
 }
 
 function createEnvelope(

@@ -1,8 +1,8 @@
-/* Block Attack — camera-powered block destruction game
+/* Breakers — camera-powered block destruction game
  * Viewport checkpoints: 390x844, 844x390, 1024x768, 1280x800.
  */
 
-body.block-attack-game {
+body.breakers-game {
   --font: system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-title: system-ui, -apple-system, "Segoe UI", sans-serif;
   --bg: #0a0a14;
@@ -24,7 +24,7 @@ body.block-attack-game {
   background: var(--bg);
 }
 
-body.block-attack-game main {
+body.breakers-game main {
   overflow: hidden;
 }
 
@@ -365,7 +365,7 @@ body.block-attack-game main {
 /* ── Reduced motion ─────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  body.block-attack-game .screen {
+  body.breakers-game .screen {
     transition-duration: 0ms;
   }
 
@@ -376,12 +376,12 @@ body.block-attack-game main {
   }
 }
 
-body.block-attack-game[data-reduce-motion="true"] .screen {
+body.breakers-game[data-reduce-motion="true"] .screen {
   transition-duration: 0ms;
 }
 
-body.block-attack-game[data-reduce-motion="true"] .ba-primary-btn,
-body.block-attack-game[data-reduce-motion="true"] .ba-icon-btn,
-body.block-attack-game[data-reduce-motion="true"] .ba-menu-btn {
+body.breakers-game[data-reduce-motion="true"] .ba-primary-btn,
+body.breakers-game[data-reduce-motion="true"] .ba-icon-btn,
+body.breakers-game[data-reduce-motion="true"] .ba-menu-btn {
   transition: none;
 }

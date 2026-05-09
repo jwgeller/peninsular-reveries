@@ -34,7 +34,7 @@ const swFiles = [
   'grow-with-me/sw.js',
   'baking-simulator/sw.js',
   'all-aboard/sw.js',
-  'block-attack/sw.js',
+  'breakers/sw.js',
 ]
 for (const swFile of swFiles) {
   const swPath = join(outputDir, swFile)
@@ -65,7 +65,7 @@ mkdirSync(join(outputDir, 'client', 'tuna-piano'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'grow-with-me'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'baking-simulator'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'all-aboard'), { recursive: true })
-mkdirSync(join(outputDir, 'client', 'block-attack'), { recursive: true })
+mkdirSync(join(outputDir, 'client', 'breakers'), { recursive: true })
 
 // ── Minify copied CSS assets ─────────────────────────────
 const stylesheetDir = join(outputDir, 'styles')
@@ -118,7 +118,7 @@ await esbuild.build({
     'games/grow-with-me/main.ts',
     'games/baking-simulator/main.ts',
     'games/all-aboard/main.ts',
-    'games/block-attack/main.ts',
+    'games/breakers/main.ts',
   ],
   bundle: true,
   outbase: 'games',
@@ -171,8 +171,8 @@ const staticRoutes: Array<{ url: string; outPath: string }> = [
   { url: 'http://localhost/baking-simulator/info/', outPath: 'baking-simulator/info/index.html' },
   { url: 'http://localhost/all-aboard/', outPath: 'all-aboard/index.html' },
   { url: 'http://localhost/all-aboard/info/', outPath: 'all-aboard/info/index.html' },
-  { url: 'http://localhost/block-attack/', outPath: 'block-attack/index.html' },
-  { url: 'http://localhost/block-attack/info/', outPath: 'block-attack/info/index.html' },
+  { url: 'http://localhost/breakers/', outPath: 'breakers/index.html' },
+  { url: 'http://localhost/breakers/info/', outPath: 'breakers/info/index.html' },
   { url: 'http://localhost/404.html', outPath: '404.html' },
 ]
 
@@ -235,7 +235,7 @@ const pages: Record<string, string[]> = {
   'grow-with-me': ['grow-with-me/index.html', 'styles/grow-with-me.css', 'client/shell.js', 'client/grow-with-me/main.js'],
   'baking-simulator': ['baking-simulator/index.html', 'styles/baking-simulator.css', 'client/shell.js', 'client/baking-simulator/main.js'],
   'all-aboard': ['all-aboard/index.html', 'styles/all-aboard.css', 'client/shell.js', 'client/all-aboard/main.js'],
-  'block-attack': ['block-attack/index.html', 'styles/block-attack.css', 'client/shell.js', 'client/block-attack/main.js'],
+  'breakers': ['breakers/index.html', 'styles/breakers.css', 'client/shell.js', 'client/breakers/main.js'],
   '404': ['404.html', 'styles/main.css', 'client/shell.js', 'client/404.js'],
 }
 

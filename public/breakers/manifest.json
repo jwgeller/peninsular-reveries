@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Block Attack",
-  "short_name": "Block Attack",
+  "name": "Breakers",
+  "short_name": "Breakers",
   "description": "Smash procedurally generated block towers using your camera! Destroy everything in your path!",
   "start_url": "./",
   "scope": "./",
