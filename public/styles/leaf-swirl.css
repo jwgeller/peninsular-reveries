@@ -1,0 +1,43 @@
+:root {
+  --ls-bg: #2d1b0e;
+  --ls-panel: #4a3222;
+  --ls-accent: #ff8f00;
+  --ls-accent-glow: rgba(255, 143, 0, 0.3);
+  --ls-text: #fff3e0;
+  --ls-text-dim: #ffcc80;
+  --ls-btn: #e65100;
+  --ls-btn-hover: #ef6c00;
+  --ls-btn-active: #bf360c;
+  --ls-muted: #bcaaa4;
+}
+.leaf-swirl-game { background: var(--ls-bg); color: var(--ls-text); overflow: hidden; height: 100dvh; width: 100vw; position: relative; }
+.leaf-swirl-game .scene-track { position: relative; width: 100%; height: 100%; }
+.leaf-swirl-game .screen, .leaf-swirl-game [id$="-screen"] { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: safe center; transform: translateX(100%); transition: transform 520ms cubic-bezier(0.33, 1, 0.68, 1); visibility: hidden; overflow-y: auto; overscroll-behavior: contain; }
+.leaf-swirl-game .screen.active, .leaf-swirl-game [id$="-screen"].active { transform: translateX(0); visibility: visible; }
+.ls-screen-panel { display: flex; flex-direction: column; align-items: center; gap: 1rem; max-width: 480px; width: 100%; padding: 1rem; }
+.ls-start-panel, .ls-end-panel { padding: 2rem 1rem; }
+.ls-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0.5rem; }
+.ls-title { font-size: 1.8rem; font-weight: 700; color: var(--ls-accent); margin: 0; }
+.ls-title-small { font-size: 1.2rem; }
+.ls-subtitle { color: var(--ls-text-dim); text-align: center; font-size: 1.1rem; margin: 0.5rem 0; }
+.ls-menu-btn { background: var(--ls-btn); color: var(--ls-text); border: none; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+.ls-menu-btn:hover { background: var(--ls-btn-hover); }
+.ls-menu-btn:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+.ls-pose-list { width: 100%; }
+.ls-pose-list-title { font-weight: 600; margin-bottom: 0.5rem; }
+.ls-pose-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.ls-pose-chip { background: var(--ls-panel); border: 1px solid var(--ls-accent-glow); border-radius: 8px; padding: 0.4rem 0.75rem; font-size: 0.85rem; color: var(--ls-text-dim); }
+.ls-camera-prompt { color: var(--ls-muted); font-size: 0.9rem; text-align: center; }
+.ls-primary-btn { background: var(--ls-accent); color: var(--ls-bg); border: none; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.2rem; font-weight: 700; cursor: pointer; }
+.ls-primary-btn:hover { background: var(--ls-btn-hover); transform: scale(1.02); }
+.ls-primary-btn:active { background: var(--ls-btn-active); transform: scale(0.98); }
+.ls-primary-btn:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+.ls-hud { display: flex; gap: 1rem; padding: 0.4rem 0.8rem; background: rgba(74, 50, 34, 0.8); border-radius: 8px; font-size: 0.9rem; position: absolute; top: 0.5rem; left: 50%; transform: translateX(-50%); z-index: 10; }
+.ls-hud-item { color: var(--ls-accent); font-weight: 600; }
+.ls-floor { position: relative; width: 100%; height: 100%; overflow: hidden; }
+#camera-preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.3; z-index: 0; pointer-events: none; }
+#pixi-stage { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+#pixi-stage canvas { display: block; width: 100% !important; height: 100% !important; touch-action: none; }
+.ls-completion-msg { font-size: 1.5rem; font-weight: 700; color: var(--ls-accent); text-align: center; }
+.ls-controls-help p { margin: 0.3rem 0; color: var(--ls-text-dim); font-size: 0.9rem; }
+@media (prefers-reduced-motion: reduce) { .leaf-swirl-game .screen, .leaf-swirl-game [id$="-screen"] { transition: none; } }

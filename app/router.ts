@@ -23,6 +23,11 @@ import { growWithMeAction } from '../games/grow-with-me/controller.js'
 import { bakingSimulatorAction } from '../games/baking-simulator/controller.js'
 import { allAboardAction } from '../games/all-aboard/controller.js'
 import { breakersAction } from '../games/breakers/controller.js'
+import { bubblePopAction } from '../games/bubble-pop/controller.js'
+import { colorReachAction } from '../games/color-reach/controller.js'
+import { jellyWobbleAction } from '../games/jelly-wobble/controller.js'
+import { leafSwirlAction } from '../games/leaf-swirl/controller.js'
+import { starDashAction } from '../games/star-dash/controller.js'
 
 export function createAppRouter() {
   const router = createRouter()
@@ -67,6 +72,16 @@ export function createAppRouter() {
   router.get(routes.allAboardInfo, () => gameInfoAction('all-aboard'))
   router.get(routes.breakers, () => breakersAction())
   router.get(routes.breakersInfo, () => gameInfoAction('breakers'))
+  router.get(routes.bubblePop, () => bubblePopAction())
+  router.get(routes.bubblePopInfo, () => gameInfoAction('bubble-pop'))
+  router.get(routes.colorReach, () => colorReachAction())
+  router.get(routes.colorReachInfo, () => gameInfoAction('color-reach'))
+  router.get(routes.jellyWobble, () => jellyWobbleAction())
+  router.get(routes.jellyWobbleInfo, () => gameInfoAction('jelly-wobble'))
+  router.get(routes.leafSwirl, () => leafSwirlAction())
+  router.get(routes.leafSwirlInfo, () => gameInfoAction('leaf-swirl'))
+  router.get(routes.starDash, () => starDashAction())
+  router.get(routes.starDashInfo, () => gameInfoAction('star-dash'))
   router.get(routes.notFound, () => notFoundAction())
 
   return router

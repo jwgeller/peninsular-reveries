@@ -36,6 +36,16 @@ import { allAboardAttribution } from '../../games/all-aboard/attributions.js'
 import { allAboardInfo } from '../../games/all-aboard/info.js'
 import { breakersAttribution } from '../../games/breakers/attributions.js'
 import { breakersInfo } from '../../games/breakers/info.js'
+import { bubblePopAttribution } from '../../games/bubble-pop/attributions.js'
+import { bubblePopInfo } from '../../games/bubble-pop/info.js'
+import { colorReachAttribution } from '../../games/color-reach/attributions.js'
+import { colorReachInfo } from '../../games/color-reach/info.js'
+import { jellyWobbleAttribution } from '../../games/jelly-wobble/attributions.js'
+import { jellyWobbleInfo } from '../../games/jelly-wobble/info.js'
+import { leafSwirlAttribution } from '../../games/leaf-swirl/attributions.js'
+import { leafSwirlInfo } from '../../games/leaf-swirl/info.js'
+import { starDashAttribution } from '../../games/star-dash/attributions.js'
+import { starDashInfo } from '../../games/star-dash/info.js'
 import type { GameAttribution, GameInfo } from './attribution-types.js'
 import { attributionsPagePath, repositoryCodeLicense } from './attribution-types.js'
 
@@ -66,6 +76,11 @@ const gameEntries: readonly { attribution: GameAttribution; info: GameInfo }[] =
   { attribution: bakingSimulatorAttribution, info: bakingSimulatorInfo },
   { attribution: allAboardAttribution, info: allAboardInfo },
   { attribution: breakersAttribution, info: breakersInfo },
+  { attribution: bubblePopAttribution, info: bubblePopInfo },
+  { attribution: colorReachAttribution, info: colorReachInfo },
+  { attribution: jellyWobbleAttribution, info: jellyWobbleInfo },
+  { attribution: leafSwirlAttribution, info: leafSwirlInfo },
+  { attribution: starDashAttribution, info: starDashInfo },
 ]
 
 export const gameAttributions: readonly GameAttributionWithInfo[] = gameEntries.map(

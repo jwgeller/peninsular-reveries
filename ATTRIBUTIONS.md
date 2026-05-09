@@ -713,3 +713,89 @@
 - License: MIT
 - Modifications: Not applicable
 - Notes: 2D WebGL rendering engine used for the game stage.
+
+### Bubble Pop
+
+- Slug: bubble-pop
+- Code license: GPL-3.0
+- Summary: Pop soap bubbles with your body! Move in front of the camera to burst colorful bubbles rising from below. A calming sensory toy with no score pressure.
+
+#### Entries
+
+##### PixiJS
+
+- Type: other
+- Used in: Bubble Pop game rendering via PixiJS
+- Creator: PixiJS Contributors
+- Source: https://pixijs.com/ (https://pixijs.com/)
+- License: MIT
+- Modifications: Not applicable
+- Notes: 2D WebGL rendering engine used for the game stage.
+
+### Color Reach
+
+- Slug: color-reach
+- Code license: GPL-3.0
+- Summary: Reach for the matching color zone with your body! A camera-powered game that teaches color recognition through movement.
+
+#### Entries
+
+##### PixiJS
+
+- Type: other
+- Used in: Color Reach game rendering via PixiJS
+- Creator: PixiJS Contributors
+- Source: https://pixijs.com/ (https://pixijs.com/)
+- License: MIT
+- Modifications: Not applicable
+
+### Jelly Wobble
+
+- Slug: jelly-wobble
+- Code license: GPL-3.0
+- Summary: A big friendly jelly wobbles when you move near it! Push it, squish it, and watch it bounce. Pure sensory play with satisfying physics.
+
+#### Entries
+
+##### PixiJS
+
+- Type: other
+- Used in: Jelly Wobble game rendering via PixiJS
+- Creator: PixiJS Contributors
+- Source: https://pixijs.com/ (https://pixijs.com/)
+- License: MIT
+- Modifications: Not applicable
+
+### Leaf Swirl
+
+- Slug: leaf-swirl
+- Code license: GPL-3.0
+- Summary: Blow autumn leaves around by moving your body! Create swirling wind patterns and watch leaves dance. A creative, zen-like experience with no wrong answers.
+
+#### Entries
+
+##### PixiJS
+
+- Type: other
+- Used in: Leaf Swirl game rendering via PixiJS
+- Creator: PixiJS Contributors
+- Source: https://pixijs.com/ (https://pixijs.com/)
+- License: MIT
+- Modifications: Not applicable
+
+### Star Dash
+
+- Slug: star-dash
+- Code license: GPL-3.0
+- Summary: Dash to catch fading stars with your body! Build constellations and streak multipliers in this fast-paced camera game.
+
+#### Entries
+
+##### PixiJS
+
+- Type: other
+- Used in: Star Dash game rendering via PixiJS
+- Creator: PixiJS Contributors
+- Source: https://pixijs.com/ (https://pixijs.com/)
+- License: MIT
+- Modifications: Not applicable

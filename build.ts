@@ -35,6 +35,11 @@ const swFiles = [
   'baking-simulator/sw.js',
   'all-aboard/sw.js',
   'breakers/sw.js',
+  'bubble-pop/sw.js',
+  'color-reach/sw.js',
+  'jelly-wobble/sw.js',
+  'leaf-swirl/sw.js',
+  'star-dash/sw.js',
 ]
 for (const swFile of swFiles) {
   const swPath = join(outputDir, swFile)
@@ -66,6 +71,11 @@ mkdirSync(join(outputDir, 'client', 'grow-with-me'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'baking-simulator'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'all-aboard'), { recursive: true })
 mkdirSync(join(outputDir, 'client', 'breakers'), { recursive: true })
+mkdirSync(join(outputDir, 'client', 'bubble-pop'), { recursive: true })
+mkdirSync(join(outputDir, 'client', 'color-reach'), { recursive: true })
+mkdirSync(join(outputDir, 'client', 'jelly-wobble'), { recursive: true })
+mkdirSync(join(outputDir, 'client', 'leaf-swirl'), { recursive: true })
+mkdirSync(join(outputDir, 'client', 'star-dash'), { recursive: true })
 
 // ── Minify copied CSS assets ─────────────────────────────
 const stylesheetDir = join(outputDir, 'styles')
@@ -119,6 +129,11 @@ await esbuild.build({
     'games/baking-simulator/main.ts',
     'games/all-aboard/main.ts',
     'games/breakers/main.ts',
+    'games/bubble-pop/main.ts',
+    'games/color-reach/main.ts',
+    'games/jelly-wobble/main.ts',
+    'games/leaf-swirl/main.ts',
+    'games/star-dash/main.ts',
   ],
   bundle: true,
   outbase: 'games',
@@ -173,6 +188,16 @@ const staticRoutes: Array<{ url: string; outPath: string }> = [
   { url: 'http://localhost/all-aboard/info/', outPath: 'all-aboard/info/index.html' },
   { url: 'http://localhost/breakers/', outPath: 'breakers/index.html' },
   { url: 'http://localhost/breakers/info/', outPath: 'breakers/info/index.html' },
+  { url: 'http://localhost/bubble-pop/', outPath: 'bubble-pop/index.html' },
+  { url: 'http://localhost/bubble-pop/info/', outPath: 'bubble-pop/info/index.html' },
+  { url: 'http://localhost/color-reach/', outPath: 'color-reach/index.html' },
+  { url: 'http://localhost/color-reach/info/', outPath: 'color-reach/info/index.html' },
+  { url: 'http://localhost/jelly-wobble/', outPath: 'jelly-wobble/index.html' },
+  { url: 'http://localhost/jelly-wobble/info/', outPath: 'jelly-wobble/info/index.html' },
+  { url: 'http://localhost/leaf-swirl/', outPath: 'leaf-swirl/index.html' },
+  { url: 'http://localhost/leaf-swirl/info/', outPath: 'leaf-swirl/info/index.html' },
+  { url: 'http://localhost/star-dash/', outPath: 'star-dash/index.html' },
+  { url: 'http://localhost/star-dash/info/', outPath: 'star-dash/info/index.html' },
   { url: 'http://localhost/404.html', outPath: '404.html' },
 ]
 
@@ -236,6 +261,11 @@ const pages: Record<string, string[]> = {
   'baking-simulator': ['baking-simulator/index.html', 'styles/baking-simulator.css', 'client/shell.js', 'client/baking-simulator/main.js'],
   'all-aboard': ['all-aboard/index.html', 'styles/all-aboard.css', 'client/shell.js', 'client/all-aboard/main.js'],
   'breakers': ['breakers/index.html', 'styles/breakers.css', 'client/shell.js', 'client/breakers/main.js'],
+  'bubble-pop': ['bubble-pop/index.html', 'styles/bubble-pop.css', 'client/shell.js', 'client/bubble-pop/main.js'],
+  'color-reach': ['color-reach/index.html', 'styles/color-reach.css', 'client/shell.js', 'client/color-reach/main.js'],
+  'jelly-wobble': ['jelly-wobble/index.html', 'styles/jelly-wobble.css', 'client/shell.js', 'client/jelly-wobble/main.js'],
+  'leaf-swirl': ['leaf-swirl/index.html', 'styles/leaf-swirl.css', 'client/shell.js', 'client/leaf-swirl/main.js'],
+  'star-dash': ['star-dash/index.html', 'styles/star-dash.css', 'client/shell.js', 'client/star-dash/main.js'],
   '404': ['404.html', 'styles/main.css', 'client/shell.js', 'client/404.js'],
 }
 

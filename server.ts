@@ -46,6 +46,11 @@ const gameEntryPoints = [
   'games/all-aboard/main.ts',
   'games/breakers/main.ts',
   'games/dragons-crunch/main.ts',
+  'games/bubble-pop/main.ts',
+  'games/color-reach/main.ts',
+  'games/jelly-wobble/main.ts',
+  'games/leaf-swirl/main.ts',
+  'games/star-dash/main.ts',
 ]
 
 

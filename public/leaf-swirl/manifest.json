@@ -1,0 +1,14 @@
+{
+  "id": "./",
+  "name": "Leaf Swirl",
+  "short_name": "Leaf Swirl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#2d1b0e",
+  "theme_color": "#2d1b0e",
+  "icons": [
+    { "src": "../favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "../apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

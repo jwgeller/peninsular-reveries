@@ -1,0 +1,43 @@
+:root {
+  --jw-bg: #1a0a2e;
+  --jw-panel: #2d1b4e;
+  --jw-accent: #e040fb;
+  --jw-accent-glow: rgba(224, 64, 251, 0.3);
+  --jw-text: #f3e5f5;
+  --jw-text-dim: #ce93d8;
+  --jw-btn: #7b1fa2;
+  --jw-btn-hover: #9c27b0;
+  --jw-btn-active: #6a1b9a;
+  --jw-muted: #b39ddb;
+}
+.jelly-wobble-game { background: var(--jw-bg); color: var(--jw-text); overflow: hidden; height: 100dvh; width: 100vw; position: relative; }
+.jelly-wobble-game .scene-track { position: relative; width: 100%; height: 100%; }
+.jelly-wobble-game .screen, .jelly-wobble-game [id$="-screen"] { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: safe center; transform: translateX(100%); transition: transform 520ms cubic-bezier(0.33, 1, 0.68, 1); visibility: hidden; overflow-y: auto; overscroll-behavior: contain; }
+.jelly-wobble-game .screen.active, .jelly-wobble-game [id$="-screen"].active { transform: translateX(0); visibility: visible; }
+.jw-screen-panel { display: flex; flex-direction: column; align-items: center; gap: 1rem; max-width: 480px; width: 100%; padding: 1rem; }
+.jw-start-panel, .jw-end-panel { padding: 2rem 1rem; }
+.jw-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0.5rem; }
+.jw-title { font-size: 1.8rem; font-weight: 700; color: var(--jw-accent); margin: 0; }
+.jw-title-small { font-size: 1.2rem; }
+.jw-subtitle { color: var(--jw-text-dim); text-align: center; font-size: 1.1rem; margin: 0.5rem 0; }
+.jw-menu-btn { background: var(--jw-btn); color: var(--jw-text); border: none; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+.jw-menu-btn:hover { background: var(--jw-btn-hover); }
+.jw-menu-btn:focus-visible { outline: 2px solid var(--jw-accent); outline-offset: 2px; }
+.jw-pose-list { width: 100%; }
+.jw-pose-list-title { font-weight: 600; margin-bottom: 0.5rem; }
+.jw-pose-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.jw-pose-chip { background: var(--jw-panel); border: 1px solid var(--jw-accent-glow); border-radius: 8px; padding: 0.4rem 0.75rem; font-size: 0.85rem; color: var(--jw-text-dim); }
+.jw-camera-prompt { color: var(--jw-muted); font-size: 0.9rem; text-align: center; }
+.jw-primary-btn { background: var(--jw-accent); color: var(--jw-bg); border: none; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.2rem; font-weight: 700; cursor: pointer; }
+.jw-primary-btn:hover { background: var(--jw-btn-hover); transform: scale(1.02); }
+.jw-primary-btn:active { background: var(--jw-btn-active); transform: scale(0.98); }
+.jw-primary-btn:focus-visible { outline: 2px solid var(--jw-accent); outline-offset: 2px; }
+.jw-hud { display: flex; gap: 1rem; padding: 0.4rem 0.8rem; background: rgba(45, 27, 78, 0.8); border-radius: 8px; font-size: 0.9rem; position: absolute; top: 0.5rem; left: 50%; transform: translateX(-50%); z-index: 10; }
+.jw-hud-item { color: var(--jw-accent); font-weight: 600; }
+.jw-floor { position: relative; width: 100%; height: 100%; overflow: hidden; }
+#camera-preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.3; z-index: 0; pointer-events: none; }
+#pixi-stage { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+#pixi-stage canvas { display: block; width: 100% !important; height: 100% !important; touch-action: none; }
+.jw-completion-msg { font-size: 1.5rem; font-weight: 700; color: var(--jw-accent); text-align: center; }
+.jw-controls-help p { margin: 0.3rem 0; color: var(--jw-text-dim); font-size: 0.9rem; }
+@media (prefers-reduced-motion: reduce) { .jelly-wobble-game .screen, .jelly-wobble-game [id$="-screen"] { transition: none; } }
